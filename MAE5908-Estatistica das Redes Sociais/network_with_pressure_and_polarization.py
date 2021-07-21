@@ -8,13 +8,14 @@ import matplotlib.pyplot as plt
 N = 50
 N_ACTORS = list(range(1, N+1))
 OPINIONS = [-1, 1]
-POLARIZATION_PARAM = np.log(2)
+POLARIZATION_PARAM = 9
 
-actor_opinion_history = {actor: [] for actor in N_ACTORS}
+actor_opinion_history = {actor: [0] for actor in N_ACTORS}
 full_opinion_history = []
 
 #pressure_exerted = [np.random.choice(OPINIONS)*np.random.randint(0, 5) for i in N_ACTORS]
-pressure_exerted = [0 for i in N_ACTORS]
+pressure_exerted = [i for i in N_ACTORS]
+pressure_history = [pressure_exerted[:]]
 
     
 def last_agent_opinion_emission(actor):
@@ -25,6 +26,7 @@ def pressure_exerted_at_n(actor, current_n):
     pressure = 0
     for timestamp in range(last_agent_opinion_emission(actor), current_n+1):
         pressure += full_opinion_history[timestamp]
+    return pressure
 
 
 def probability_of_opinion_of_actor(
@@ -65,6 +67,7 @@ def update_pressure(pressure, actor, opinion):
             pressure[i] = 0
         else:
             pressure[i] += opinion
+    pressure_history.append(pressure[:])
     return pressure
 
 
@@ -154,12 +157,20 @@ def find_probability_of_v_given_u_multiple_steps(
                 return probability_of_opinion_of_actor(opinion, actor, pressure_u, n_actors=n_actors), True
     return None, False
 
+def mean_pressure(actor, timestamp):
+    sum_of_pressures = 0
+    for time in pressure_history[:timestamp]:
+        sum_of_pressures += time[actor+1]
+    return sum_of_pressures/timestamp
+
+def mean_pressure_stair_infinite_beta(N):
+    return (N-1)/2
 
 def simulate(time, pressure):
     for n in range(time):
         actor_probabilities = calculate_actors_probabilities(pressure, N_ACTORS)
         actor = np.random.choice(N_ACTORS, p=actor_probabilities)
-        actor_opinion_history[actor] = n
+        actor_opinion_history[actor].append(n)
         actor_pressure = pressure[actor-1]
 
         emitted_opinion = emit_opinion(pressure)
@@ -170,12 +181,11 @@ def simulate(time, pressure):
 
         print(f"Percentage of positive opinion: {len(opinion_history[opinion_history==1])/len(opinion_history)}% - Emitted Opinion: {emitted_opinion}")
 
-
 def simulate_with_gif(time, pressure):
     for n in range(time):
         actor_probabilities = calculate_actors_probabilities(pressure, N_ACTORS)
         actor = np.random.choice(N_ACTORS, p=actor_probabilities)
-        actor_opinion_history[actor] = n
+        actor_opinion_history[actor].append(n)
         actor_pressure = pressure[actor-1]
 
         emitted_opinion = emit_opinion(pressure)
