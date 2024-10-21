@@ -58,7 +58,7 @@
 %%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%
 
-\title{Relatorio Exercicio Computacional 4}
+\title{Relatório Exercício Computacional 5}
 
 \author{Leonardo Heidi Almeida Murakami - NUSP: 11260186 \\\small leonardo.murakami@usp.br} 
 \affiliation{
@@ -106,15 +106,30 @@ que sera utilizada para calcularmos a função verdade (objetivo desse exercíci
 Utilizaremos a fracão de pontos ate aquele intervalo como uma aproximação para W(v)
 \subsection{Aproximação de W(v)}
 \subsubsection{Gerando o espaço de thetas aleatórios}
-\indent Assim como pedido pelo professor, utilizaremos uma distribuição Gamma para gerarmos números aleatórios distribuídos baseados na distribuição da nossa função potencial, que se assemelha fortemente a uma Dirichlet. Para isso amostraremos 3 pontos independentes de 3 distribuições Gamma com densidade
+\indent Assim como pedido pelo professor, utilizaremos um gerador de amostras de \textit{Markov Chain Monte Carlo} (MCMC) baseado no conhecimento da potencial de Dirichlet. Como kernel do nosso MCMC utilizaremos a Normal Multivariada $N(0, \sum)$ onde a matriz de covariância é calculada baseada no conhecimento \textit{a priori} dos parâmetros de nossa Dirichlet (ou seja, nosso $\alpha = X + Y$) \\
+\indent Para calcularmos a matriz de covariância, utilizamos as formulas da própria distribuição de Dirichlet, onde
 \begin{equation}
-    Gamma(\alpha_i, 1) = \frac{y_i^{\alpha_i-1}e^{-y_i}}{\Gamma(\alpha_i)}
+    Var(X_i) = \frac{\alpha_i(\alpha_0-\alpha_i)}{\alpha_0^2(\alpha_0 + 1)}
 \end{equation}
-onde $\alpha_i$ é cada parâmetro da distribuição de Dirichlet, no nosso caso, usaremos $\alpha_i = x_i + y_i$ e então normalizamos os 3 valores gerados para cada componente de theta, Seja $x_i$ o valor aleatório de uma das componentes de theta
 \begin{equation}
-    x_i = \frac{y_i}{\sum_{j=1}^{K}y_j}
+    Cov(X_i, X_j) = \frac{-\alpha_i\alpha_j}{\alpha_0^2(\alpha_0 + 1)}
 \end{equation}
-Teremos então nosso theta aleatório, para gerar todo o nosso espaço rodaremos esse algoritmo $n$ vezes
+Onde geraremos uma matriz do tipo
+\begin{equation}
+    \begin{bmatrix}
+        Var(\alpha_1) & Cov(\alpha_1,\alpha_2) & Cov(\alpha_1, \alpha_3)\\
+        Cov(\alpha_2, \alpha_1) & Var(\alpha_2) & Cov(\alpha_2, \alpha_3)\\
+        Cov(\alpha_3, \alpha_1) & Cov(\alpha_3,\alpha_2) & Var(\alpha_3)\\
+    \end{bmatrix}
+\end{equation}
+Que sera utilizada no nosso kernel, uma Normal Multivariada ($N(0, \sum)$). \\
+\indent Utilizamos um \textit{burn-in} de 1000 iterações, número arbitrariamente escolhido para não possuirmos quaisquer vieses quanto ao valor inicial utilizado pelo nosso MCMC, mas não grande o suficiente para causar impactos em nossa performance. \\
+\indent Como método de aproximação utilizaremos o Metropolis-Hasting, utilizando o kernel como passo aleatório entre os valores aleatório gerados e uma aceitação de
+\begin{equation}
+    min(1, \frac{f(\theta_{n-1} + N(0, \sum))}{f(\theta_{n-1})})
+\end{equation}
+\indent Para verificar se o MCMC estava gerando amostras condizentes com a distribuição de Dirichlet passada, verificamos se a distribuição potencial de um numero grande de números gerados estavam próximas entre si, como visto na imagem a baixo.
+\includegraphics[scale=0.55]{dist.png}
 \subsubsection{Ajustando as bordas dinamicamente}
 \indent Para que tenhamos bins com peso semelhantes, ou seja, todos próximos a $1/k$ ajustaremos dinamicamente as bordas de cada bin. Para isso, ordenaremos todo o nosso espaço de $f(\theta | x,y)$ em ordem crescente e realizaremos $k$ cortes nesse array, de modo que cada pedaço possuirá $n/k$ membros do vetor de $f(\theta | x,y)$, pegamos então as bordas direitas destes vetores e igualamos a cada ponto $v$.  Deste modo teremos todos os bins balanceados.
 \subsubsection{Calculando uma aproximação para W(v)}
@@ -149,7 +164,7 @@ Teremos então nosso theta aleatório, para gerar todo o nosso espaço rodaremos
 \begin{itemize}
     \item \textit{Dirichlet()}
     \begin{itemize}
-        \item .sample(): retorna uma lista com os valores de theta da distribuição de Dirichlet que modela nosso problema baseado no algoritmo explicado anteriormente (I.C.2)
+        \item .sample\_metropolis\_hasting(): retorna uma lista com os valores de theta da distribuição de Dirichlet que modela nosso problema baseado no algoritmo do Metropolis-Hasting, explicado brevemente anteriormente (I.C.2)
     \end{itemize}
 \end{itemize}
 \begin{itemize}
@@ -161,9 +176,7 @@ Teremos então nosso theta aleatório, para gerar todo o nosso espaço rodaremos
     \end{itemize}
 \end{itemize}
 \section{Conclusão}
-\indent Após diversos testes com diversos valores diferentes de $k$ e $n$, obtivemos um valor agradável de erro por volta de $k = 30000$ e $n = 300000$. \\
+\indent Após diversos testes com diversos valores diferentes de $k$ e $n$, obtivemos um valor agradável de erro por volta de $k = 50000$ e $n = 300000$. \\
 \indent Para estes valores o desvio padrão de um mesmo valor rodado diversas vezes com um modelo instanciado com variáveis aleatórias diferentes e independentes entre modelos, atingimos um desvio padrão menor que 0.05, desejado pelo enunciado do exercício. \\
-\indent Além disso, para iniciar o modelo estatístico (com o set dinâmico dos limites de cada \textit{bin}) temos uma demora de aproximadamente 11.29 segundos, onde, após a instanciação da classe, demoramos um tempo infimamente menor (2.57 nano segundos, calculando usando o Google Colabs com a utilidade \textit{\%timeit}) para obtermos um valor de $U(v) \approx W(v)$, isso utilizando variáveis de teste que não necessariamente representam o real valor a ser testado.
-\indent 
-\indent 
+\indent Além disso, para iniciar o modelo estatístico (com o set dinâmico dos limites de cada \textit{bin}) temos uma demora de aproximadamente 40.29 segundos, onde, após a instanciação da classe, demoramos um tempo infimamente menor (2.57 nano segundos, calculado usando o Google Colabs com a utilidade \textit{\%timeit}) para obtermos um valor de $U(v) \approx W(v)$, isso utilizando variáveis de teste que não necessariamente representam o real valor a ser testado.
 \end{document}

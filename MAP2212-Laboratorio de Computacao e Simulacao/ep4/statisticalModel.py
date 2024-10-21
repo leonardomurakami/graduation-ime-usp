@@ -85,9 +85,6 @@ class StatisticalModel:
     return self._posterior_dist.samples(samples)
 
 
-  def _s(self, theta):
-    return self._f(theta)/
-
   def _calculate_fraction_of_cut_off_set(self, lower_bound, upper_bound):
     #calculate fraction through numpy where logic
     subsetter = np.where(np.logical_and(lower_bound <= self._f_theta_space, self._f_theta_space < upper_bound))
