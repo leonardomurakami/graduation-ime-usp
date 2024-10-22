@@ -1,0 +1,10 @@
+http://dados.prefeitura.sp.gov.br/dataset/0aecfa2b-aa3a-40d4-8183-0d4351b7fd0a/resource/2d020379-fa40-4dc0-8d17-add74b119550/download/arquivofinal2tri2024.csv
+http://dados.prefeitura.sp.gov.br/dataset/0aecfa2b-aa3a-40d4-8183-0d4351b7fd0a/resource/787c054d-3e77-46c8-8713-e4e26eb2dd55/download/arquivofinal1tri2024.csv
+http://dados.prefeitura.sp.gov.br/dataset/0aecfa2b-aa3a-40d4-8183-0d4351b7fd0a/resource/33d41278-02de-417a-a99a-5e01d3d87952/download/arquivofinal4tri2023.csv
+http://dados.prefeitura.sp.gov.br/dataset/0aecfa2b-aa3a-40d4-8183-0d4351b7fd0a/resource/b01a9038-969e-4630-bd3a-4abe188b7259/download/arquivofinal3tri2023.csv
+http://dados.prefeitura.sp.gov.br/dataset/0aecfa2b-aa3a-40d4-8183-0d4351b7fd0a/resource/7978d3ba-d379-44db-993b-61b9ff406435/download/arquivofinal2tri2023.csv
+http://dados.prefeitura.sp.gov.br/dataset/0aecfa2b-aa3a-40d4-8183-0d4351b7fd0a/resource/d3043e41-4270-47b5-9922-9e35edd10950/download/arquivofinal1tri2023.csv
+http://dados.prefeitura.sp.gov.br/dataset/0aecfa2b-aa3a-40d4-8183-0d4351b7fd0a/resource/68408b82-9123-4be0-87cf-bff9096947c6/download/arquivofinal4tri2022.csv
+http://dados.prefeitura.sp.gov.br/dataset/0aecfa2b-aa3a-40d4-8183-0d4351b7fd0a/resource/69b1460a-a245-47fa-bbb0-51f5e57c2f28/download/arquivofinal3tri2022.csv
+http://dados.prefeitura.sp.gov.br/dataset/0aecfa2b-aa3a-40d4-8183-0d4351b7fd0a/resource/6de63b14-e804-44cb-9be1-e8b2971504ce/download/arquivofinal2tri2022.csv
+http://dados.prefeitura.sp.gov.br/dataset/0aecfa2b-aa3a-40d4-8183-0d4351b7fd0a/resource/6e6b299c-1952-433c-be06-797a2bc14fda/download/arquivofinal1tri2022.csv
