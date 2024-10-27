@@ -14,23 +14,31 @@
 ################################################
 # GLOBALS
 ################################################
+# Diretório onde os dados serão armazenados
 DATA_DIR="dados"
+# Arquivo que conterá todos os dados concatenados
 COMPLETE_FILE="$DATA_DIR/arquivocompleto.csv"
+# Arquivo atual sendo manipulado
 current_file="$COMPLETE_FILE"
+# Arquivo temporário para armazenar dados filtrados
+TEMP_FILE="$DATA_DIR/temp_filtered.csv"
+# Array para armazenar os filtros ativos
 declare -a filters=()
 
 ################################################
 # HEADER
+# Função para exibir o cabeçalho inicial do programa
 ################################################
 mostrar_cabecalho() {
-    echo "+++++++++++++++++++++++++++++++++++++++"
+    echo "++++++++++++++++++++++++++++++++++++"
     echo "Este programa mostra estatísticas do"
     echo "Serviço 156 da Prefeitura de São Paulo"
-    echo "+++++++++++++++++++++++++++++++++++++++"
+    echo "++++++++++++++++++++++++++++++++++++"
 }
 
 ################################################
-# DATA CHECK
+# DATA DIR CHECK
+# Verifica se o diretório de dados existe e contém os arquivos necessários
 ################################################
 verificar_diretorio_dados() {
     if [ ! -d "$DATA_DIR" ]; then
@@ -43,15 +51,18 @@ verificar_diretorio_dados() {
 
 ################################################
 # DOWNLOAD AND PROCESS
+# Baixa os arquivos CSV e os processa para um formato uniforme
 ################################################
 baixar_e_processar_arquivos() {
     local arquivo_urls="$1"
     mkdir -p "$DATA_DIR"    
     wget -nv -i "$arquivo_urls" -P "$DATA_DIR"    
+    # Converte todos os arquivos para UTF-8
     for arquivo in "$DATA_DIR"/*.csv; do
         iconv -f ISO-8859-1 -t UTF8 "$arquivo" -o "${arquivo}.tmp"
         mv "${arquivo}.tmp" "$arquivo"
     done
+    # Cria arquivo completo mantendo apenas um cabeçalho
     head -n 1 "$(ls "$DATA_DIR"/*.csv | head -n 1)" > "$COMPLETE_FILE"
     for arquivo in "$DATA_DIR"/*.csv; do
         if [ "$arquivo" != "$COMPLETE_FILE" ]; then
@@ -62,8 +73,10 @@ baixar_e_processar_arquivos() {
 
 ################################################
 # SELECT FILE
+# Permite ao usuário selecionar qual arquivo será analisado
 ################################################
 selecionar_arquivo() {
+    rm -f "$TEMP_FILE"  # Remove o arquivo temporário anterior
     local arquivos=("$COMPLETE_FILE" $(ls "$DATA_DIR"/*.csv | grep -v "arquivocompleto.csv"))
     PS3="Escolha uma opção de arquivo: "
     select arquivo in "${arquivos[@]}"; do
@@ -78,33 +91,22 @@ selecionar_arquivo() {
 
 ################################################
 # COLUMN NAMES
+# Obtém os nomes das colunas do arquivo CSV atual
 ################################################
 obter_nomes_colunas() {
-    # Lê apenas a primeira linha do arquivo (cabeçalho)
-    head -n 1 "$current_file" | \
-    # Divide a linha em colunas usando ponto e vírgula como separador
-    awk -F';' '{
-        # Processa cada coluna
-        for(i=1; i<=NF; i++) {
-            # Remove espaços em branco no início e fim
-            gsub(/^[[:space:]]+|[[:space:]]+$/, "", $i)
-            # Imprime o nome da coluna
-            print $i
-        }
-    }'
+    head -n 1 "$current_file" | tr ';' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//'
 }
 
 ################################################
 # ADD FILTER
+# Permite adicionar filtros para análise específica dos dados
 ################################################
 adicionar_filtro_coluna() {
-    # Cria array com nomes das colunas
-    mapfile -t colunas < <(obter_nomes_colunas)
+    mapfile -t colunas < <(head -n 1 "$current_file" | tr ';' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
     
     echo "Escolha uma opção de coluna para o filtro:"
     local i=1
     for coluna in "${colunas[@]}"; do
-        # Remove caracteres de nova linha e espaços extras
         coluna=$(echo "$coluna" | tr -d '\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
         printf "%2d) %s\n" $i "$coluna"
         ((i++))
@@ -114,22 +116,30 @@ adicionar_filtro_coluna() {
     
     if [[ "$opcao" =~ ^[0-9]+$ ]] && [ "$opcao" -ge 1 ] && [ "$opcao" -le "${#colunas[@]}" ]; then
         local coluna_selecionada="${colunas[$((opcao-1))]}"
-        
-        # Obtém valores únicos para a coluna selecionada usando awk para preservar o valor completo
-        echo "Obtendo valores únicos para a coluna..."
-        mapfile -t valores < <(awk -F';' -v col="$opcao" '
-            NR > 1 {  # Skip header
-                val = $col
-                gsub(/^[[:space:]]+|[[:space:]]+$/, "", val)  # Trim spaces
-                if (val != "" && !seen[val]++) {  # Only print unique, non-empty values
-                    print val
-                }
-            }
-        ' "$current_file" | sort)
+        coluna_selecionada=$(echo "$coluna_selecionada" | tr -d '\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
         
         echo "Escolha uma opção de valor para $coluna_selecionada:"
+        
+        # Obtém valores únicos considerando maiúsculas e minúsculas
+        if [ ${#filters[@]} -eq 0 ]; then
+            mapfile -t valores < <(tail -n +2 "$current_file" | cut -d';' -f"$opcao" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | grep . | sort -u)
+        else
+            mapfile -t valores < <(tail -n +2 "$TEMP_FILE" | cut -d';' -f"$opcao" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | grep . | sort -u)
+        fi
+        
+        # Ordena valores priorizando minúsculas antes das maiúsculas
+        mapfile -t valores_sorted < <(
+            printf "%s\n" "${valores[@]}" | awk '
+            {
+                orig = $0
+                lower = tolower($0)
+                is_lower = ($0 == tolower($0)) ? 0 : 1
+                print lower "\t" is_lower "\t" orig
+            }' | sort -k1,1 -k2,2n | cut -f3
+        )
+        
         local j=1
-        for valor in "${valores[@]}"; do
+        for valor in "${valores_sorted[@]}"; do
             if [ ! -z "$valor" ]; then
                 printf "%2d) %s\n" $j "$valor"
                 ((j++))
@@ -138,145 +148,120 @@ adicionar_filtro_coluna() {
         
         read -p "#? " opcao_valor
         
-        if [[ "$opcao_valor" =~ ^[0-9]+$ ]] && [ "$opcao_valor" -ge 1 ] && [ "$opcao_valor" -le "${#valores[@]}" ]; then
-            local valor_selecionado="${valores[$((opcao_valor-1))]}"
-            filters+=("$coluna_selecionada = $valor_selecionado")
+        if [[ "$opcao_valor" =~ ^[0-9]+$ ]] && [ "$opcao_valor" -ge 1 ] && [ "$opcao_valor" -le "${#valores_sorted[@]}" ]; then
+            local valor_selecionado="${valores_sorted[$((opcao_valor-1))]}"
+            valor_selecionado=$(echo "$valor_selecionado" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+            echo "+++ Adicionado filtro: $coluna_selecionada = $valor_selecionado"
+            filters+=("$coluna_selecionada" "$valor_selecionado")
+            
+            # Aplica o filtro selecionado aos dados
+            if [ ${#filters[@]} -eq 2 ]; then  # Primeiro filtro
+                head -n 1 "$current_file" > "$TEMP_FILE"
+                tail -n +2 "$current_file" | grep -F "$valor_selecionado" >> "$TEMP_FILE"
+            else
+                # Aplica filtro adicional ao conjunto já filtrado
+                head -n 1 "$TEMP_FILE" > "$TEMP_FILE.new"
+                tail -n +2 "$TEMP_FILE" | grep -F "$valor_selecionado" >> "$TEMP_FILE.new"
+                mv "$TEMP_FILE.new" "$TEMP_FILE"
+            fi
+            
             mostrar_status_atual
         fi
     fi
 }
 
-
 ################################################
 # REMOVE FILTERS
+# Remove todos os filtros ativos
 ################################################
 limpar_filtros() {
     filters=()
+    rm -f "$TEMP_FILE"  # Remove o arquivo temporário
+    echo "+++ Filtros removidos"
     mostrar_status_atual
 }
 
 ################################################
 # SHOW CURRENT STATUS
+# Exibe o status atual da análise, incluindo arquivo e filtros ativos
 ################################################
 mostrar_status_atual() {
     echo "+++ Arquivo atual: $(basename "$current_file")"
     if [ ${#filters[@]} -gt 0 ]; then
         echo "+++ Filtros atuais:"
-        # HACK: There must be a better way to do this
-        [[ ${#filters[@]} -gt 0 ]] && printf "%s" "${filters[0]}" && \
-        for ((i=1; i<${#filters[@]}; i++)); do printf " | %s" "${filters[$i]}"; done
-        echo ""
+        i=0
+        while [ $i -lt ${#filters[@]} ]; do
+            printf "%s = %s" "${filters[$i]}" "${filters[$((i+1))]}"
+            i=$((i+2))
+            if [ $i -lt ${#filters[@]} ]; then
+                printf " | "
+            fi
+        done
+        echo
     fi
     echo "+++ Número de reclamações: $(contar_linhas_filtradas)"
-    echo "+++++++++++++++++++++++++++++++++++++++"
+    echo "++++++++++++++++++++++++++++++++++++"
 }
 
 ################################################
 # COUNT LINES
+# Conta o número de reclamações considerando os filtros ativos
 ################################################
 contar_linhas_filtradas() {
-    local resultado=$(cat "$current_file")
-    local num_coluna
-    
-    for filtro in "${filters[@]}"; do
-        local coluna=$(echo "$filtro" | cut -d'=' -f1 | tr -d ' ')
-        local valor=$(echo "$filtro" | cut -d'=' -f2 | tr -d ' ')
-        
-        # Obtém número da coluna
-        num_coluna=$(head -n 1 "$current_file" | tr ';' '\n' | grep -n "^$coluna$" | cut -d: -f1)
-        
-        # Aplica filtro
-        resultado=$(echo "$resultado" | awk -F';' -v col="$num_coluna" -v val="$valor" '$col == val')
-    done
-    
-    echo "$resultado" | wc -l
+    if [ ${#filters[@]} -eq 0 ]; then
+        tail -n +2 "$current_file" | wc -l
+    else
+        tail -n +2 "$TEMP_FILE" | wc -l
+    fi
 }
 
 ################################################
 # SHOW MEAN DURATION
+# Calcula e exibe a duração média das reclamações
 ################################################
-# FIXME: Not correctly calculating average duration, sometimes
 mostrar_duracao_media() {
-    local resultado=$(cat "$current_file")
+    local arquivo_fonte
+    if [ ${#filters[@]} -eq 0 ]; then
+        arquivo_fonte="$current_file"
+    else
+        arquivo_fonte="$TEMP_FILE"
+    fi
     
-    # Aplica os filtros existentes
-    for filtro in "${filters[@]}"; do
-        local coluna=$(echo "$filtro" | cut -d'=' -f1 | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-        local valor=$(echo "$filtro" | cut -d'=' -f2- | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-        
-        # Encontra o número da coluna
-        local num_coluna=1
-        while IFS= read -r col; do
-            col=$(echo "$col" | tr -d '\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-            if [ "$col" = "$coluna" ]; then
-                break
+    local total_dias=0
+    local count=0
+    
+    while IFS=';' read -r data_abertura _ _ _ _ _ _ _ _ _ _ _ data_parecer _; do
+        if [ -n "$data_abertura" ] && [ -n "$data_parecer" ]; then
+            local abertura=$(date -d "$data_abertura" +%s)
+            local parecer=$(date -d "$data_parecer" +%s)
+            
+            if [ $abertura -gt 0 ] && [ $parecer -gt 0 ]; then
+                local diff_dias=$(( (parecer - abertura) / 86400 ))
+                total_dias=$((total_dias + diff_dias))
+                count=$((count + 1))
             fi
-            ((num_coluna++))
-        done < <(obter_nomes_colunas)
-        
-        resultado=$(echo "$resultado" | awk -F';' -v col="$num_coluna" -v val="$valor" '
-            function trim(str) {
-                gsub(/^[[:space:]]+|[[:space:]]+$/, "", str)
-                return str
-            }
-            {
-                if (NR == 1 || trim($col) == val) {
-                    print
-                }
-            }
-        ')
-    done
-
-    # Calcula a duração média usando um único comando awk
-    local stats=$(echo "$resultado" | awk -F';' '
-        function to_seconds(date_str) {
-            gsub(/^[[:space:]]+|[[:space:]]*$/, "", date_str)
-            cmd = "date -d \"" date_str "\" +%s"
-            cmd | getline seconds
-            close(cmd)
-            return seconds
-        }
-        
-        NR > 1 && $1 != "" && $13 != "" {
-            abertura = to_seconds($1)
-            parecer = to_seconds($13)
-            if (abertura > 0 && parecer > 0) {
-                diff_dias = int((parecer - abertura) / 86400)
-                total += diff_dias
-                count++
-            }
-        }
-        
-        END {
-            if (count > 0) {
-                printf "%d %d", total, count
-            }
-        }
-    ')
+        fi
+    done < <(tail -n +2 "$arquivo_fonte")
     
-    if [ ! -z "$stats" ]; then
-        local total_dias=$(echo "$stats" | cut -d' ' -f1)
-        local contagem=$(echo "$stats" | cut -d' ' -f2)
-        local media_dias=$((total_dias / contagem))
+    if [ $count -gt 0 ]; then
+        local media_dias=$((total_dias / count))
         echo "+++ Duração média da reclamação: $media_dias dias"
     else
         echo "+++ Não há dados suficientes para calcular a duração média"
     fi
-    echo "+++++++++++++++++++++++++++++++++++++++"
+    echo "++++++++++++++++++++++++++++++++++++"
 }
 
 ################################################
 # SHOW RANKING
+# Exibe o ranking das reclamações por coluna selecionada
 ################################################
-# FIXME: Show ranking is not displaying the ranking
 mostrar_ranking_reclamacoes() {
-    # Cria array com nomes das colunas
-    mapfile -t colunas < <(obter_nomes_colunas)
+    mapfile -t colunas < <(head -n 1 "$current_file" | tr ';' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
     
     echo "Escolha uma opção de coluna para análise:"
     local i=1
     for coluna in "${colunas[@]}"; do
-        # Remove caracteres de nova linha e espaços extras
         coluna=$(echo "$coluna" | tr -d '\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
         printf "%2d) %s\n" $i "$coluna"
         ((i++))
@@ -286,48 +271,42 @@ mostrar_ranking_reclamacoes() {
     
     if [[ "$opcao" =~ ^[0-9]+$ ]] && [ "$opcao" -ge 1 ] && [ "$opcao" -le "${#colunas[@]}" ]; then
         local coluna_selecionada="${colunas[$((opcao-1))]}"
-        local resultado=$(cat "$current_file")
         
-        if [ ${#filters[@]} -gt 0 ]; then
-            for filtro in "${filters[@]}"; do
-                local coluna_filtro=$(echo "$filtro" | cut -d'=' -f1 | tr -d ' ')
-                local valor_filtro=$(echo "$filtro" | cut -d'=' -f2 | tr -d ' ')
-                
-                local num_coluna=1
-                for col in "${colunas[@]}"; do
-                    col=$(echo "$col" | tr -d '\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-                    if [ "$col" = "$coluna_filtro" ]; then
-                        break
-                    fi
-                    ((num_coluna++))
-                done
-                
-                resultado=$(echo "$resultado" | awk -F';' -v col="$num_coluna" -v val="$valor_filtro" '$col == val')
-            done
+        local arquivo_fonte
+        if [ ${#filters[@]} -eq 0 ]; then
+            arquivo_fonte="$current_file"
+        else
+            arquivo_fonte="$TEMP_FILE"
         fi
         
         echo "+++ $coluna_selecionada com mais reclamações:"
-        echo "$resultado" | cut -d';' -f$opcao | tail -n +2 | sort | uniq -c | sort -rn | head -n 5
-        echo "+++++++++++++++++++++++++++++++++++++++"
+        tail -n +2 "$arquivo_fonte" | cut -d';' -f"$opcao" | sort | uniq -c | sort -rn | head -n 5 | while read -r count value; do
+            printf "%6d %s\n" "$count" "$value"
+        done
+        echo "++++++++++++++++++++++++++++++++++++"
     fi
 }
 
 ################################################
 # SHOW FILTERED
+# Exibe todas as reclamações considerando os filtros ativos
 ################################################
 mostrar_reclamacoes() {
-    local resultado=$(cat "$current_file")
-    
-    for filtro in "${filters[@]}"; do
-        local coluna=$(echo "$filtro" | cut -d'=' -f1 | tr -d ' ')
-        local valor=$(echo "$filtro" | cut -d'=' -f2 | tr -d ' ')
-        
-        local num_coluna=$(head -n 1 "$current_file" | tr ';' '\n' | grep -n "^$coluna$" | cut -d: -f1)
-        resultado=$(echo "$resultado" | awk -F';' -v col="$num_coluna" -v val="$valor" '$col == val')
-    done
-    
-    echo "$resultado" | tail -n +2
+    if [ ${#filters[@]} -eq 0 ]; then
+        cat "$current_file"
+    else
+        cat "$TEMP_FILE"
+    fi
     mostrar_status_atual
+}
+
+################################################
+# CLEANUP
+# Função de limpeza executada ao encerrar o programa
+################################################
+cleanup() {
+    rm -f "$TEMP_FILE" "$TEMP_FILE.new"
+    exit 0
 }
 
 ################################################
@@ -339,8 +318,12 @@ mostrar_reclamacoes() {
 #  |_|  |_/_/    \_\_____|_| \_|                     
 ################################################
 
+# Garante a limpeza dos arquivos temporários ao encerrar
+trap cleanup SIGINT SIGTERM EXIT
+
 mostrar_cabecalho
 
+# Verifica se foi fornecido um arquivo de URLs como argumento
 if [ $# -eq 1 ]; then
     if [ ! -f "$1" ]; then
         echo "ERRO: O arquivo $1 não existe."
@@ -353,6 +336,7 @@ fi
 
 ################################################
 # MAIN MENU
+# Loop principal do programa com menu de opções
 ################################################
 while true; do
     echo "Escolha uma opção de operação:"
@@ -386,6 +370,7 @@ while true; do
                 break
                 ;;
             "sair")
+                cleanup
                 echo "Fim do programa"
                 echo "+++++++++++++++++++++++++++++++++++++++"
                 exit 0
