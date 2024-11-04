@@ -1,0 +1,289 @@
+\documentclass[11pt,reqno,a4paper]{amsart}
+
+\usepackage{setspace}
+\usepackage[portuguese]{babel}
+\usepackage[utf8]{inputenc}
+
+\usepackage{fullpage}
+\usepackage{setspace}
+
+\def\Assin#1{\noindent\textit{Assinatura}\strut\\%:\\
+\framebox[\textwidth]{\phantom{\vrule height#1}}}
+
+\begin{document}
+\parindent=0pt
+
+\title{\textsl{
+    MAC0121 Algoritmos e Estruturas de Dados I}\\\vspace{3\jot}
+  Folha de solução}
+\author[MAC0122 Folha de solução]{}
+
+\maketitle
+\thispagestyle{empty} 
+\pagestyle{plain}
+\onehalfspace
+
+\textbf{Nome:} Leonardo Heidi Almeida Murakami\enspace \hfill \enspace
+\textbf{NUSP:}11260186\enspace\hfill
+
+\medskip
+\Assin{1cm}
+
+\medskip \textit{Sua assinatura atesta a autenticidade e
+  originalidade de seu trabalho e que você se compromete a seguir o
+  código de ética da USP em suas atividades acadêmicas, incluindo esta
+  atividade.}
+
+\bigskip
+\textbf{Exercício:} Exercicio Teórico I - MAC0121\enspace\hfill\enspace
+\textbf{Data:} 03/10/2024\enspace
+
+\bigskip
+\noindent\textbf{SOLUÇÃO}
+
+\section{Exercício 1}
+
+\subsection{Explicação do funcionamento do algoritmo}
+
+\begin{answer} 
+\ 
+\\
+\\
+Podemos dividir o funcionamento do algoritmo da seguinte forma
+\\
+\\
+\begin{math}
+    \text{funcao}(n) = 
+\begin{cases} 
+n - 10 & \text{para } n > 100 \\
+\text{funcao}(\text{funcao}(n + 11)) & \text{para } n \leq 100
+\end{cases}
+\end{math}
+\\
+\\
+Para qualquer valor de $n$ maior que 100, temos que a funcao retornara $n-10$, para outros valores, a funcao crescerá o valor de $n$ até atingir o valor de 101 e retornar como valor final 91.
+
+\end{answer}
+
+\subsection{Provando que o caso base é atingido para qualquer inteiro n}
+\
+\\
+\\
+Para provar que esta função sempre chegará a seu caso base, provaremos que, para qualquer valor $n$ inicial, depois de um numero finito de chamadas recursivas, que este valor atingirá um valor superior a 100
+\begin{enumerate}
+    \item Primeiro devemos notar que, para qualquer $ n > 100 $, temos o caso base, dado que a função retorna um valor imediatamente
+    \item Para $n \leq 100$, vamos verificar o que acontece em cada chamada recursiva:
+    \begin{itemize}
+        \item Na chamada interna, $n$ é acrescido de 11.
+        \item Se este valor for $\leq 100$, será acrescido novamente de 11 na próxima chamada.
+        \item Este valor é decrescido, numa chamada, de no máximo 10
+        \item Logo, n sempre terá seu valor, previsivelmente crescente e será $ > 100$ após uma quantidade finita de iterações
+    \end{itemize}
+    \item Logo, sabemos que, existe um $k$ tal que $n + 11k > 100$ para $n < 100$
+\end{enumerate}
+\\
+
+\subsection{Calculando o numero de chamadas para $funcao(n)$}
+\
+\\
+\\
+Podemos concluir, a partir do funcionamento da função, que a quantidade de chamadas para a $funcao$ pode ser calculada pela seguinte formula
+\\
+\\
+\begin{math}
+    \text{chamadas}(n) = 
+\begin{cases} 
+1 & \text{para } n > 100 \\
+\text{chamadas}(n + 1) + 2 & \text{para } n \leq 100
+\end{cases}
+\end{math}
+
+
+\newpage
+\section{Exercício 2}
+\subsection{Calculando f(1,6)}
+\
+\\
+\\
+Vamos analisar o comportamento da função para \( \text{funcao}(1, 6) \):
+
+\begin{verbatim}
+public static int funcao(int a, int b) {
+   if (b == 0)
+      return 0;
+   else
+      return (a + funcao(a, b-1));
+}    
+\end{verbatim}
+
+A função é recursiva e tem o seguinte comportamento:
+\begin{itemize}
+  \item Quando \( b = 0 \), a função retorna 0.
+  \item Caso contrário, ela soma \( a \) ao valor retornado pela chamada recursiva \( \text{funcao}(a, b-1) \).
+\end{itemize}
+
+Agora, vamos simular a execução para \( \text{funcao}(1, 6) \):
+\begin{itemize}
+    \item \( \text{funcao}(1, 6) \) chama \( \text{funcao}(1, 5) \) e adiciona 1 ao resultado.
+    \item \( \text{funcao}(1, 5) \) chama \( \text{funcao}(1, 4) \) e adiciona 1 ao resultado.
+    \item \( \text{funcao}(1, 4) \) chama \( \text{funcao}(1, 3) \) e adiciona 1 ao resultado.
+    \item \( \text{funcao}(1, 3) \) chama \( \text{funcao}(1, 2) \) e adiciona 1 ao resultado.
+    \item \( \text{funcao}(1, 2) \) chama \( \text{funcao}(1, 1) \) e adiciona 1 ao resultado.
+    \item \( \text{funcao}(1, 1) \) chama \( \text{funcao}(1, 0) \), que retorna 0 (caso base).
+\end{itemize}
+
+
+Agora, a função começa a retornar os valores somados: 
+\begin{itemize}
+   \item \( \text{funcao}(1, 1) \) retorna \( 1 + 0 = 1 \).
+   \item \( \text{funcao}(1, 2) \) retorna \( 1 + 1 = 2 \).
+   \item \( \text{funcao}(1, 3) \) retorna \( 1 + 2 = 3 \).
+   \item \( \text{funcao}(1, 4) \) retorna \( 1 + 3 = 4 \).
+   \item \( \text{funcao}(1, 5) \) retorna \( 1 + 4 = 5 \).
+   \item \( \text{funcao}(1, 6) \) retorna \( 1 + 5 = 6 \).
+\end{itemize}
+Portanto, o resultado de \( \text{funcao}(1, 6) \) é $6$.
+\\
+\\
+\subsection{Provando que a função termina para qualquer a e b}
+
+Vamos analisar o comportamento da função:
+\begin{itemize}
+    \item O caso base ocorre quando \( b = 0 \), onde a função retorna 0 e não realiza mais chamadas recursivas.
+    \item Em cada chamada recursiva, o valor de \( b \) é decrementado em 1 (\( b - 1 \)).
+\end{itemize}
+Assim, independentemente do valor de \( a \), o valor de \( b \) sempre diminui até atingir o caso base \( b = 0 \). Como \( b \) diminui a cada iteração e é um valor inteiro, eventualmente \( b \) chegará a 0, o que faz com que a função termine para qualquer valor de b. Como atingir o caso base independe do valor de $a$, a função sempre termina.\
+\newpage
+\section{Exercício 3}
+\subsection{Código para calcular a sequencia de Fibonacci}
+\
+\\
+\\
+Utilizando a formula dada, temos que:
+\\
+\begin{verbatim}
+public class Main {
+    public static int fibonacci(int n) {
+        if (n == 1 || n == 2) {
+            return 1;
+        }
+        if (n % 2 != 0) {
+            int k = (n + 1) / 2;
+            int fk1 = fibonacci(k);
+            int fk2 = fibonacci(k - 1);
+            return fk1 * fk1 + fk2 * fk2;
+        } else {
+            int k = n / 2;
+            int fk1 = fibonacci(k + 1);
+            int fk2 = fibonacci(k - 1);
+            return fk1 * fk1 - fk2 * fk2;
+        }
+    }
+
+    public static void main(String[] args) {
+        if (args.length == 0) {
+            System.out.println("Por favor, passe o valor de N como argumento.");
+            return;
+        }
+
+        int N = Integer.parseInt(args[0]);
+        for (int i = 1; i <= N; i++) {
+            System.out.println("F(" + i + ") = " + fibonacci(i));
+        }
+    }
+}
+\end{verbatim}
+
+Este código nos permite calcular até o numero 46 da sequencia de Fibonacci (de valor 1836311903), isto ocorre devido ao overflow. Se alterarmos o código para usar o BigInteger do java de forma que o código pareça algo como:
+\newpage
+\begin{verbatim}
+import java.math.BigInteger;
+
+public class Main {
+    public static BigInteger fibonacci(int n) {
+        // Caso base
+        if (n == 1 || n == 2) {
+            return BigInteger.ONE;
+        }
+        if (n % 2 != 0) {
+            int k = (n + 1) / 2;
+            BigInteger fk1 = fibonacci(k);
+            BigInteger fk2 = fibonacci(k - 1);
+            return fk1.multiply(fk1).add(fk2.multiply(fk2));
+        } else {
+            int k = n / 2;
+            BigInteger fk1 = fibonacci(k + 1);
+            BigInteger fk2 = fibonacci(k - 1);
+            return fk1.multiply(fk1).subtract(fk2.multiply(fk2));
+        }
+    }
+
+    public static void main(String[] args) {
+        if (args.length == 0) {
+            System.out.println("Por favor, insira o valor de N como argumento.");
+            return;
+        }
+
+        int N = Integer.parseInt(args[0]);
+        for (int i = 1; i <= N; i++) {
+            System.out.println("F(" + i + ") = " + fibonacci(i));
+        }
+    }
+}
+\end{verbatim}
+Com este código foi possível calcular o valor ate o numero 50000 da sequencia de Fibonacci, de valor aproximado de $1.84e+4083$ (calculado usando outro programa)
+\\
+\\
+\newpage
+\subsection{Prova que o de Djikstra é equivalentes a versão original}
+\subsubsection{Prova da Equivalência da Definições Alternativa de Fibonacci}
+\
+\\
+\\
+Vamos provar por indução que as seguintes definições alternativas da função de Fibonacci são equivalentes à definição original:
+
+\textbf{Base da indução:}
+Para $n = 0$ e $n = 1$, as definições são idênticas à original, então a equivalência é trivialmente verdadeira.
+\\
+\textbf{Hipótese indutiva:}
+Assumimos que a equivalência é verdadeira para todos os valores até $n$, onde $n \geq 2$. Além disso, assumimos que as seguintes equações são verdadeiras:
+\\
+\begin{align*}
+F_{2n-1} &= F_n^2 + F_{n-1}^2 \\
+F_{2n} &= F_n(F_{n+1} + F_{n-1})
+\end{align*}
+
+\textbf{Passo indutivo:}
+Precisamos provar que a equivalência se mantém para $n+1$. Temos dois casos a considerar:
+
+\textit{Caso 1:} $(2n+1)$ (caso onde n é impar)
+
+Provamos $F_{2n+1} = F_n^2 + F_{n+1}^2$:
+
+\begin{align*}
+F_{2n+1} &= F_{2n}+F_{2n-1} \\
+&= F_{n}(F_{n+1}+F_{n-1}) + F_{n-1}^2+ F_n^2 \\
+&= F_{n-1}(F_{n-1}+F_n)+F_n^2+F_nF_{n+1} \\
+&= F_{n+1}^2+F_{n}^2.
+\end{align*}
+
+\textit{Caso 2:} $(2n+2)$ (caso onde n é par)
+
+Provamos $F_{2n+2} = F_{n+1}(F_{n+2} + F_n)$:
+
+\begin{align*}
+F_{2n+2} &= F_{2n+1} + F_{2n} \\
+&= (F_{n+1}^2 + F_n^2) + F_n(F_{n+1} + F_{n-1}) \\
+&= F_{n+1}^2 + F_n^2 + F_n F_{n+1} + F_n F_{n-1} \\
+&= F_{n+1}(F_{n+1} + F_n) + F_n(F_n + F_{n-1}) \\
+&= F_{n+1}F_{n+2} + F_n F_{n+1} \\
+&= F_{n+1}(F_{n+2} + F_n)
+\end{align*}
+
+\textbf{Conclusão:}
+Provamos que a definição de djikstra é equivalente à definição original para $n+1$, assumindo que são equivalentes para $n$. Pelo princípio da indução matemática, as definições são equivalentes para todos os números naturais.
+
+\endgroup
+\end{document}
+
+

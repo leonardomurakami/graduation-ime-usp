@@ -1,0 +1,5 @@
+Grade: 6,50 / 10,00
+	
+1. c) O Valor encontrado está errado e sem justificativa (-1)
+3.3 Código 2) Código ausente (-1)
+3.4 Indução) Provou apenas para a definição de Dijsktra. Caso par está errado. (-1,5)

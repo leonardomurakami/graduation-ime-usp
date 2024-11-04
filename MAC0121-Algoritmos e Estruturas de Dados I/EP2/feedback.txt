@@ -1,0 +1,4 @@
+Grade: 10,0/10,0
+
+Faltou pintar a movimentação final do gato no caso de fuga.
+
