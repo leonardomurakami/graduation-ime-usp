@@ -16,4 +16,4 @@ Aluno: Leonardo Heidi Almeida Murakami
 - [MAC0422 - Sistemas Operacionais](https://github.com/leonardomurakami/graduation-ime-usp/tree/master/MAC0422-Sistemas%20Operacionais)
 ### 2024
 - [MAC0216 - Tecnicas de Programacao I](https://github.com/leonardomurakami/graduation-ime-usp/tree/master/MAC0216-Tecnicas%20de%20Programacao%20I)
-
+- [MAC0121 - Algoritmos e Estruturas de Dados I](https://github.com/leonardomurakami/graduation-ime-usp/tree/master/MAC0121-Algoritmos%20e%20Estruturas%20de%20Dados%20I)
