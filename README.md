@@ -1,6 +1,7 @@
 # Graduação no Instituto de Matematica e Estatistica na Universidade de São Paulo
 
 Aluno: Leonardo Heidi Almeida Murakami
+Este repositorio contem apenas as matérias que possuiam algum tipo de código durante o curso.
 
 
 ## Tabela de Conteudos
