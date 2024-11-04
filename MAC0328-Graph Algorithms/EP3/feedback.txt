@@ -1,0 +1,3 @@
+Grade: 90.00 / 100.00
+The Bellman-Ford algorithm does not need to construct all paths. 
+This consumes too much memory and time, you could only stores the predecessor of each vertex and use this to construct a negative cycle.

@@ -1,0 +1,4 @@
+Grade: 78.00 / 100.00
+I had no problem with the compressed file, thanks for the other options though.
+You only had problems with disconnected graphs, the DFS is called several times, but always with vertex 0 as the starting point. 
+And for debug levels 1 and 2 you only call the function one time.

@@ -1,0 +1,4 @@
+Grade: 20.00 / 20.00
+
+We already discussed via e-mail the problem with the compressed file, let's try to use only the moodle system for assignment 1. 
+For this first assignment we didn't penalized this, and your code passed all test cases, so you got the full grade. Good job.

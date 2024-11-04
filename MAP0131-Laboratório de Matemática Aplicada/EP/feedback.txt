@@ -1,0 +1,6 @@
+Grade: 10,00 / 10,00
+	
+Relatório claro e bem organizado. Discussão bastante pertinente das discrepâncias entre o modelo e os dados. 
+Discretização muito pequena do espaço de parâmetros levou a (possivelmente) má escolha do erro mínimo.
+Gráficos claros (e bonitos).
+Descrição detalhada do código.

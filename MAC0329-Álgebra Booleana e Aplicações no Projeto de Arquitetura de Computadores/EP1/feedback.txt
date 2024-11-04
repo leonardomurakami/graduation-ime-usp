@@ -1,0 +1,3 @@
+Grade: 9,50 / 10,00
+
+A detecção de overflow sem sinal está errada em casos como 0 - 0
