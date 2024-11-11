@@ -1,10 +1,12 @@
 \documentclass[12pt]{article}
 \usepackage[a4paper,top=3cm,bottom=2cm,inner=3cm,outer=2cm]{geometry}
+\usepackage[backend=biber,style=apa,doi=true,isbn=false,url=false]{biblatex}
+\usepackage[onehalfspacing]{setspace}
 \usepackage{graphicx}
 \usepackage{authblk}
-\usepackage[onehalfspacing]{setspace}
-\usepackage[backend=biber,style=apa]{biblatex}
+\usepackage{ragged2e}
 \setcounter{section}{-1}
+\setlength{\emergencystretch}{3em}
 \addbibresource{references.bib}
 
 
@@ -123,6 +125,7 @@ De forma semelhante, em sistemas de sinalização de aeroportos, placas modulare
 O sucesso de sistemas modulares não reside em eliminar essas tensões, mas em encontrar o equilíbrio adequado para cada contexto. Tanto Engenheiros de Software quanto Designers devem considerar os requisitos, restrições e casos de uso específicos ao definir os limites e a granularidade dos módulos. O objetivo não é maximizar a modularidade, mas otimizá-la para as necessidades particulares de cada projeto, reconhecendo que certa tensão entre padronização e adaptação não é apenas inevitável, mas essencial para a eficácia do sistema.
 
 \section{Bibliografia}
+\renewcommand{\bibfont}{\raggedright}
 \renewcommand{\bibname}{}
 \renewcommand{\refname}{}
 \printbibliography
