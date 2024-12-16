@@ -1,0 +1,176 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[portuguese]{babel}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+
+\makeatletter
+\renewcommand\paragraph{\@startsection{paragraph}{4}{\z@}%
+  {-3.25ex\@plus -1ex \@minus -.2ex}%
+  {1.5ex \@plus .2ex}%
+  {\normalfont\normalsize\bfseries}}
+\makeatother
+
+\title{Análise do Sistema de Gerenciamento de Contatos\\
+\large Estruturas de Dados e Complexidade}
+\author{Relatório Técnico}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Introdução}
+Este relatório apresenta uma análise detalhada do sistema de gerenciamento de contatos (Contatinho), focando nas estruturas de dados utilizadas, complexidade computacional, análise de memória e comparações com sistemas de banco de dados relacionais.
+
+\section{Estruturas de Dados}
+\subsection{Visão Geral}
+O sistema utiliza quatro estruturas principais:
+\begin{itemize}
+    \item Red-black BST para indexação por nome
+    \item Red-black BST para indexação por Instagram
+    \item Red-black BST com listas encadeadas para indexação por prioridade
+    \item Fila para manter ordem de inserção
+\end{itemize}
+
+\subsection{Justificativa das Escolhas}
+\subsubsection{Red-black BST para Nome e Instagram}
+\paragraph{Vantagens:}
+\begin{itemize}
+    \item Busca, inserção e remoção em $O(\log n)$
+    \item Manutenção automática da ordem dos elementos
+    \item Garantia de unicidade das chaves
+\end{itemize}
+
+\paragraph{Alternativas Consideradas:}
+\begin{itemize}
+    \item Hash Tables: Descartada por não manter ordenação
+    \item Lista: Descartada por busca $O(n)$
+    \item Lista Ligada: Descartada por busca $O(n)$        
+    \item Árvore AVL: Descartada por ter maior overhead de implementação e manutenção, com benefícios marginais de performance para o caso de uso
+\end{itemize}
+
+\subsubsection{Red-black BST com Listas para Prioridade}
+\paragraph{Vantagens:}
+\begin{itemize}
+    \item Ordenação automática das prioridades
+    \item Suporte a múltiplos contatos por prioridade através de listas encadeadas
+    \item Acesso eficiente $O(\log n)$
+\end{itemize}
+
+\paragraph{Alternativas Consideradas:}
+\begin{itemize}
+    \item Heap: Complexo para gerenciar múltiplos elementos com mesma prioridade
+    \item Lista Ordenada: Inserção ineficiente $O(n)$
+    \item Árvore AVL: Complexidade desnecessária para dados não únicos
+\end{itemize}
+
+\subsubsection{Fila para Ordem de Chegada}
+\paragraph{Vantagens:}
+\begin{itemize}
+    \item Implementação natural do princípio FIFO
+    \item Remoção do primeiro elemento em $O(1)$
+    \item Overhead mínimo de memória
+    \item Simplicidade de implementação
+\end{itemize}
+
+\paragraph{Alternativas Consideradas:}
+\begin{itemize}
+    \item Lista Encadeada: Funcionalidade excessiva para o requisito
+    \item Pilha: Ordem LIFO não atenderia o requisito
+    \item Lista Circular: Complexidade desnecessária
+\end{itemize}
+
+\section{Análise de Complexidade}
+\subsection{Complexidade Temporal}
+\paragraph{Adicionar Contato: $O(\log n)$}
+A operação de adição envolve:
+\begin{itemize}
+    \item Inserção na árvore de nomes: $O(\log n)$
+    \item Inserção na árvore de Instagram: $O(\log n)$
+    \item Inserção na árvore de prioridades: $O(\log n)$
+    \item Inserção na fila: $O(1)$
+\end{itemize}
+A complexidade final é $O(\log n)$. Todas as operações são independentes e executadas sequencialmente.
+
+\paragraph{Buscar Contato: $O(\log n)$}
+A busca é realizada em duas etapas:
+\begin{itemize}
+    \item Busca na árvore de nomes: $O(\log n)$
+    \item Se não encontrado, busca na árvore de Instagram: $O(\log n)$
+\end{itemize}
+Mesmo no pior caso (quando o contato não existe), a complexidade mantém-se em $O(\log n)$ pois as buscas são sequenciais.
+
+\paragraph{Atualizar Contato: $O(\log n)$}
+A atualização consiste em:
+\begin{itemize}
+    \item Busca do contato na árvore de nomes: $O(\log n)$
+    \item Remoção da antiga referência na árvore de Instagram: $O(\log n)$
+    \item Inserção da nova referência na árvore de Instagram: $O(\log n)$
+    \item Atualização na árvore de prioridades: $O(\log n)$ para remoção e inserção
+\end{itemize}
+Como todas as operações são executadas sequencialmente, mantendo a complexidade final em $O(\log n)$.
+
+\subsubsection{Operações de Listagem}
+
+\paragraph{Listar por Prioridade: $O(n \log n)$}
+
+\begin{itemize}
+    \item Percorrer a árvore de prioridades: $O(\log n)$ por nível
+    \item Para cada prioridade, acessar a lista de contatos: $O(k)$ onde $k$ é o número de contatos naquela prioridade
+    \item Como $\sum k = n$, e precisamos percorrer $O(\log n)$ níveis da árvore
+    \item A complexidade total resulta em $O(n \log n)$
+\end{itemize}
+
+\paragraph{Listar em Ordem Alfabética: $O(n)$}
+Operação simples:
+\begin{itemize}
+    \item Percorrer a árvore em ordem (in-order traversal): $O(n)$
+    \item Cada nó é visitado exatamente uma vez
+    \item Não requer ordenação adicional pois a árvore já se mantêm ordenada
+\end{itemize}
+
+\paragraph{Remover Primeiro Contato: $O(1)$}
+A remoção envolve:
+\begin{itemize}
+    \item Acesso ao primeiro elemento da fila: $O(1)$
+    \item Remoção nas árvores: $O(\log n)$ para cada árvore
+    \item Porém, como temos acesso direto ao elemento a ser removido, a complexidade amortizada é $O(1)$
+\end{itemize}
+
+\subsubsection{Análise do Pior Caso}
+Em cenários específicos, algumas operações podem ter desempenho diferente:
+\begin{itemize}
+    \item Inserções ordenadas poderiam degradar uma árvore não balanceada para $O(n)$
+    \item Múltiplos contatos com mesma prioridade podem aumentar o tempo de listagem
+    \item Remoções consecutivas podem causar rebalanceamento em cascata
+\end{itemize}
+
+\subsubsection{Otimizações Possíveis}
+Algumas melhorias poderiam ser implementadas:
+\begin{itemize}
+    \item Cache de resultados frequentes
+    \item Lazy deletion para remoções
+    \item Bulk operations para operações em lote
+    \item Estruturas auxiliares para casos específicos de uso
+\end{itemize}
+
+\subsection{Análise de Memória}
+\subsubsection{Estruturas Principais}
+Consumo de memória por contato:
+\begin{itemize}
+    \item Objeto Contato: $O(1)$ - campos fixos
+    \item Referências em TreeMaps: $O(1)$ por índice
+    \item Lista na prioridade: $O(k)$ onde k é número de contatos com mesma prioridade
+\end{itemize}
+
+\subsubsection{Overhead Total}
+\begin{itemize}
+    \item Espaço total: $O(n)$ para n contatos
+    \item Overhead de indexação: $O(n)$ devido às estruturas auxiliares
+\end{itemize}
+
+\end{document}
