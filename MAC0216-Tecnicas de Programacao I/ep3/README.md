@@ -19,6 +19,9 @@ Textris é uma implementação em Python do clássico jogo Tetris que oferece ta
 - Make (para usar os comandos do Makefile)
 - Doxygen (para gerar a documentação)
 
+### Ambiente de Desenvolvimento
+- Esse programa foi desenvolvido primariamente numa maquina rodando WSL e em um ubuntu 22.04
+
 ### Instalação e Execução
 
 1. Clone o repositório:
@@ -89,7 +92,11 @@ make clean
 ```
 
 ## Autor
-Leonardo Heidi Almeida Murakami
+Leonardo Heidi Almeida Murakami 
+  - NUSP: 11260186
+  - e-mail: 
+    - leonardo.murakami@usp.br
+    - contato@murakams.com
 
 ## Agradecimentos
 - Desenvolvido como projeto para a disciplina MAC0216 - Tecnicas de Programacao I do Instituto de Matematica e Estatistica durante o curso de Bacharelado em ciencia da computacao ministrada pela professora Kelly Rosa Braghetto
