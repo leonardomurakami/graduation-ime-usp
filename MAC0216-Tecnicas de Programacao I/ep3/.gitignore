@@ -1,5 +1,7 @@
 *.pkl
 *.db
+*.rar
+
 __pycache__
 docs
 .pytest_cache
