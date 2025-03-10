@@ -12,7 +12,7 @@ const config = {
   tagline: 'Leonardo Heidi Almeida Murakami',
   favicon: 'img/favicon.ico',
 
-  url: 'https://ime.murakams.com',
+  url: 'https://graduacao.murakams.com',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/',
