@@ -207,6 +207,7 @@ const CodeBrowser = ({ rootDir = 'static/code-samples', defaultOpenFile = null})
         return 'java';
       case 'c':
         return 'c';
+      case 'h':
       case 'cpp':
       case 'cc':
         return 'cpp';

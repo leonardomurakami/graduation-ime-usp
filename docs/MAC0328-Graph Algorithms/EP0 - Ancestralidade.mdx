@@ -1,0 +1,81 @@
+---
+title: 'EP0 - Consultas de Ancestralidade'
+description: 'Implementação em C++ para preprocessamento e consulta eficiente de ancestralidade em arborescências.'
+date: '2021-09-22'
+tags: ['c++', 'grafos', 'algoritmos', 'busca em profundidade']
+---
+
+# Consultas de Ancestralidade
+
+## Enunciado
+
+import PdfViewer from '@site/src/components/PdfViewer';
+
+<PdfViewer pdfPath="/ime/MAC0328-Graph Algorithms/EP0/enunciado.pdf"/>
+
+## Descrição do Problema
+
+Este exercício propõe a implementação de um algoritmo para preprocessar uma **arborescência** \(T = (V, A)\) com \(n\) vértices em **O(n)** e responder a consultas sobre ancestralidade em **O(1)**.
+
+O objetivo é responder eficientemente se um vértice **x** é ancestral de um vértice **y** na arborescência fornecida.
+
+## Formato de Entrada e Saída
+
+O programa recebe como entrada:
+
+- Um número **n** (1 ≤ n ≤ 100000), indicando o número de vértices.
+- **n - 1** linhas, cada uma contendo dois inteiros **i** e **j**, representando uma aresta direcionada de **i** para **j**.
+- Um número **q** (1 ≤ q ≤ 100000), indicando o número de consultas.
+- **q** linhas contendo dois inteiros **x** e **y**, onde a saída será **"YES"** se **x** for ancestral de **y**, e **"NO"** caso contrário.
+
+## Implementação
+
+A implementação foi feita em **C++14**, utilizando a biblioteca **Boost Graph Library (BGL)** para manipulação do grafo. O algoritmo de preprocessamento utiliza **DFS (Depth-First Search)** para armazenar os tempos de descoberta e saída de cada vértice, garantindo consultas eficientes.
+
+### Estrutura do Código
+
+```plaintext
+├── arb.h      # Definição da estrutura do grafo
+├── asgt.cpp   # Implementação do algoritmo principal
+```
+
+### Nota: 20/20
+
+import CodeBrowser from '@site/src/components/CodeBrowser';
+
+<CodeBrowser 
+    rootDir="ime/MAC0328-Graph Algorithms/EP0" 
+    defaultOpenFile="asgt.cpp" 
+/>
+
+## Exemplo de Execução
+
+### Entrada
+```plaintext
+5
+1 2
+1 3
+3 4
+3 5
+3
+1 4
+3 2
+3 5
+```
+
+### Saída
+```plaintext
+YES
+NO
+YES
+```
+
+## Conclusão
+
+Este projeto ilustra o uso de **DFS** para preprocessamento eficiente de arborescências e consultas de ancestralidade. A implementação otimizada permite resposta instantânea a cada consulta, tornando-a ideal para aplicações em algoritmos de grafos.
+
+export default ({ children }) => (
+  <article className="prose prose-lg max-w-none">
+    {children}
+  </article>
+);

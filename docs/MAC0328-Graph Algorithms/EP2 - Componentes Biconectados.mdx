@@ -1,0 +1,82 @@
+---
+title: 'EP2 - Componentes Biconexas'
+description: 'Implementação de um algoritmo para identificação das componentes biconexas em um grafo não direcionado.'
+date: '2021-11-04'
+tags: ['c++', 'grafos', 'componentes biconexas', 'dfs']
+---
+
+# Componentes Biconexas
+
+## Enunciado
+
+import PdfViewer from '@site/src/components/PdfViewer';
+
+<PdfViewer pdfPath="/ime/MAC0328-Graph Algorithms/EP2/enunciado.pdf"/>
+
+## Descrição do Problema
+
+Este exercício propõe a implementação de um algoritmo para **identificar e rotular as componentes biconexas** de um grafo não direcionado. O objetivo é processar a estrutura do grafo em **tempo O(n + m)** e classificar cada aresta de acordo com a componente biconexa à qual pertence.
+
+Além disso, o programa deve ser capaz de identificar **pontos de articulação (cut vertices)** e **pontes (bridges)** quando solicitados.
+
+## Formato de Entrada e Saída
+
+O programa recebe como entrada:
+
+1. Um número **d** que indica o nível de depuração (0 = componentes biconexas, 1 = cut vertices, 2 = bridges).
+2. Dois inteiros **n** e **m**, representando o número de vértices e arestas, respectivamente.
+3. **m** linhas contendo dois inteiros, representando uma aresta entre dois vértices.
+
+A saída será:
+- Para **d = 0**: Os rótulos das componentes biconexas de cada aresta.
+- Para **d = 1**: Os vértices que são pontos de articulação.
+- Para **d = 2**: As arestas que são pontes.
+
+## Implementação
+
+A implementação foi feita em **C++14**, utilizando a **Boost Graph Library (BGL)** apenas para armazenamento do grafo, conforme exigido pelo enunciado. O algoritmo de Tarjan foi utilizado para encontrar as **componentes biconexas** e determinar **pontos de articulação** e **pontes**.
+
+### Estrutura do Código
+
+```plaintext
+├── graph.h  # Definição das estruturas do grafo
+├── asgt.cpp # Implementação do algoritmo principal
+```
+
+### Nota: 78/100 (Correção necessária: Tratamento de grafos desconexos e chamadas múltiplas para debug levels 1 e 2)
+
+import CodeBrowser from '@site/src/components/CodeBrowser';
+
+<CodeBrowser 
+    rootDir="ime/MAC0328-Graph Algorithms/EP2" 
+    defaultOpenFile="asgt.cpp" 
+/>
+
+
+## Exemplo de Execução
+
+### Entrada
+```plaintext
+0
+5 5
+1 2
+1 3
+3 4
+3 5
+4 5
+```
+
+### Saída
+```plaintext
+0 1 1 2 2
+```
+
+## Conclusão
+
+A implementação baseia-se na **busca em profundidade (DFS)** para detectar **componentes biconexas**, **pontos de articulação** e **pontes**. O feedback indicou que o código falha em **grafos desconexos** e não chama corretamente as funções para debug levels 1 e 2, devendo ser ajustado para garantir múltiplas chamadas adequadas ao contexto.
+
+export default ({ children }) => (
+  <article className="prose prose-lg max-w-none">
+    {children}
+  </article>
+);

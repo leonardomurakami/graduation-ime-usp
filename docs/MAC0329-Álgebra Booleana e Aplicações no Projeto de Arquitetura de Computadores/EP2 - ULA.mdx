@@ -1,0 +1,78 @@
+---
+title: 'EP2 - Unidade Lógico-Aritmética (ULA)'
+description: 'Implementação de uma ULA de 8 bits utilizando o Logisim-evolution.'
+date: '2023-06-14'
+tags: ['logisim', 'circuitos digitais', 'ULA', 'comparação']
+---
+
+# Unidade Lógico-Aritmética (ULA)
+
+## Descrição do Problema
+
+A **ULA (Unidade Lógico-Aritmética)** é a parte da CPU responsável por executar operações **aritméticas** e **lógicas**. Neste projeto, foi implementada uma ULA de **8 bits** capaz de realizar **adição, subtração e comparações**.
+
+## Estrutura da ULA
+
+A ULA implementada possui as seguintes **entradas e saídas**:
+
+### **Entradas:**
+- **A e B**: Operandos de 8 bits.
+- **OP**: Define a operação (0 para soma, 1 para subtração). Comparações são sempre calculadas.
+
+### **Saídas:**
+- **R**: Resultado da operação aritmética (8 bits).
+- **SignedOverflow**: Indica **overflow com sinal**.
+- **UnsignedOverflow**: Indica **overflow sem sinal**.
+- **Comparadores**:
+  - **c0**: `1` se **A > B** (sem sinal).
+  - **c1**: `1` se **A < B** (sem sinal).
+  - **c2**: `1` se **A == B**.
+  - **c3**: `1` se **A == 0**.
+  - **c4**: `1` se **A > B** (complemento de dois).
+  - **c5**: `1` se **A < B** (complemento de dois).
+
+## Implementação
+
+### Comparador 1-bit
+<img src="/ime/MAC0329-Álgebra Booleana e Aplicações no Projeto de Arquitetura de Computadores/EP2/circuit.png" alt="comparador 1-bit" />
+### Comparador 8-bit
+<img src="/ime/MAC0329-Álgebra Booleana e Aplicações no Projeto de Arquitetura de Computadores/EP2/circuit2.png" alt="comparador 8-bit" />
+### ULA
+<img src="/ime/MAC0329-Álgebra Booleana e Aplicações no Projeto de Arquitetura de Computadores/EP2/circuit3.png" alt="ula" />
+
+A implementação seguiu a abordagem **modular**, com os seguintes subcircuitos:
+
+1. **Comparador**: Responsável por calcular os flags de comparação.
+2. **Somador**: Reutilizado do EP1, realiza adição e subtração (via complemento de dois).
+3. **ULA**: Integra os módulos anteriores e gera as saídas.
+
+### **Detecção de Overflow**
+- **Overflow com sinal**: Ocorre quando há mudança inesperada no bit de sinal.
+- **Overflow sem sinal**: Baseia-se no carry out, mas requer ajustes para casos especiais.
+
+## Avaliação
+
+O circuito foi avaliado considerando **corretude, modularização e aderência à especificação**.
+
+### Nota: **10/10**
+
+O circuito atendeu a todos os requisitos, com implementação correta das operações e comparações.
+
+## Exemplo de Operações
+
+| A       | B       | OP | R       | SignedOverflow | UnsignedOverflow | A > B | A < B | A == B |
+|---------|---------|----|---------|----------------|------------------|------|------|------|
+| 00000001 | 00000001 | 0  | 00000010 | 0              | 0                | 0    | 0    | 1    |
+| 10000000 | 10000000 | 0  | 00000000 | 1              | 1                | 0    | 0    | 1    |
+| 00000000 | 00000001 | 1  | 11111111 | 0              | 0                | 0    | 1    | 0    |
+
+## Conclusão
+
+A implementação da **ULA de 8 bits** demonstrou a integração entre **operações aritméticas e lógicas**. O projeto foi modularizado corretamente, garantindo **reutilização do somador do EP1** e um **comparador eficiente**.
+
+export default ({ children }) => (
+  <article className="prose prose-lg max-w-none">
+    {children}
+  </article>
+);
+

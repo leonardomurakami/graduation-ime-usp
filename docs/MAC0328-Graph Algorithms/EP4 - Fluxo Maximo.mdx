@@ -1,0 +1,80 @@
+---
+title: 'EP4 - Fluxo Máximo e Corte Mínimo'
+description: 'Implementação do algoritmo de Edmonds-Karp para encontrar o fluxo máximo em um grafo direcionado.'
+date: '2021-12-16'
+tags: ['c++', 'grafos', 'fluxo máximo', 'edmonds-karp']
+---
+
+# Fluxo Máximo e Corte Mínimo
+
+## Enunciado
+
+import PdfViewer from '@site/src/components/PdfViewer';
+
+<PdfViewer pdfPath="/ime/MAC0328-Graph Algorithms/EP4/enunciado.pdf"/>
+
+
+## Descrição do Problema
+
+Este exercício propõe a implementação do **algoritmo de Edmonds-Karp** para resolver o problema do **fluxo máximo** em um grafo direcionado. O objetivo é encontrar o fluxo máximo entre um **vértice de origem** e um **vértice de destino**, garantindo que a solução satisfaça as restrições de capacidade dos arcos.
+
+Além disso, caso não existam mais caminhos aumentantes, o programa deve exibir um **corte mínimo** que separa o grafo entre o conjunto de vértices alcançáveis a partir da fonte e os não alcançáveis.
+
+## Formato de Entrada e Saída
+
+O programa recebe como entrada:
+
+1. Dois inteiros **n** e **m**, representando o número de vértices e arcos.
+2. Dois inteiros **s** e **t**, representando o vértice de origem e o vértice de destino.
+3. **m** linhas contendo três valores: dois inteiros **u** e **v** e um inteiro **c(uv)**, representando a capacidade do arco de **u** para **v**.
+
+A saída será:
+- **Fluxo máximo e descrição do corte mínimo** quando não houver mais caminhos aumentantes.
+- **Fluxo aumentado e arcos percorridos** quando houver um caminho aumentante no grafo residual.
+
+## Implementação
+
+A implementação foi feita em **C++14**, utilizando a **Boost Graph Library (BGL)** apenas para armazenamento do grafo, conforme exigido pelo enunciado. O algoritmo segue a estratégia de **busca em largura (BFS)** para encontrar caminhos aumentantes, garantindo um tempo de execução de **O((n + m)nm)**.
+
+### Estrutura do Código
+
+```plaintext
+├── 11260186.cpp  # Implementação principal
+```
+
+### Nota: 100/100 (Solução correta e eficiente)
+
+import CodeBrowser from '@site/src/components/CodeBrowser';
+
+<CodeBrowser 
+    rootDir="ime/MAC0328-Graph Algorithms/EP4" 
+    defaultOpenFile="11260186.cpp" 
+/>
+
+## Exemplo de Execução
+
+### Entrada
+```plaintext
+4 5
+1 4
+1 2 10
+1 3 5
+2 4 10
+3 2 15
+3 4 10
+```
+
+### Saída
+```plaintext
+1 15 2 1 3
+```
+
+## Conclusão
+
+A implementação baseia-se no **algoritmo de Edmonds-Karp**, garantindo a obtenção do fluxo máximo e do corte mínimo. A solução foi **totalmente correta e eficiente**, recebendo **nota máxima (100/100)**. Se desejar expandir ou modificar funcionalidades, o código pode ser aprimorado para a versão bônus com otimização adicional.
+
+export default ({ children }) => (
+  <article className="prose prose-lg max-w-none">
+    {children}
+  </article>
+);

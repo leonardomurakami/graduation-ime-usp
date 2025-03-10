@@ -1,0 +1,83 @@
+---
+title: 'EP1 - Problema 2-SAT'
+description: 'Implementação de um solucionador para a satisfatibilidade booleana em CNF com cláusulas de até 2 literais.'
+date: '2021-10-13'
+tags: ['c++', 'grafos', 'satisfatibilidade', 'algoritmos']
+---
+
+# Problema 2-SAT
+
+## Enunciado
+
+import PdfViewer from '@site/src/components/PdfViewer';
+
+<PdfViewer pdfPath="/ime/MAC0328-Graph Algorithms/EP1/enunciado.pdf"/>
+
+## Descrição do Problema
+
+Este exercício propõe a implementação de um algoritmo para resolver o problema **2-SAT** (2-Satisfatibilidade). Dada uma **fórmula booleana** na **Forma Normal Conjuntiva (CNF)** com **cláusulas de no máximo dois literais**, o objetivo é encontrar uma **atribuição de valores verdadeiros ou falsos** para as variáveis de modo que a expressão seja satisfeita, ou determinar que nenhuma atribuição válida existe.
+
+## Representação e Algoritmo
+
+O problema é resolvido utilizando a construção de um **grafo de implicação**, onde cada variável e sua negação são representadas como vértices. Para cada cláusula \( (x \lor y) \), adicionamos as arestas **(¬x → y)** e **(¬y → x)**. A solução do problema pode ser determinada por meio da decomposição do grafo em **Componentes Fortemente Conectadas (SCCs)**.
+
+Para garantir um tempo de execução eficiente de **O(n + m)**, a implementação correta do algoritmo deve evitar o uso de bibliotecas de alto nível como a **Boost Graph Library (BGL)** para a computação das SCCs, conforme destacado no feedback da correção.
+
+## Formato de Entrada e Saída
+
+O programa recebe como entrada:
+
+1. Um número **d** que indica o nível de depuração (0 = normal, 1 = SCCs, 2 = estrutura do grafo).
+2. Dois inteiros **n** e **m**, representando o número de variáveis e cláusulas, respectivamente.
+3. **m** linhas contendo dois inteiros **a** e **b**, representando uma cláusula \( (a \lor b) \). Se um número é negativo, representa a negação da variável correspondente.
+
+A saída será:
+- **"YES"** seguido da atribuição das variáveis, caso uma solução válida exista.
+- **"NO"**, caso contrário.
+
+## Implementação
+
+A implementação foi feita em **C++14**, utilizando vetores para representar os SCCs e evitar o uso da **Boost Graph Library** para o algoritmo de Tarjan/Kosaraju.
+
+### Estrutura do Código
+
+```plaintext
+├── main.cpp  # Implementação principal
+```
+
+### Nota: 0/80 (Correção necessária: Implementação do algoritmo sem BGL)
+
+import CodeBrowser from '@site/src/components/CodeBrowser';
+
+<CodeBrowser 
+    rootDir="ime/MAC0328-Graph Algorithms/EP1" 
+    defaultOpenFile="main.cpp" 
+/>
+
+## Exemplo de Execução
+
+### Entrada
+```plaintext
+0
+3 4
+-1 -2
+3 -1
+2 -3
+4 -3
+```
+
+### Saída
+```plaintext
+YES 0 1 1
+```
+
+## Conclusão
+
+A abordagem baseada na decomposição em SCCs permite determinar a satisfatibilidade da fórmula **em tempo linear**. A implementação original utilizava a **BGL** para esse cálculo, o que foi penalizado na correção. A correção do código deve envolver a substituição dessa dependência por um **algoritmo manual para SCCs**, como **Kosaraju ou Tarjan**.
+
+export default ({ children }) => (
+  <article className="prose prose-lg max-w-none">
+    {children}
+  </article>
+);
+

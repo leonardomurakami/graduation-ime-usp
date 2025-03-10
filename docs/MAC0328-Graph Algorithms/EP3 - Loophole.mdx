@@ -1,0 +1,77 @@
+---
+title: 'EP3 - Loophole e Ciclos Negativos'
+description: 'Implementação do algoritmo de Bellman-Ford para detectar ciclos negativos e modelar arbitragem financeira.'
+date: '2021-11-25'
+tags: ['c++', 'grafos', 'ciclos negativos', 'bellman-ford']
+---
+
+# Loophole e Ciclos Negativos
+
+## Enunciado
+
+import PdfViewer from '@site/src/components/PdfViewer';
+
+<PdfViewer pdfPath="/ime/MAC0328-Graph Algorithms/EP3/enunciado.pdf"/>
+
+## Descrição do Problema
+
+Este exercício propõe a modelagem e implementação de um algoritmo para detectar **ciclos negativos** em um grafo direcionado, aplicado ao contexto de **arbitragem financeira**. O objetivo é verificar se existe uma sequência de trocas de moedas capaz de gerar lucro infinito.
+
+Para isso, um grafo direcionado é construído a partir das taxas de câmbio, e o problema é resolvido utilizando uma **variação do algoritmo de Bellman-Ford**, convertendo os valores para **logaritmos negativos** para a detecção eficiente de ciclos negativos.
+
+## Formato de Entrada e Saída
+
+O programa recebe como entrada:
+
+1. Dois inteiros **n** e **m**, representando o número de moedas e taxas de câmbio.
+2. **m** linhas contendo três valores: dois inteiros **u** e **v** e um número real **c(uv)**, representando a taxa de conversão de **u** para **v**.
+
+A saída será:
+- **Uma sequência de moedas** se um **ciclo negativo** for encontrado, indicando uma forma de arbitragem.
+- **Uma função viável de potenciais** se não houver ciclo negativo.
+
+## Implementação
+
+A implementação foi feita em **C++14**, utilizando a **Boost Graph Library (BGL)** apenas para armazenamento do grafo, conforme exigido pelo enunciado. O algoritmo de Bellman-Ford foi utilizado para detectar ciclos negativos.
+
+### Estrutura do Código
+
+```plaintext
+├── digraph.h  # Definição das estruturas do grafo
+├── asgt.cpp   # Implementação do algoritmo principal
+```
+
+### Nota: 90/100 (Correção necessária: Uso excessivo de memória para armazenar caminhos completos; substituir por predecessores)
+
+import CodeBrowser from '@site/src/components/CodeBrowser';
+
+<CodeBrowser 
+    rootDir="ime/MAC0328-Graph Algorithms/EP3" 
+    defaultOpenFile="asgt.cpp" 
+/>
+
+## Exemplo de Execução
+
+### Entrada
+```plaintext
+3 3
+1 2 1.1
+2 3 1.2
+3 1 0.9
+```
+
+### Saída
+```plaintext
+1 2 3 1
+```
+
+## Conclusão
+
+A implementação baseia-se na **detecção de ciclos negativos** para verificar a possibilidade de arbitragem. O feedback indicou que o código **armazena caminhos completos desnecessariamente**, consumindo mais memória do que o necessário. A correção deve envolver **armazenar apenas predecessores**, reduzindo o uso de espaço.
+
+export default ({ children }) => (
+  <article className="prose prose-lg max-w-none">
+    {children}
+  </article>
+);
+

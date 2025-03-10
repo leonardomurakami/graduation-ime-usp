@@ -1,0 +1,81 @@
+---
+title: 'EP3 - Implementação de um Processador (CPU)'
+description: 'Implementação de um processador de 8 bits com ciclo de instrução FDX usando Logisim-evolution.'
+date: '2023-07-14'
+tags: ['logisim', 'circuitos digitais', 'CPU', 'FDX']
+---
+
+# Implementação de um Processador (CPU)
+
+## Descrição do Problema
+
+O objetivo deste projeto foi construir um **processador simples de 8 bits**, baseado no modelo descrito no **Capítulo 11 das notas de aula**. A CPU deve ser capaz de buscar e executar instruções armazenadas na RAM, seguindo o **ciclo de instrução FDX (Fetch-Decode-Execute)**.
+
+## Estrutura do Processador
+
+A CPU implementada é composta pelos seguintes **componentes principais**:
+
+- **ULA**: Responsável por executar operações aritméticas e comparações (reutilizada do EP2).
+- **RAM**: Armazena instruções e dados (256 posições, 16 bits por posição).
+- **PC (Program Counter)**: Controla o fluxo das instruções.
+- **IR (Instruction Register)**: Armazena a instrução a ser executada.
+- **AC (Acumulador)**: Armazena temporariamente dados para operações.
+- **UC (Unidade de Controle)**: Decodifica e ativa os sinais de controle para a execução das instruções.
+
+## Conjunto de Instruções Implementadas
+
+| Código | Instrução | Descrição |
+|--------|-----------|-------------|
+| `00`   | `NOP`     | Não faz nada. |
+| `01 EE`| `LOAD`    | Copia `[EE]` para o AC. |
+| `02 EE`| `STORE`   | Copia `[AC]` para `[EE]`. |
+| `03 EE`| `ADD`     | Soma `[EE]` com `[AC]` e armazena no AC. |
+| `04 EE`| `SUB`     | Subtrai `[EE]` de `[AC]` e armazena no AC. |
+| `07 EE`| `INPUT`   | Lê um número e armazena em `[EE]`. |
+| `08 EE`| `OUTPUT`  | Imprime `[EE]`. |
+| `09 00`| `HALT`    | Interrompe a execução. |
+| `0A EE`| `JUMP`    | Desvia incondicionalmente para `EE`. |
+| `0B EE`| `JUMP > 0`| Desvia para `EE` se `[AC] > 0`. |
+| `0D EE`| `JUMP = 0`| Desvia para `EE` se `[AC] == 0`. |
+| `0F EE`| `JUMP < 0`| Desvia para `EE` se `[AC] < 0`. |
+
+## Implementação
+
+<img src="/ime/MAC0329-Álgebra Booleana e Aplicações no Projeto de Arquitetura de Computadores/EP3/circuit.png" alt="cpu" />
+
+A implementação seguiu a abordagem **modular**, separando cada funcionalidade em subcircuitos. O ciclo de instrução **FDX** foi modelado com controle síncrono via **clock**, garantindo execução ordenada das instruções.
+
+### **Execução do Ciclo FDX**
+1. **Fetch**: O **PC** acessa a **RAM** e carrega a instrução no **IR**.
+2. **Decode**: A **UC** decodifica a instrução e ativa os sinais de controle.
+3. **Execute**: A instrução é executada pela **ULA** ou pela **RAM**, dependendo do tipo de operação.
+
+## Avaliação
+
+### Nota: **8,00/10,00**
+
+**Correção necessária**: As **instruções de pulo (JUMP, JUMP > 0, JUMP = 0, JUMP < 0) não funcionam corretamente**. O problema pode estar relacionado à **atualização assíncrona do PC**, que precisa ser corrigida para respeitar as condições de salto.
+
+## Exemplo de Programa
+
+### Entrada (código armazenado na RAM):
+```plaintext
+0710 0711 0110 0311 0212 0812 0110 0411 0213 0813 0900
+```
+### Explicação:
+1. Lê dois números e armazena em `[10]` e `[11]`.
+2. Soma `[10]` e `[11]`, armazenando o resultado em `[12]`.
+3. Imprime `[12]`.
+4. Subtrai `[11]` de `[10]`, armazenando o resultado em `[13]`.
+5. Imprime `[13]`.
+6. Finaliza a execução (`HALT`).
+
+## Conclusão
+
+A CPU foi implementada corretamente, permitindo a execução de programas simples. No entanto, as **instruções de pulo não estão funcionando corretamente**, o que impede a correta execução de laços e desvios condicionais. A solução pode envolver **corrigir a atualização do PC** para garantir que os saltos sejam processados corretamente.
+
+export default ({ children }) => (
+  <article className="prose prose-lg max-w-none">
+    {children}
+  </article>
+);

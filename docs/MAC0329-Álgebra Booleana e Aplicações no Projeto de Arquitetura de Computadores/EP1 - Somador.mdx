@@ -1,0 +1,71 @@
+---
+title: 'EP1 - Circuito Somador de 8 Bits'
+description: 'Implementação de um circuito somador de 8 bits utilizando o Logisim-evolution.'
+date: '2023-04-18'
+tags: ['logisim', 'circuitos digitais', 'somador', 'overflow']
+---
+
+# Circuito Somador de 8 Bits
+
+## Descrição do Problema
+
+O objetivo deste projeto é implementar um **circuito somador de 8 bits** utilizando o software **Logisim-evolution**. O circuito deve ser capaz de realizar operações de **adição** e **subtração**, além de detectar **overflow com e sem sinal**.
+
+## Estrutura do Circuito
+
+O circuito é dividido em três partes principais:
+
+1. **somabits**: Um somador de um único bit, que recebe três entradas (**a**, **b**, **cin**) e retorna dois valores (**s**, **cout**).
+2. **somador**: Um somador completo de 8 bits, construído utilizando instâncias do **somabits**.
+3. **main**: O circuito principal que testa o somador, implementando as operações de adição e subtração.
+
+### Entradas e Saídas
+
+- **A e B**: Operandos de 8 bits.
+- **OP**: Um bit que define a operação (0 para soma, 1 para subtração).
+- **R**: Resultado da operação (8 bits).
+- **SignedOverflow**: Indica overflow interpretando os números como complemento de dois.
+- **UnsignedOverflow**: Indica overflow considerando os números como sem sinal.
+
+## Implementação
+
+### Soma Bits
+<img src="/ime/MAC0329-Álgebra Booleana e Aplicações no Projeto de Arquitetura de Computadores/EP1/circuit.png" alt="Circuito Soma Bits" />
+### Somador
+<img src="/ime/MAC0329-Álgebra Booleana e Aplicações no Projeto de Arquitetura de Computadores/EP1/circuit2.png" alt="Circuito Somador" />
+### Circuito Inteiro
+<img src="/ime/MAC0329-Álgebra Booleana e Aplicações no Projeto de Arquitetura de Computadores/EP1/circuit3.png" alt="Circuito Total" />
+
+O circuito foi implementado seguindo a abordagem **bottom-up**, iniciando com o somador de 1 bit e compondo os níveis superiores.
+
+A subtração é implementada através do complemento de dois, invertendo os bits de **B** quando **OP = 1** e somando 1 ao bit menos significativo.
+
+### Detecção de Overflow
+
+- **Overflow com sinal**: Ocorre quando há uma discrepância entre os sinais dos operandos e do resultado.
+- **Overflow sem sinal**: Baseia-se no **carry out** da última e da penúltima soma. No entanto, um erro foi identificado na detecção para casos como **0 - 0**.
+
+## Avaliação
+
+### Nota: 9,50/10,00
+
+**Correção necessária**: O cálculo do **overflow sem sinal** está incorreto em alguns casos específicos, como **0 - 0**.
+
+## Exemplo de Operações
+
+| A       | B       | OP | R       | SignedOverflow | UnsignedOverflow |
+|---------|---------|----|---------|----------------|------------------|
+| 00000001 | 00000001 | 0  | 00000010 | 0              | 0                |
+| 10000000 | 10000000 | 0  | 00000000 | 1              | 1                |
+| 00000000 | 00000000 | 1  | 00000000 | 0              | **(erro)**       |
+
+## Conclusão
+
+O circuito foi implementado corretamente, com exceção de um erro na detecção de **overflow sem sinal**. A solução pode ser ajustada analisando o comportamento do **carry out** nos casos problemáticos.
+
+export default ({ children }) => (
+  <article className="prose prose-lg max-w-none">
+    {children}
+  </article>
+);
+

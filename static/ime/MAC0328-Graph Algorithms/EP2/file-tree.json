@@ -1,0 +1,22 @@
+{
+  "name": "EP2",
+  "path": "EP2",
+  "type": "directory",
+  "children": [
+    {
+      "name": "asgt.cpp",
+      "path": "EP2/asgt.cpp",
+      "type": "file"
+    },
+    {
+      "name": "feedback.txt",
+      "path": "EP2/feedback.txt",
+      "type": "file"
+    },
+    {
+      "name": "graph.h",
+      "path": "EP2/graph.h",
+      "type": "file"
+    }
+  ]
+}

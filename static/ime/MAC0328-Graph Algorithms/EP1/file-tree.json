@@ -1,0 +1,17 @@
+{
+  "name": "EP1",
+  "path": "EP1",
+  "type": "directory",
+  "children": [
+    {
+      "name": "feedback.txt",
+      "path": "EP1/feedback.txt",
+      "type": "file"
+    },
+    {
+      "name": "main.cpp",
+      "path": "EP1/main.cpp",
+      "type": "file"
+    }
+  ]
+}
