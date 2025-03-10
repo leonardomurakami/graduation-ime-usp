@@ -33,7 +33,7 @@ jobs:
         with:
           switches: -avzr --delete
           path: build/
-          remote_path: /var/www/ime/
+          remote_path: /var/www/graduacao/
           remote_host: ${{ vars.DEPLOY_HOST }}
           remote_user: ${{ vars.DEPLOY_USER }}
           remote_key: ${{ secrets.DEPLOY_KEY }}
