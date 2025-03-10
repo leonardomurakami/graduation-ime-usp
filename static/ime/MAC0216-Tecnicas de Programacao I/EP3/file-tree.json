@@ -1,0 +1,106 @@
+{
+  "name": "EP3",
+  "path": "EP3",
+  "type": "directory",
+  "children": [
+    {
+      "name": "src",
+      "path": "EP3/src",
+      "type": "directory",
+      "children": [
+        {
+          "name": "board.py",
+          "path": "EP3/src/board.py",
+          "type": "file"
+        },
+        {
+          "name": "controller.py",
+          "path": "EP3/src/controller.py",
+          "type": "file"
+        },
+        {
+          "name": "game.py",
+          "path": "EP3/src/game.py",
+          "type": "file"
+        },
+        {
+          "name": "pieces.py",
+          "path": "EP3/src/pieces.py",
+          "type": "file"
+        },
+        {
+          "name": "scores.py",
+          "path": "EP3/src/scores.py",
+          "type": "file"
+        },
+        {
+          "name": "views.py",
+          "path": "EP3/src/views.py",
+          "type": "file"
+        }
+      ]
+    },
+    {
+      "name": "tests",
+      "path": "EP3/tests",
+      "type": "directory",
+      "children": [
+        {
+          "name": "__init__.py",
+          "path": "EP3/tests/__init__.py",
+          "type": "file"
+        },
+        {
+          "name": "test_board.py",
+          "path": "EP3/tests/test_board.py",
+          "type": "file"
+        },
+        {
+          "name": "test_controller.py",
+          "path": "EP3/tests/test_controller.py",
+          "type": "file"
+        },
+        {
+          "name": "test_game.py",
+          "path": "EP3/tests/test_game.py",
+          "type": "file"
+        },
+        {
+          "name": "test_pieces.py",
+          "path": "EP3/tests/test_pieces.py",
+          "type": "file"
+        },
+        {
+          "name": "test_scores.py",
+          "path": "EP3/tests/test_scores.py",
+          "type": "file"
+        },
+        {
+          "name": "test_views.py",
+          "path": "EP3/tests/test_views.py",
+          "type": "file"
+        }
+      ]
+    },
+    {
+      "name": "main.py",
+      "path": "EP3/main.py",
+      "type": "file"
+    },
+    {
+      "name": "Makefile",
+      "path": "EP3/Makefile",
+      "type": "file"
+    },
+    {
+      "name": "README.md",
+      "path": "EP3/README.md",
+      "type": "file"
+    },
+    {
+      "name": "requirements.txt",
+      "path": "EP3/requirements.txt",
+      "type": "file"
+    }
+  ]
+}

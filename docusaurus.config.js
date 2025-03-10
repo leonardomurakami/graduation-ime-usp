@@ -49,7 +49,6 @@ const config = {
       }),
     ],
   ],
-
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
@@ -118,7 +117,7 @@ const config = {
         copyright: `Copyright © ${new Date().getFullYear()} Murakams, Inc (lol). Built with Docusaurus with love.`,
       },
       prism: {
-        additionalLanguages: ['java', 'python', 'scala', 'sql'],
+        additionalLanguages: ['java', 'python', 'nasm'],
         defaultLanguage: 'java',
         theme: prismThemes.github,
         darkTheme: prismThemes.dracula,

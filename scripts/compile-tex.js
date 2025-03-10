@@ -18,12 +18,6 @@ function findTexFiles(dir, filelist = []) {
   return filelist;
 }
 
-// Create the static PDF directory
-const pdfDir = path.join('static', 'pdfs');
-if (!fs.existsSync(pdfDir)) {
-  fs.mkdirSync(pdfDir, { recursive: true });
-}
-
 // Process each .tex file
 const texFiles = findTexFiles('.');
 texFiles.forEach(texFile => {
@@ -39,40 +33,6 @@ texFiles.forEach(texFile => {
     } catch (compileError) {
       console.warn(`Warning: LaTeX compilation had issues for ${texFile}, but continuing: ${compileError.message}`);
       // Continue execution - PDF might still have been generated
-    }
-    
-    // Create a meaningful path for the PDF
-    const relativePath = path.relative('.', dirName);
-    const destinationDir = path.join(pdfDir, relativePath);
-    
-    // Create destination directory if it doesn't exist
-    if (!fs.existsSync(destinationDir)) {
-      fs.mkdirSync(destinationDir, { recursive: true });
-    }
-    
-    // Check if PDF was created
-    const pdfFile = path.join(dirName, `${baseName}.pdf`);
-    const destinationFile = path.join(destinationDir, `${baseName}.pdf`);
-    
-    if (!fs.existsSync(pdfFile)) {
-      console.error(`Error: PDF file ${pdfFile} was not created`);
-    } else {
-      try {
-        // Copy instead of rename
-        if (fs.existsSync(destinationFile)) {
-          fs.unlinkSync(destinationFile); // Remove existing file if it exists
-        }
-        
-        // Use copyFile with a small delay to avoid potential file lock issues
-        fs.copyFileSync(pdfFile, destinationFile);
-        console.log(`Copied ${pdfFile} to ${destinationFile}`);
-        
-        // Only delete the original after successful copy
-        fs.unlinkSync(pdfFile);
-      } catch (moveError) {
-        console.error(`Warning: Could not move PDF file ${pdfFile}: ${moveError.message}`);
-        // Continue with execution - don't throw
-      }
     }
     
     // Clean up auxiliary files

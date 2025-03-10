@@ -1,0 +1,605 @@
+;****************************************************************************** 
+; MAC0216 - Técnicas de Programação I (2024)
+; EP1 - Linguagem de Montagem
+;
+; Nome do(a) aluno(a): Leonardo Heidi Almeida Murakami
+; NUSP: 11260186
+;****************************************************************************** 
+
+global _start 
+
+;****************************************************************************** 
+; Seção de declaração de variáveis inicializadas e constantes
+;****************************************************************************** 
+section .data				
+
+;*************************************************
+; Constantes
+;*************************************************
+
+; Descritores dos arquivos de entrada e saída padrão   
+STDIN:  equ 0
+STDOUT: equ 1
+
+; Modos de abertura de arquivo (segundo parâmetro da syscall sys_open)
+RDONLY: equ	0                 ; somente leitura
+WRONLY: equ	1                 ; somente escrita
+RDWR:   equ 	2                 ; leitura + escrita
+WRONLY_CREAT_TRUNC: equ  577  ; somente escrita + cria se não existe + trunca se existe
+
+; Modo de permissão de acesso a arquivo (terceiro parâmetro da syscall sys_open)
+PERMISSION_MODE: equ 438          ; permissões de leitura e escrita 
+
+; SYS_CALL_TABLE
+SYS_READ: equ 0
+SYS_WRITE: equ 1
+SYS_OPEN: equ 2
+SYS_CLOSE: equ 3
+
+; Deslocamentos para os parâmetros e variáveis locais das funções
+
+tam_max db 128    ; Define o tamanho máximo do buffer
+
+
+;*************************************************
+; Variáveis
+;*************************************************
+msg_arq_entrada:  db "Digite o nome do arquivo de entrada: ",0x0
+msg_arq_saida:    db "Digite o nome do arquivo de saida: ",0x0
+msg_arq_error_open: db "Erro ao abrir arquivo.", 0
+msg_arq_error_read: db "Erro na leitura do arquivo.", 0
+
+
+;****************************************************************************** 
+; Seção de declaração de variáveis não inicializadas
+;****************************************************************************** 
+section .bss
+
+file_descriptor resq 1    ; Reserva espaço para armazenar o descritor de arquivo
+file_descriptor_out resq 1    ; Reserva espaço para armazenar o descritor de arquivo
+read_buffer resb 1      ; Reserva espaço para armazenar o buffer de leitura
+buffer  resb 128    ; Reserva bytes para o buffer
+	
+;****************************************************************************** 
+; Seção de texto (código do corpo do programa)
+;******************************************************************************    
+section .text
+
+;******************************************************************************
+; FUNÇÃO: le_string(char* buffer, int tam_max)
+; Lê da entrada padrão (STDIN) uma sequência de caracteres finalizada por ENTER 
+; (caracter 0xA) e armazena-a na memória, finalizando com '\0' (caractere 0x0).
+; Usa a sys_read.  
+; ENTRADAS:
+; - char* buffer: endereço inicial do espaço de memória onde a função 
+;                 armazenará a string lida.
+; - int tam_max: a quantidade máxima de caracteres a serem lidos. Usado para 
+;                evitar 'estouro' do buffer caso o usuário digite mais 
+;                caracteres do que o espaço disponível para armazenamento.
+; SAÍDA: 
+; - Devolve no registrador RAX a quantidade de caracteres lidos.
+;******************************************************************************
+
+le_string:
+    push rbp
+    mov rbp, rsp
+
+    mov rax, SYS_READ
+    mov rdi, STDIN
+    mov rsi, [rbp + 16]  ; buffer
+    mov rdx, [rbp + 24]  ; tam_max
+    syscall
+    
+    dec rax               ; Remove o caractere de nova linha
+    mov rsi, [rbp + 16]
+    mov byte [rsi + rax], 0  ; Adiciona o terminador nulo
+
+    mov rsp, rbp
+    pop rbp
+    ret 16  ; Limpa 16 bytes da pilha (2 parâmetros)
+
+;******************************************************************************
+; FUNÇÃO: escreve_string(char* buffer)
+; Escreva uma string na saída padrão (STDOUT). A função supõe que a string é 
+; finalizada com '\0' (código 0x0). Usa a sys_write.
+; ENTRADA:
+; - char* buffer: ponteiro para a string (ou seja, o endereço da sua posição de 
+;                 memória inicial).
+;******************************************************************************
+escreve_string:
+    push rbp
+    mov rbp, rsp
+
+    mov rsi, [rbp + 16]  ; buffer
+    xor rdx, rdx         ; Contador de comprimento da string
+
+encontra_nulo:
+    cmp byte [rsi + rdx], 0
+    je escreve
+    inc rdx
+    jmp encontra_nulo
+
+escreve:
+    mov rax, SYS_WRITE
+    mov rdi, STDOUT
+    syscall
+
+    mov rsp, rbp
+    pop rbp
+    ret 8  ; Limpa 8 bytes da pilha (1 parâmetro)
+
+;******************************************************************************
+; FUNÇÃO:  abre_arquivo(char* nome_arquivo, int modo_abertura)
+; Abre um arquivo. 
+; Usa a sys_open (const char *pathname, int flags, mode_t mode).
+; Obs.: No parâmetro mode da sys_open, passa o valor 438 (constante 
+;       PERMISSION_MODE) como modo de permissão de acesso (que corresponde à
+;       permissão de leitura e escrita).
+; ENTRADAS: 
+; - char* nome_arquivo: endereço inicial da string do nome (ou do caminho+nome)
+; - int modo_abertura: valor 0 (constante RDONLY) para indicar abertura para 
+;                      leitura ou valor 577 (constante WRONLY_CREAT_TRUNC) para 
+;                      indicar abertura para escrita e criando o arquivo caso
+;                      ele não exista ainda ou sobreescrevendo o conteúdo dele
+;                      caso ele já exista.  
+; SAÍDA: 
+; - Devolve no registrador RAX o descritor do arquivo aberto.
+;******************************************************************************
+abre_arquivo:
+    push rbp
+    mov rbp, rsp
+
+    mov rax, SYS_OPEN
+    mov rdi, [rbp + 16]  ; nome_arquivo
+    mov rsi, [rbp + 24]  ; modo_abertura
+    mov rdx, PERMISSION_MODE
+    syscall
+
+    mov rsp, rbp
+    pop rbp
+    ret 16  ; Limpa 16 bytes da pilha (2 parâmetros)
+
+
+;******************************************************************************
+; FUNÇÃO: fecha_arquivo(int descritor_arquivo)
+; Fecha um arquivo aberto previamente. Usa a sys_close.
+; ENTRADA:
+; - int  descritor_arquivo: descritor do arquivo a ser fechado.
+;******************************************************************************
+fecha_arquivo:
+    push rbp
+    mov rbp, rsp
+
+    mov rax, SYS_CLOSE
+    mov rdi, [rbp + 16]  ; descritor_arquivo
+    syscall
+
+    mov rsp, rbp
+    pop rbp
+    ret 8  ; Limpa 8 bytes da pilha (1 parâmetro)
+
+;******************************************************************************
+; FUNÇÃO: le_byte_arquivo(int descritor_arquivo, char* byte_arq) 
+; Lê um byte de um arquivo aberto previamente para leitura. Usa a sys_read.
+; ENTRADAS:
+; - int descritor_arquivo: descritor do arquivo aberto para leitura.
+; - char* byte_arq: endereço da posição de memória onde será armazenado o byte
+;                   lido do arquivo.
+; SAÍDA: 
+; - Devolve em RAX o número de bytes lidos (ou seja, o valor devolvido pela 
+;   chamada à sys_read). 
+;******************************************************************************
+le_byte_arquivo:
+    push rbp
+    mov rbp, rsp
+
+    mov rax, SYS_READ
+    mov rdi, [rbp + 16]  ; descritor_arquivo
+    mov rsi, [rbp + 24]  ; byte_arq
+    mov rdx, 1
+    syscall
+
+    mov rsp, rbp
+    pop rbp
+    ret 16  ; Limpa 16 bytes da pilha (2 parâmetros)
+
+;******************************************************************************
+; FUNÇÃO: grava_string_arquivo(int descritor_arquivo, char* buffer)
+; Grava string em um arquivo previamente aberto para escrita. A função supõe 
+; que a string é finalizada com '\n' (código 0xA) e com '\0' (código 0x0). 
+; Usa a sys_write.
+; ENTRADAS:
+; - int descritor_arquivo: descritor do arquivo aberto para escrita.
+; - char* buffer: ponteiro para a string (ou seja, o endereço da sua posição de 
+;                 memória inicial).
+;******************************************************************************
+grava_string_arquivo:
+    push rbp
+    mov rbp, rsp
+
+    mov rdi, [rbp + 16]  ; descritor_arquivo
+    mov rsi, [rbp + 24]  ; buffer
+    xor rdx, rdx         ; Inicializa o tamanho da string
+
+calcula_tamanho:
+    cmp byte [rsi + rdx], 0
+    je escreve_arquivo
+    inc rdx
+    jmp calcula_tamanho
+
+escreve_arquivo:
+    mov rax, SYS_WRITE
+    syscall
+
+    mov rsp, rbp
+    pop rbp
+    ret 16  ; Limpa 16 bytes da pilha (2 parâmetros)
+
+;******************************************************************************
+; FUNÇÃO: gera_string_hexadecimal(int valor, char* buffer)
+; Converte um número em uma string com a representação em hexadecimal dele. Por
+; ex., para o inteiro 128526 (11111011000001110b), a string em hexadecimal é 
+; '0x1F60E'. A função finaliza a string gerada com um caractere de quebra de 
+; linha '\n' (código 0xA) e com o '\0' (código 0x0).
+; ENTRADAS:
+; - int valor: o número inteiro a ser convertido.
+; - char* buffer: endereço da posição inicial da região de memória previamente  
+;                 alocada que receberá a string gerada na conversão. 
+;******************************************************************************
+gera_string_hexadecimal:
+    push rbp
+    mov rbp, rsp
+    sub rsp, 32  ; Espaço para variáveis locais
+
+    mov rax, [rbp + 16]  ; valor
+    mov rdi, [rbp + 24]  ; buffer
+
+    mov byte [rdi], '0'
+    mov byte [rdi + 1], 'x'
+    add rdi, 2
+    xor rcx, rcx
+    lea rbx, [rdi + 16]
+    mov rdx, rbx
+
+converte_loop:
+    xor rbx, rbx
+    mov rbx, rax
+    and rbx, 0xF
+    shr rax, 4
+    cmp rbx, 9
+    ja ajusta_hex
+    add rbx, '0'
+    jmp armazena_digito
+
+ajusta_hex:
+    add rbx, 'A' - 10
+
+armazena_digito:
+    dec rdx
+    mov [rdx], bl
+    inc rcx
+    test rax, rax
+    jnz converte_loop
+
+copia_loop:
+    mov al, [rdx]
+    mov [rdi], al
+    inc rdi
+    inc rdx
+    dec rcx
+    jnz copia_loop
+
+    mov byte [rdi], 0xA   ; '\n'
+    mov byte [rdi + 1], 0 ; '\0'
+    mov rax, rdi
+    sub rax, [rbp + 24]
+    add rax, 2            ; Considera '\n' e '\0'
+
+    mov rsp, rbp
+    pop rbp
+    ret 16  ; Limpa 16 bytes da pilha (2 parâmetros)
+
+;******************************************************************************
+; FUNÇÃO: concatena_valores(valor1, valor2, deslocamento)
+; Concatena dois valores arbitrários deslocando o primeiro valor por uma 
+; quantidade especificada de bits e em seguida combinando com o segundo valor.
+; ENTRADAS:
+; - valor1: o primeiro valor (será deslocado).
+; - valor2: o segundo valor.
+; - deslocamento: quantidade de bits para deslocar o primeiro valor.
+; SAÍDA:
+; - Devolve o valor concatenado no registrador RAX.
+;******************************************************************************
+concatena_valores:
+    push rbp
+    mov rbp, rsp
+
+    mov rdi, [rbp + 16]  ; valor1
+    mov rsi, [rbp + 24]  ; valor2
+    mov rcx, [rbp + 32]  ; deslocamento
+
+    shl rdi, cl
+    or rdi, rsi
+    mov rax, rdi
+
+    mov rsp, rbp
+    pop rbp
+    ret 24  ; Limpa 24 bytes da pilha (3 parâmetros)
+
+;******************************************************************************
+; Início do Programa
+;****************************************************************************** 
+
+_start:
+    ; Solicita e lê o nome do arquivo de entrada
+    push msg_arq_entrada
+    call escreve_string
+
+    push qword [tam_max]
+    push buffer
+    call le_string
+
+    ; Abre o arquivo de entrada
+    push RDONLY
+    push buffer
+    call abre_arquivo
+    mov qword [file_descriptor], rax
+
+    ; Verifica se houve erro na abertura do arquivo
+    cmp rax, 0
+    jl erro_abertura
+
+    ; Solicita e lê o nome do arquivo de saída
+    push msg_arq_saida
+    call escreve_string
+
+    push qword [tam_max]
+    push buffer
+    call le_string
+
+    ; Abre o arquivo de saída
+    push WRONLY_CREAT_TRUNC
+    push buffer
+    call abre_arquivo
+    mov qword [file_descriptor_out], rax
+
+    ; Verifica se houve erro na abertura do arquivo de saída
+    cmp rax, 0
+    jl erro_abertura
+
+loop_leitura:
+    ; Lê um byte do arquivo de entrada
+    push read_buffer
+    push qword [file_descriptor]
+    call le_byte_arquivo
+
+    ; Verifica o fim do arquivo ou erro de leitura
+    cmp rax, 0
+    je fim_leitura
+    jl erro_leitura
+
+    ; Processa o byte lido
+    xor rax, rax
+    xor rsi, rsi
+    mov al, byte [read_buffer]
+    mov sil, al
+
+    ; Verifica se é um byte único (ASCII ou similar)
+    and al, 0x80
+    mov al, sil
+    jz processa_byte_unico
+
+    ; Verifica se é uma sequência de 2 bytes
+    and al, 0xE0
+    cmp al, 0xC0
+    je sequencia_dois_bytes
+
+    ; Verifica se é uma sequência de 3 bytes
+    mov al, sil
+    and al, 0xF0
+    cmp al, 0xE0
+    je sequencia_tres_bytes
+
+    ; Verifica se é uma sequência de 4 bytes
+    mov al, sil
+    and al, 0xF8
+    cmp al, 0xF0
+    je sequencia_quatro_bytes
+
+    jmp loop_leitura
+
+processa_byte_unico:
+    ; Converte o byte único para hexadecimal
+    xor rsi, rsi
+    movzx rdi, byte [read_buffer]
+    push read_buffer
+    push rdi
+    call gera_string_hexadecimal
+
+    ; Grava a string hexadecimal no arquivo de saída
+    push read_buffer
+    push qword [file_descriptor_out]
+    call grava_string_arquivo
+
+    jmp loop_leitura
+
+sequencia_dois_bytes:
+    ; Processa uma sequência de 2 bytes
+    xor rbx, rbx
+    mov rbx, rsi  ; Salva o primeiro byte
+
+    ; Lê o segundo byte
+    push read_buffer
+    push qword [file_descriptor]
+    call le_byte_arquivo
+
+    ; Concatena os dois bytes
+    xor rdi, rdi
+    xor rsi, rsi
+    mov rdi, rbx
+    and rdi, 0x1F  ; Remove bits de controle do primeiro byte
+    movzx rsi, byte [read_buffer]
+    and rsi, 0x3F  ; Remove bits de controle do segundo byte
+    push 6
+    push rsi
+    push rdi
+    call concatena_valores
+
+    ; Converte para hexadecimal e grava no arquivo de saída
+    push read_buffer
+    push rax
+    call gera_string_hexadecimal
+
+    push read_buffer
+    push qword [file_descriptor_out]
+    call grava_string_arquivo
+
+    jmp loop_leitura
+
+sequencia_tres_bytes:
+    ; Processa uma sequência de 3 bytes
+    xor r12, r12
+    xor r13, r13
+    xor r14, r14
+
+    mov r12, rsi  ; Salva o primeiro byte
+
+    ; Lê o segundo byte
+    push read_buffer
+    push qword [file_descriptor]
+    call le_byte_arquivo
+    mov r13b, byte [read_buffer]
+
+    ; Lê o terceiro byte
+    push read_buffer
+    push qword [file_descriptor]
+    call le_byte_arquivo
+    mov r14b, byte [read_buffer]
+
+    ; Concatena os três bytes
+    xor rdi, rdi
+    xor rsi, rsi
+    mov rdi, r12
+    and rdi, 0x0F  ; Remove bits de controle do primeiro byte
+    mov sil, r13b
+    and rsi, 0x3F  ; Remove bits de controle do segundo byte
+    push 6
+    push rsi
+    push rdi
+    call concatena_valores
+
+    xor rdi, rdi
+    xor rsi, rsi
+    mov rdi, rax
+    mov sil, r14b
+    and rsi, 0x3F  ; Remove bits de controle do terceiro byte
+    push 6
+    push rsi
+    push rdi
+    call concatena_valores
+
+    ; Converte para hexadecimal e grava no arquivo de saída
+    push read_buffer
+    push rax
+    call gera_string_hexadecimal
+
+    push read_buffer
+    push qword [file_descriptor_out]
+    call grava_string_arquivo
+
+    jmp loop_leitura
+
+sequencia_quatro_bytes:
+    ; Processa uma sequência de 4 bytes
+    xor r12, r12
+    xor r13, r13
+    xor r14, r14
+    xor r15, r15
+
+    mov r12, rsi  ; Salva o primeiro byte
+
+    ; Lê o segundo byte
+    push read_buffer
+    push qword [file_descriptor]
+    call le_byte_arquivo
+    mov r13b, byte [read_buffer]
+
+    ; Lê o terceiro byte
+    push read_buffer
+    push qword [file_descriptor]
+    call le_byte_arquivo
+    mov r14b, byte [read_buffer]
+
+    ; Lê o quarto byte
+    push read_buffer
+    push qword [file_descriptor]
+    call le_byte_arquivo
+    mov r15b, byte [read_buffer]
+
+    ; Concatena os quatro bytes
+    xor rdi, rdi
+    xor rsi, rsi
+    mov rdi, r12
+    and rdi, 0x07  ; Remove bits de controle do primeiro byte
+    mov sil, r13b
+    and rsi, 0x3F  ; Remove bits de controle do segundo byte
+    push 6
+    push rsi
+    push rdi
+    call concatena_valores
+
+    xor rdi, rdi
+    xor rsi, rsi
+    mov rdi, rax
+    mov sil, r14b
+    and rsi, 0x3F  ; Remove bits de controle do terceiro byte
+    push 6
+    push rsi
+    push rdi
+    call concatena_valores
+
+    xor rdi, rdi
+    xor rsi, rsi
+    mov rdi, rax
+    mov sil, r15b
+    and rsi, 0x3F  ; Remove bits de controle do quarto byte
+    push 6
+    push rsi
+    push rdi
+    call concatena_valores
+
+    ; Converte para hexadecimal e grava no arquivo de saída
+    push read_buffer
+    push rax
+    call gera_string_hexadecimal
+
+    push read_buffer
+    push qword [file_descriptor_out]
+    call grava_string_arquivo
+
+    jmp loop_leitura
+
+fim_leitura:
+    ; Fecha os arquivos
+    push qword [file_descriptor]
+    call fecha_arquivo
+
+    push qword [file_descriptor_out]
+    call fecha_arquivo
+
+    jmp sair_programa
+
+erro_abertura:
+    push msg_arq_error_open
+    call escreve_string
+    jmp sair_programa
+
+erro_leitura:
+    push msg_arq_error_read
+    call escreve_string
+    jmp sair_programa
+
+sair_programa:
+    mov rax, 60  ; syscall exit
+    xor rdi, rdi ; código de saída 0
+    syscall

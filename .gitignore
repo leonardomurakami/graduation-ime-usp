@@ -28,3 +28,6 @@ yarn-error.log*
 *.toc
 *.aux
 *.out
+
+# Auto-generated
+/static/code-json/*

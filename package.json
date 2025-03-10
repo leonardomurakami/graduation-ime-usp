@@ -4,9 +4,11 @@
   "private": true,
   "scripts": {
     "compile-pdfs": "node scripts/compile-tex.js",
+    "generate-code-jsons": "node scripts/generate-code-jsons.js",
     "docusaurus": "docusaurus",
+    "prebuild": "npm run generate-code-jsons",
     "build": "docusaurus build",
-    "prestart": "npm run compile-pdfs",
+    "prestart": "npm run generate-code-jsons",
     "start": "docusaurus start",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
@@ -20,14 +22,16 @@
     "@docusaurus/preset-classic": "3.7.0",
     "@mdx-js/react": "^3.0.0",
     "clsx": "^2.0.0",
-    "prism-react-renderer": "^2.3.0",
+    "lucide-react": "^0.479.0",
+    "prism-react-renderer": "^2.4.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "shiki-twoslash": "^3.1.2"
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "3.7.0",
-    "@docusaurus/types": "3.7.0"
+    "@docusaurus/types": "3.7.0",
+    "glob": "^11.0.1"
   },
   "browserslist": {
     "production": [
