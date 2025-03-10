@@ -4,32 +4,32 @@ import styles from './styles.module.css';
 
 const FeatureList = [
   {
-    title: 'Easy to Use',
+    title: 'Portfólio Acadêmico',
     Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        Esta documentação apresenta uma coleção de projetos e trabalhos 
+        desenvolvidos durante minha graduação no IME-USP.
       </>
     ),
   },
   {
-    title: 'Focus on What Matters',
+    title: 'Organização por Disciplinas',
     Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        Navegar pelos trabalhos é simples e intuitivo. Os projetos estão organizados
+        por disciplinas e incluem todos os principais entregáveis e suas descrições.
       </>
     ),
   },
   {
-    title: 'Powered by React',
+    title: 'Documentação Técnica',
     Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        Cada projeto contém explicações técnicas detalhadas, incluindo código-fonte,
+        análises e reflexões sobre o processo de desenvolvimento.
       </>
     ),
   },
@@ -43,7 +43,7 @@ function Feature({Svg, title, description}) {
       </div>
       <div className="text--center padding-horiz--md">
         <Heading as="h3">{title}</Heading>
-        <p>{description}</p>
+        <p className="text--responsive">{description}</p>
       </div>
     </div>
   );

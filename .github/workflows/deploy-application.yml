@@ -1,0 +1,39 @@
+name: Deploy Portfolio Site
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-deploy:
+    environment: production
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Build React app
+        run: npm run build
+        env:
+          CI: false
+          
+      - name: Deploy with rsync
+        uses: burnett01/rsync-deployments@7.0.2
+        with:
+          switches: -avzr --delete
+          path: build/
+          remote_path: /var/www/ime/
+          remote_host: ${{ vars.DEPLOY_HOST }}
+          remote_user: ${{ vars.DEPLOY_USER }}
+          remote_key: ${{ secrets.DEPLOY_KEY }}

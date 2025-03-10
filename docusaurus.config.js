@@ -12,28 +12,19 @@ const config = {
   tagline: 'Leonardo Heidi Almeida Murakami',
   favicon: 'img/favicon.ico',
 
-  // Set the production url of your site here
   url: 'https://ime.murakams.com',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/',
-
-  // GitHub pages deployment config.
-  // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'leonardomurakami', // Usually your GitHub org/user name.
-  projectName: 'graduation-ime-usp', // Usually your repo name.
+  organizationName: 'leonardomurakami',
+  projectName: 'graduation-ime-usp',
 
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
-
-  // Even if you don't use internationalization, you can use this field to set
-  // useful metadata like html lang. For example, if your site is Chinese, you
-  // may want to replace "en" with "zh-Hans".
   i18n: {
-    defaultLocale: 'en',
-    locales: ['en'],
+    defaultLocale: 'pt-BR',
+    locales: ['pt-BR'],
   },
-
   presets: [
     [
       'classic',
@@ -41,10 +32,6 @@ const config = {
       ({
         docs: {
           sidebarPath: './sidebars.js',
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
         },
         blog: {
           showReadingTime: true,
@@ -52,11 +39,6 @@ const config = {
             type: ['rss', 'atom'],
             xslt: true,
           },
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
-          // Useful options to enforce blogging best practices
           onInlineTags: 'warn',
           onInlineAuthors: 'warn',
           onUntruncatedBlogPosts: 'warn',
@@ -74,7 +56,7 @@ const config = {
       // Replace with your project's social card
       image: 'img/docusaurus-social-card.jpg',
       navbar: {
-        title: 'My Site',
+        title: 'Graduação IME USP',
         logo: {
           alt: 'My Site Logo',
           src: 'img/logo.svg',
@@ -84,11 +66,11 @@ const config = {
             type: 'docSidebar',
             sidebarId: 'tutorialSidebar',
             position: 'left',
-            label: 'Tutorial',
+            label: 'Portfolio IME',
           },
           {to: '/blog', label: 'Blog', position: 'left'},
           {
-            href: 'https://github.com/facebook/docusaurus',
+            href: 'https://github.com/leonardomurakami/graduation-ime-usp',
             label: 'GitHub',
             position: 'right',
           },
@@ -98,10 +80,10 @@ const config = {
         style: 'dark',
         links: [
           {
-            title: 'Docs',
+            title: 'Portfolio',
             items: [
               {
-                label: 'Tutorial',
+                label: 'IME',
                 to: '/docs/intro',
               },
             ],
@@ -110,16 +92,16 @@ const config = {
             title: 'Community',
             items: [
               {
-                label: 'Stack Overflow',
-                href: 'https://stackoverflow.com/questions/tagged/docusaurus',
+                label: 'LinkedIn',
+                href: 'https://linkedin.com/in/leonardo-murakami',
               },
               {
-                label: 'Discord',
-                href: 'https://discordapp.com/invite/docusaurus',
+                label: 'Github',
+                href: 'https://github.com/leonardomurakami',
               },
               {
-                label: 'X',
-                href: 'https://x.com/docusaurus',
+                label: 'Email',
+                href: 'mailto:contato@murakams.com',
               },
             ],
           },
@@ -130,16 +112,14 @@ const config = {
                 label: 'Blog',
                 to: '/blog',
               },
-              {
-                label: 'GitHub',
-                href: 'https://github.com/facebook/docusaurus',
-              },
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
+        copyright: `Copyright © ${new Date().getFullYear()} Murakams, Inc (lol). Built with Docusaurus with love.`,
       },
       prism: {
+        additionalLanguages: ['java', 'python', 'scala', 'sql'],
+        defaultLanguage: 'java',
         theme: prismThemes.github,
         darkTheme: prismThemes.dracula,
       },

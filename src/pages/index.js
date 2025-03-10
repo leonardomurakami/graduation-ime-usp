@@ -3,7 +3,6 @@ import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
 import HomepageFeatures from '@site/src/components/HomepageFeatures';
-
 import Heading from '@theme/Heading';
 import styles from './index.module.css';
 
@@ -20,7 +19,7 @@ function HomepageHeader() {
           <Link
             className="button button--secondary button--lg"
             to="/docs/intro">
-            Docusaurus Tutorial - 5min ⏱️
+            Explorar Projetos Acadêmicos
           </Link>
         </div>
       </div>
@@ -32,10 +31,35 @@ export default function Home() {
   const {siteConfig} = useDocusaurusContext();
   return (
     <Layout
-      title={`Hello from ${siteConfig.title}`}
-      description="Description will go into a meta tag in <head />">
+      title={`${siteConfig.title}`}
+      description="Portfólio de projetos acadêmicos desenvolvidos durante a graduação no IME-USP">
       <HomepageHeader />
       <main>
+        <section className={styles.aboutSection}>
+          <div className="container">
+            <div className="row">
+              <div className="col col--8 col--offset-2">
+                <Heading as="h2" className={styles.sectionTitle}>
+                  Sobre este Portfólio
+                </Heading>
+                <p className="text--responsive">
+                  Bem-vindo ao meu portfólio acadêmico! Este site reúne os principais trabalhos e projetos 
+                  que desenvolvi durante minha graduação no Instituto de Matemática e Estatística da 
+                  Universidade de São Paulo (IME-USP).
+                </p>
+                <p className="text--responsive">
+                  Aqui você encontrará uma documentação organizada dos meus entregáveis acadêmicos, 
+                  incluindo códigos, análises, relatórios e projetos práticos. Cada projeto contém 
+                  uma descrição detalhada do problema abordado, a metodologia utilizada e os resultados obtidos.
+                </p>
+                <p className="text--responsive">
+                  Este portfólio serve tanto como registro pessoal da minha jornada acadêmica quanto 
+                  como demonstração das habilidades e conhecimentos que adquiri ao longo da graduação.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
         <HomepageFeatures />
       </main>
     </Layout>
