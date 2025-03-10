@@ -1,0 +1,53 @@
+/**
+ * CSS personalizado para ser adicionado em src/css/custom.css
+ */
+
+ :root {
+  --ifm-color-primary: #2e5f8c;
+  --ifm-color-primary-dark: #29557e;
+  --ifm-color-primary-darker: #264f77;
+  --ifm-color-primary-darkest: #204162;
+  --ifm-color-primary-light: #33699a;
+  --ifm-color-primary-lighter: #366fa1;
+  --ifm-color-primary-lightest: #3c7db6;
+}
+
+/* Para o tema escuro */
+[data-theme='dark'] {
+  --ifm-color-primary: #4d87c7;
+  --ifm-color-primary-dark: #3879bd;
+  --ifm-color-primary-darker: #3472b2;
+  --ifm-color-primary-darkest: #2b5e93;
+  --ifm-color-primary-light: #6295cf;
+  --ifm-color-primary-lighter: #6e9ed3;
+  --ifm-color-primary-lightest: #8fb3dd;
+  --ifm-background-color: #0f1724;
+  --ifm-background-surface-color: #162033;
+}
+
+/* Garantindo que texto seja sempre legível em ambos os modos */
+.text--responsive {
+  color: var(--ifm-font-color-base);
+}
+
+/* Estilos para cards na homepage */
+[data-theme='dark'] .col.col--4 {
+  background-color: var(--ifm-background-surface-color);
+  border-radius: 0px;
+  margin: 0px;
+  padding: 20px;
+}
+
+[data-theme='light'] .col.col--4 {
+  background-color: var(--ifm-color-emphasis-100);
+  border-radius: 0px;
+  margin: 0px;
+  padding: 20px;
+}
+
+/* Tamanhos de fonte responsivos */
+@media screen and (max-width: 996px) {
+  .hero__subtitle, .text--responsive {
+    font-size: 0.9rem;
+  }
+}

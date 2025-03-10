@@ -1,0 +1,213 @@
+---
+title: 'EP4 - Contatinhos'
+description: 'Implementação de um sistema eficiente para gerenciar contatos com prioridades usando estruturas de dados otimizadas'
+date: '2024-11-24'
+tags: ['java', 'estruturas de dados', 'algoritmos', 'árvores', 'filas']
+---
+
+# Contatinhos - Sistema de Gerenciamento de Contatos
+
+## Visão Geral do Projeto
+
+Este projeto implementa um sistema de gerenciamento de contatos em Java que permite adicionar, buscar, atualizar, remover e listar contatos, com suporte a prioridades para determinar a importância de cada contato. O sistema utiliza estruturas de dados otimizadas para garantir operações eficientes de acordo com restrições de tempo específicas.
+
+## Funcionalidades Implementadas
+
+- **Adicionar contato**: Adiciona um novo contato com nome, perfil do Instagram, telefone e prioridade (1-100)
+- **Buscar contato**: Busca um contato pelo nome ou perfil do Instagram
+- **Atualizar contato**: Atualiza informações de um contato existente
+- **Listar contatos por prioridade**: Exibe os contatos ordenados por prioridade
+- **Listar contatos em ordem alfabética**: Exibe os contatos em ordem alfabética
+- **Remover contato**: Remove o primeiro contato adicionado ao sistema
+
+## Estruturas de Dados Utilizadas
+
+O sistema utiliza quatro estruturas de dados principais para garantir a eficiência das operações:
+
+1. **TreeMap para indexação por nome**: Indexa contatos por nome para buscas e listagem alfabética eficientes
+2. **TreeMap para indexação por Instagram**: Indexa contatos por perfil do Instagram para buscas eficientes
+3. **TreeMap para indexação por prioridade**: Indexa contatos por prioridade para listagem eficiente por nível de prioridade
+4. **Queue para ordem de inserção**: Armazena contatos na ordem de adição para remoção eficiente
+
+## Complexidade Temporal
+
+- **Adicionar contato**: O(log n) - Inserção em TreeMap
+- **Buscar contato**: O(log n) - Busca em TreeMap
+- **Atualizar contato**: O(log n) - Busca e atualização em TreeMap
+- **Listar contatos por prioridade**: O(n) - Travessia dos elementos já ordenados
+- **Listar contatos em ordem alfabética**: O(n) - Travessia dos elementos já ordenados
+- **Remover contato**: O(log n) - Remoção em TreeMap após acesso O(1) à Queue
+
+## Implementação
+### Nota: 10/10
+* Implementação: 6.0/6.0
+* Relatório: 4.0/4.0
+* Comentários: ok
+
+```java title="Contatinhos.java" showLineNumbers
+import java.util.*;
+
+public class Contatinhos {
+    private static class Contato {
+        String nome;
+        String instagram;
+        String telefone;
+        int prioridade;
+
+        public Contato(String nome, String instagram, String telefone, int prioridade) {
+            this.nome = nome;
+            this.instagram = instagram;
+            this.telefone = telefone;
+            this.prioridade = prioridade;
+        }
+        
+        public String toString(){
+            return this.nome + " - " + this.instagram + " - " + this.telefone + " - prioridade: " + this.prioridade;
+        }
+    }
+
+    // Indexacao dos contatos ordenados por nome - O(log n) para insercao/busca
+    private TreeMap<String, Contato> contatosPorNome;
+    
+    // Indexacao dos contatos ordenados por Instagram - O(log n) para insercao/busca
+    private TreeMap<String, Contato> contatosPorInstagram;
+    
+    // Indexacao dos contatos ordenados por prioridade - O(log n) para insercao/busca
+    private TreeMap<Integer, List<Contato>> contatosPorPrioridade;
+    
+    // Salvando a ordem de chegada dos usuarios - O(1) para insercao, O(1) para remocao
+    private Queue<Contato> contatosPorOrdem;
+
+    public Contatinhos() {
+        contatosPorNome = new TreeMap<>();
+        contatosPorInstagram = new TreeMap<>();
+        contatosPorPrioridade = new TreeMap<>();
+        contatosPorOrdem = new LinkedList<>();
+    }
+
+    // Adicionar Contato - O(log n)
+    public boolean adicionarContato(String nome, String instagram, String telefone, int prioridade) {
+        if (prioridade < 1 || prioridade > 100) {
+            return false;
+        }
+
+        if (contatosPorNome.containsKey(nome) || contatosPorInstagram.containsKey(instagram)) {
+            return false;
+        }
+
+        Contato novoContato = new Contato(nome, instagram, telefone, prioridade);
+
+        contatosPorNome.put(nome, novoContato); 
+        contatosPorInstagram.put(instagram, novoContato);
+        contatosPorPrioridade.computeIfAbsent(prioridade, k -> new ArrayList<>()).add(novoContato);
+        contatosPorOrdem.offer(novoContato);
+        
+        return true;
+    }
+
+    // Buscar contato - O(log n)
+    public Contato buscarContato(String busca) {
+        Contato porNome = contatosPorNome.get(busca);
+        if (porNome != null) {
+            return porNome;
+        }
+        return contatosPorInstagram.get(busca);
+    }
+
+    // Atualizar contato - O(log n)
+    public boolean atualizarContato(String nome, String novoInstagram, String novoTelefone, int novaPrioridade) {
+        if (novaPrioridade < 1 || novaPrioridade > 100) {
+            return false;
+        }
+
+        Contato contato = contatosPorNome.get(nome);
+        if (contato == null) {
+            return false;
+        }
+
+        // Se o Instagram esta mudando, verificar se o novo ja existe
+        if (!contato.instagram.equals(novoInstagram) && contatosPorInstagram.containsKey(novoInstagram)) {
+            return false;
+        }
+
+        // Remover das estruturas antigas (nunca acessamos o contato na lista ligada de prioridade)
+        // O que mantem O(log n+)
+        contatosPorInstagram.remove(contato.instagram);
+        contatosPorPrioridade.get(contato.prioridade).remove(contato);
+        
+        // Atualizar informacoes
+        contato.instagram = novoInstagram;
+        contato.telefone = novoTelefone;
+        contato.prioridade = novaPrioridade;
+
+        // Adicionar nas novas estruturas
+        contatosPorInstagram.put(novoInstagram, contato);
+        contatosPorPrioridade.computeIfAbsent(novaPrioridade, k -> new ArrayList<>()).add(contato);
+
+        return true;
+    }
+    
+    public void listarContatosPorPrioridade(){
+        for (Map.Entry<Integer, List<Contato>> entry : contatosPorPrioridade.entrySet()) {
+            for (Contato c : entry.getValue()){
+                System.out.println("Contato: " + c.toString());
+            }
+        }
+    }
+
+    // Listar contatos em ordem alfabetica - O(n)
+    public void listarContatosOrdemAlfabetica() {
+        for (Contato c : contatosPorNome.values()){
+            System.out.println("Contato: " + c.toString());
+        }
+    }
+
+    // Remover primeiro contato - O(log n)
+    public boolean removerPrimeiroContato() {
+        if (contatosPorOrdem.isEmpty()) {
+            return false;
+        }
+        
+        // Pegar o primeiro contato da fila - O(1)
+        Contato primeiro = contatosPorOrdem.poll();
+
+        // Remover das estruturas - O(log n)
+        contatosPorNome.remove(primeiro.nome);
+        contatosPorInstagram.remove(primeiro.instagram);
+        contatosPorPrioridade.get(primeiro.prioridade).remove(primeiro);
+
+        return true;
+    }
+}
+```
+
+## Testes e Validação
+
+O sistema foi testado extensivamente com casos de teste verificando:
+- Adição bem-sucedida de contatos
+- Adição de contatos com a mesma prioridade
+- Tentativas de adicionar contatos com nome ou Instagram duplicados
+- Busca por nome e Instagram
+- Atualização de contatos e verificação dos valores atualizados
+- Listagem por prioridade e ordem alfabética
+- Remoção do primeiro contato
+
+## Relatório Técnico
+
+Para uma análise mais detalhada das estruturas de dados utilizadas, justificativas das escolhas de implementação e análise de complexidade, consulte o relatório técnico:
+
+import PdfViewer from '@site/src/components/PdfViewer';
+
+<PdfViewer pdfPath="/pdfs/ime/MAC0121-Algoritmos e Estruturas de Dados I/EP4/relatorio.pdf"/>
+
+## Conclusão
+
+Este projeto demonstra a aplicação de estruturas de dados eficientes para resolver um problema prático de gerenciamento de informações. A implementação satisfaz todos os requisitos de complexidade temporal especificados, garantindo um equilíbrio entre eficiência e funcionalidade.
+
+As estruturas de dados escolhidas (TreeMap e Queue) proporcionam a flexibilidade necessária para múltiplos tipos de operações enquanto mantêm a complexidade temporal dentro dos limites especificados. O projeto também demonstra a importância da indexação apropriada para diferentes padrões de acesso aos dados.
+
+export default ({ children }) => (
+  <article className="prose prose-lg max-w-none">
+    {children}
+  </article>
+);

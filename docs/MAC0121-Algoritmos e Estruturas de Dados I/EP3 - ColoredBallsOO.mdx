@@ -1,0 +1,137 @@
+---
+title: 'EP3 - ColoredBallsOO'
+description: 'Implementação orientada a objetos de uma simulação física de bolas colidindo em um ambiente 2D'
+date: '2024-03-09'
+tags: ['java', 'orientação a objetos', 'física', 'simulação', 'animação']
+---
+
+# ColoredBallOO - Simulação de Bolas Colidindo
+
+## Descrição do Projeto
+
+Este projeto implementa uma versão orientada a objetos de uma simulação de bolas colidindo em um ambiente 2D. O objetivo foi refatorar um código procedural original (`CollidingBalls.java`) para seguir os princípios da programação orientada a objetos, melhorando sua modularidade, reusabilidade e manutenibilidade.
+
+A simulação permite visualizar o movimento de múltiplas bolas coloridas que se movem em um espaço quadrado, colidindo entre si e com as paredes do ambiente, seguindo as leis da física para colisões elásticas.
+
+## Implementação
+
+A implementação orientada a objetos utiliza a classe `Vector` para representar vetores bidimensionais (posição e velocidade), e uma classe `ColoredBallOO` que encapsula as propriedades e comportamentos de cada bola na simulação.
+
+## Código-Fonte
+### Nota: 9/10 - "Faltou cabeçalho."
+
+A classe `ColoredBallOO` é o componente principal desta implementação. Ela encapsula:
+
+- Propriedades da bola (posição, velocidade, raio e cor)
+- Comportamentos para movimentação, tratamento de colisões com paredes e renderização
+
+```java title="ColoredBallOO.java" showLineNumbers
+import java.awt.Color;
+
+public class ColoredBallOO {
+    private Vector position;
+    private Vector velocity;
+    private final double radius;
+    private final Color color;
+
+    public ColoredBallOO(Vector p, Vector v, double r, Color c) {
+        position = p;
+        velocity = v;
+        radius = r;
+        color = c;
+    }
+
+    public Vector pos() {
+        return position;
+    }
+
+    public Vector vel() {
+        return velocity;
+    }
+
+    public double radius() {
+        return radius;
+    }
+
+    public void setVel(Vector v) {
+        velocity = v;
+    }
+
+    public void updatePosition(double dt) {
+        // p = p + dt*v
+        position = position.plus(velocity.scale(dt));
+    }
+
+    public void treatWalls(double size, double dt) {
+        Vector nextPos = position.plus(velocity.scale(dt));
+        if (nextPos.cartesian(0) - radius < 0 || nextPos.cartesian(0) + radius > size) {
+            // vx = -vx se bateu na parede na esquerda ou direita
+            double[] v = {-velocity.cartesian(0), velocity.cartesian(1)};
+            velocity = new Vector(v);
+        }
+        if (nextPos.cartesian(1) - radius < 0 || nextPos.cartesian(1) + radius > size) {
+            // vy = -vy se bateu na parede de cima ou de baixo
+            double[] v = {velocity.cartesian(0), -velocity.cartesian(1)};
+            velocity = new Vector(v);
+        }
+    }
+
+    public void move(double size, double dt) {
+        treatWalls(size, dt);
+        updatePosition(dt);
+    }
+
+    public void draw() {
+        StdDraw.setPenColor(color);
+        StdDraw.filledCircle(position.cartesian(0), position.cartesian(1), radius);
+    }
+}
+```
+
+## Funcionamento da Simulação
+
+### Inicialização
+
+A simulação é iniciada pela classe `CollidingBallsOO` (não mostrada aqui), que cria diversas instâncias de `ColoredBallOO` com posições, velocidades, raios e cores aleatórias ou pré-definidas.
+
+### Ciclo Principal
+
+Em cada passo da simulação:
+
+1. O cliente (`CollidingBallsOO`) verifica colisões entre as bolas
+2. Para cada colisão detectada, calcula as novas velocidades e as atualiza
+3. Para cada bola, chama o método `move()` que:
+   - Trata possíveis colisões com as paredes (`treatWalls()`)
+   - Atualiza a posição da bola (`updatePosition()`)
+4. Desenha cada bola na tela (`draw()`)
+5. Repete o processo para criar uma animação fluida
+
+## Princípios de OO Aplicados
+
+Esta implementação demonstra vários princípios de programação orientada a objetos:
+
+1. **Encapsulamento**: Atributos privados com métodos de acesso controlados
+2. **Responsabilidade única**: Cada método realiza uma única função específica
+3. **Delegação**: O cliente delega a lógica específica de cada bola para sua respectiva instância
+4. **Abstração**: A interface pública da classe esconde os detalhes de implementação
+5. **Composição**: Uso da classe `Vector` para representar propriedades complexas
+
+## Aspectos Físicos da Simulação
+
+A simulação implementa uma versão simplificada das leis da física para:
+
+- **Movimento uniforme**: Na ausência de colisões, as bolas se movem com velocidade constante
+- **Colisões elásticas**: O momento e a energia cinética são conservados durante as colisões
+- **Reflexão em paredes**: Quando uma bola atinge uma parede, sua velocidade é refletida no eixo correspondente
+
+## Conclusão
+
+Este projeto demonstra como refatorar código procedural para uma arquitetura orientada a objetos, melhorando sua estrutura sem alterar seu comportamento. A implementação resultante é mais modular, legível e extensível, facilitando futuras modificações como a adição de novos tipos de objetos ou comportamentos.
+
+A simulação também serve como uma excelente visualização de conceitos físicos como movimento, colisões elásticas e conservação de energia em um sistema fechado.
+
+export default ({ children }) => (
+  <article className="prose prose-lg max-w-none">
+    {children}
+  </article>
+);

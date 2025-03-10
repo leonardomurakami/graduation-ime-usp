@@ -1,0 +1,107 @@
+---
+title: 'EP1 - Jogo de Cartas'
+description: 'Implementação de um jogo de escolha de cartas com duas estratégias diferentes'
+date: '2024-03-09'
+tags: ['java', 'algoritmos', 'probabilidade', 'jogos']
+---
+
+# Jogo de Cartas - Estratégia Probabilística
+
+## Descrição do Problema
+
+
+Este exercício implementa duas versões de um jogo de cartas onde dois números inteiros entre 0 e 99 são escritos atrás de duas cartas (um número em cada carta). O jogador deve escolher uma das duas cartas e vence o jogo se a carta escolhida for a de maior valor.
+
+### Versões do Jogo:
+- **Versão 1 (No choice):** O jogador precisa escolher sua carta sem ver os números que foram escritos.
+- **Versão 2 (With choice):** O jogador escolhe uma carta e vê o número escrito nela. Feito isso, ele faz sua escolha final.
+
+Na Versão 1, o melhor que o jogador pode fazer é escolher uma carta aleatoriamente, obtendo chance de vitória de exatamente 50%. O desafio era desenvolver uma estratégia para a Versão 2 que supere essa probabilidade.
+
+## Implementação
+
+O programa recebe três parâmetros da linha de comando:
+- `a` e `b`: os inteiros escritos nas cartas
+- `T`: a quantidade de vezes que o programa simulará o jogo
+
+O programa executa duas estratégias:
+1. Estratégia aleatória simples (No choice)
+2. Estratégia probabilística desenvolvida (With choice)
+
+Ao final, o programa imprime a quantidade de vitórias e a porcentagem de vitórias de cada estratégia.
+
+## Código Fonte
+### Nota: 10/10
+
+```java title="Jogo.java" showLineNumbers
+/*
+Nome: Leonardo Heidi Almeida Murakami
+NUSP: 11260186
+*/
+import java.util.Random;
+
+public class Jogo {
+    private static Random random = new Random();
+    private static int MAX_CARD_VALUE = 100;
+
+    public static void main(String[] args) {
+        int a = Integer.parseInt(args[0]);
+        int b = Integer.parseInt(args[1]);
+        int T = Integer.parseInt(args[2]);
+
+        int noChoiceWins = 0;
+        int withChoiceWins = 0;
+
+        for (int i = 0; i < T; i++) {
+            if (noChoice(a, b)) {
+                noChoiceWins++;
+            }
+            if (withChoice(a, b)) {
+                withChoiceWins++;
+            }
+        }
+
+        double noChoicePercentage = (double) noChoiceWins / T * 100;
+        double withChoicePercentage = (double) withChoiceWins / T * 100;
+
+        System.out.printf("No choice: %d - %.2f%%\n", noChoiceWins, noChoicePercentage);
+        System.out.printf("With choice: %d - %.2f%%\n", withChoiceWins, withChoicePercentage);
+    }
+    
+    public static boolean noChoice(int a, int b) {
+        int choice = random.nextInt(2);
+        return (choice == 0) ? (a > b) : (b > a);
+    }
+    
+    public static boolean withChoice(int a, int b) {
+        int knownCard = random.nextInt(2);
+        int knownValue = (knownCard == 0) ? a : b;
+        int unknownValue = (knownCard == 0) ? b : a;
+        
+        double stickProbability = (double) knownValue / MAX_CARD_VALUE;
+    
+        if (random.nextDouble() < stickProbability) {
+            return knownValue > unknownValue;
+        } else {
+            return unknownValue > knownValue;
+        }
+    }
+}
+```
+
+## Explicação da Estratégia
+
+A estratégia implementada para a versão "With choice" utiliza uma abordagem probabilística:
+
+1. Primeiro, escolhemos uma carta aleatoriamente para revelar seu valor
+2. Baseado no valor conhecido, calculamos uma probabilidade de ficar com esta carta ou trocar
+3. A probabilidade de ficar com a carta revelada é proporcional ao seu valor (quanto maior o valor, maior a chance de ficarmos com ela)
+4. Esta estratégia supera significativamente os 50% de chance da escolha aleatória
+
+Esta implementação demonstra como informações parciais podem ser usadas para melhorar as chances de vitória em jogos de decisão probabilística.
+
+export default ({ children }) => (
+  <article className="prose prose-lg max-w-none">
+    {children}
+  </article>
+);
