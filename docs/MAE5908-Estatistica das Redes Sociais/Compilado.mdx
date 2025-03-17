@@ -1,0 +1,87 @@
+---
+title: 'Compilação de Modelos - MAC0459'
+description: 'Compilação de códigos utilizados para simular diferentes modelos estudados na disciplina.'
+date: '2021'
+tags: ['modelagem', 'redes complexas', 'simulação', 'python']
+---
+
+# Compilação de Modelos - MAC0459
+
+## Introdução
+
+Este documento apresenta uma **compilação de códigos** utilizados na disciplina MAC0459 para simular diferentes **modelos de redes complexas e processos dinâmicos**. Os códigos implementam desde **geração de grafos aleatórios** até **modelos de influência e mutação em redes sociais**.
+
+## Modelos Implementados
+
+### 1. **Geração de Grafos Aleatórios - Erdos-Rényi**
+Arquivo: `erdos_renyi_graph.py`
+
+O modelo **Erdos-Rényi (ER)** gera um grafo aleatório onde cada aresta entre dois nós é incluída com uma probabilidade `p`. Ele é útil como **modelo base** para estudos de redes e para comparar com grafos estruturados.
+
+**Principais características:**
+- Cada par de nós tem **probabilidade independente** de conexão.
+- O grau dos nós segue uma **distribuição binomial**.
+- Para `p` alto, o grafo tende a ser **conectado**.
+
+### 2. **Modelo de Votação**
+Arquivos: `votant_model.py`, `votant_model_mutation.py`
+
+Este modelo simula como **opiniões** se propagam em uma rede. Cada nó tem um estado/opinião e interage com vizinhos para atualizar seu estado.
+
+**Variante com Mutação:** 
+Além das interações básicas, esta versão permite que **novas opiniões surjam** com uma taxa de mutação, modelando mudanças espontâneas no sistema.
+
+**Aplicações:**
+- Modelos de **consenso e polarização** em redes sociais.
+- Simulação de **dinâmicas de opinião** e influência.
+
+### 3. **Modelo de Blocos Aleatórios**
+Arquivo: `random_blocks_model.py`
+
+Este modelo cria redes com **grupos internos**, onde os nós de um mesmo bloco têm maior probabilidade de estarem conectados. Ele é útil para simular **comunidades em redes sociais**.
+
+**Destaques:**
+- Cada bloco representa uma **subcomunidade**.
+- As conexões dentro do bloco são **mais densas** do que entre blocos.
+- Útil para estudar **segregação e modulação de influência**.
+
+### 4. **Modelo de Pressão e Polarização**
+Arquivos: `network_with_pressure.py`, `network_with_pressure_and_polarization.py`
+
+Modelos que simulam **pressão social e polarização** em redes. A pressão é uma força que empurra os nós para estados homogêneos, enquanto a polarização reforça diferenças entre grupos distintos.
+
+**Casos de Uso:**
+- Estudos sobre **polarização política e social**.
+- Impacto de **pressão de grupo** na tomada de decisões.
+
+### 5. **Modelo de Mudanças Extremas**
+Arquivo: `simple_extreme_change_model.py`
+
+Simula eventos extremos que podem **modificar rapidamente** o estado de uma rede. Pode ser usado para modelar **eventos disruptivos**, como mudanças de opinião massivas ou crises financeiras.
+
+**Destaques:**
+- Implementa uma regra onde uma fração da rede sofre **mudança radical**.
+- Representa choques exógenos em sistemas sociais.
+
+
+## Implementação
+
+import CodeBrowser from '@site/src/components/CodeBrowser';
+
+<CodeBrowser 
+    rootDir="ime/MAE5908-Estatistica das Redes Sociais" 
+    defaultOpenFile="erdos_renyi_graph.py" 
+/>
+
+## Conclusão
+
+Os códigos apresentados cobrem uma **ampla variedade de modelos** usados para estudar **redes complexas e dinâmicas sociais**. Eles permitem analisar fenômenos como **formação de consenso, polarização, impacto da pressão social e mudanças estruturais**.
+
+Esses modelos são fundamentais para entender como **redes interagem e evoluem**, sendo aplicáveis a áreas como **sociologia computacional, ciência política, economia e epidemiologia**.
+
+export default ({ children }) => (
+  <article className="prose prose-lg max-w-none">
+    {children}
+  </article>
+);
+

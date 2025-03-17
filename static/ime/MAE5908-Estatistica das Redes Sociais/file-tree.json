@@ -1,0 +1,42 @@
+{
+  "name": "MAE5908-Estatistica das Redes Sociais",
+  "path": "MAE5908-Estatistica das Redes Sociais",
+  "type": "directory",
+  "children": [
+    {
+      "name": "erdos_renyi_graph.py",
+      "path": "MAE5908-Estatistica das Redes Sociais/erdos_renyi_graph.py",
+      "type": "file"
+    },
+    {
+      "name": "network_with_pressure_and_polarization.py",
+      "path": "MAE5908-Estatistica das Redes Sociais/network_with_pressure_and_polarization.py",
+      "type": "file"
+    },
+    {
+      "name": "network_with_pressure.py",
+      "path": "MAE5908-Estatistica das Redes Sociais/network_with_pressure.py",
+      "type": "file"
+    },
+    {
+      "name": "random_blocks_model.py",
+      "path": "MAE5908-Estatistica das Redes Sociais/random_blocks_model.py",
+      "type": "file"
+    },
+    {
+      "name": "simple_extreme_change_model.py",
+      "path": "MAE5908-Estatistica das Redes Sociais/simple_extreme_change_model.py",
+      "type": "file"
+    },
+    {
+      "name": "votant_model_mutation.py",
+      "path": "MAE5908-Estatistica das Redes Sociais/votant_model_mutation.py",
+      "type": "file"
+    },
+    {
+      "name": "votant_model.py",
+      "path": "MAE5908-Estatistica das Redes Sociais/votant_model.py",
+      "type": "file"
+    }
+  ]
+}
