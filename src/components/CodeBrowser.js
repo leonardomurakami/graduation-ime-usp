@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useColorMode } from '@docusaurus/theme-common';
 import CodeBlock from '@theme/CodeBlock';
 import styles from './CodeBrowser.module.css';
-import { ChevronDown, ChevronRight, Folder, File, Code } from 'lucide-react';
+import { ChevronDown, ChevronRight, Folder, File, Code, Menu, X, ChevronLeft } from 'lucide-react';
 
 // Main component
 const CodeBrowser = ({ rootDir = 'static/code-samples', defaultOpenFile = null}) => {
@@ -12,6 +12,10 @@ const CodeBrowser = ({ rootDir = 'static/code-samples', defaultOpenFile = null})
   const [fileContent, setFileContent] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [explorerVisible, setExplorerVisible] = useState(true);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [loadingFile, setLoadingFile] = useState(false);
+  const previousFileRef = useRef(null);
   const { colorMode } = useColorMode();
   
   // Build file tree from the static directory structure
@@ -31,15 +35,24 @@ const CodeBrowser = ({ rootDir = 'static/code-samples', defaultOpenFile = null})
         const data = await response.json();
         setFileTree(data);
         
-        // Automatically expand the first level of folders
+        // Automatically expand all folders (not just first level)
         const initialExpanded = {};
-        if (data && data.children) {
-          data.children.forEach(item => {
-            if (item.type === 'directory') {
-              initialExpanded[item.path] = true;
+        const expandAllFolders = (node, path = '') => {
+          if (node.type === 'directory') {
+            initialExpanded[node.path] = true;
+            if (node.children) {
+              node.children.forEach(child => expandAllFolders(child));
             }
-          });
+          }
+        };
+        
+        if (data) {
+          expandAllFolders(data);
+          if (data.children) {
+            data.children.forEach(item => expandAllFolders(item));
+          }
         }
+        
         setExpandedFolders(initialExpanded);
         
         // If a default file is specified, load it
@@ -63,9 +76,13 @@ const CodeBrowser = ({ rootDir = 'static/code-samples', defaultOpenFile = null})
     const fetchFileContent = async () => {
       if (!selectedFile) return;
       
+      // Don't show loading if we're just selecting the same file again
+      if (selectedFile === previousFileRef.current) return;
+      
+      previousFileRef.current = selectedFile;
+      setLoadingFile(true);
+      
       try {
-        setLoading(true);
-        
         // Try to fetch from the plugin-generated JSON
         try {
           const timestamp = new Date().getTime(); // Add cache-busting
@@ -87,7 +104,7 @@ const CodeBrowser = ({ rootDir = 'static/code-samples', defaultOpenFile = null})
             try {
               const data = JSON.parse(text);
               setFileContent(data.content);
-              setLoading(false);
+              setLoadingFile(false);
               return; // Exit early if successful
             } catch (jsonError) {
               console.error('Failed to parse JSON response:', jsonError);
@@ -113,7 +130,7 @@ const CodeBrowser = ({ rootDir = 'static/code-samples', defaultOpenFile = null})
             try {
               const data = JSON.parse(text);
               setFileContent(data.content);
-              setLoading(false);
+              setLoadingFile(false);
               return; // Exit early if successful
             } catch (jsonError) {
               console.error('Failed to parse static JSON response:', jsonError);
@@ -153,11 +170,11 @@ const CodeBrowser = ({ rootDir = 'static/code-samples', defaultOpenFile = null})
           setFileContent(content);
         }
         
-        setLoading(false);
+        setLoadingFile(false);
       } catch (err) {
         console.error('Error loading file content:', err);
         setError(err.message);
-        setLoading(false);
+        setLoadingFile(false);
       }
     };
     
@@ -175,6 +192,19 @@ const CodeBrowser = ({ rootDir = 'static/code-samples', defaultOpenFile = null})
   // Handle file selection
   const handleFileSelect = (path) => {
     setSelectedFile(path);
+  };
+
+  // Toggle the entire CodeBrowser collapse state
+  const toggleCollapse = () => {
+    setIsCollapsed(prev => !prev);
+  };
+  
+  // Handle keyboard events for the explorer header
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      toggleCollapse();
+    }
   };
   
   // Determine language based on file extension
@@ -289,14 +319,6 @@ const CodeBrowser = ({ rootDir = 'static/code-samples', defaultOpenFile = null})
       );
     }
     
-    if (loading) {
-      return <div className={styles.loading}>Loading...</div>;
-    }
-    
-    if (error) {
-      return <div className={styles.error}>{error}</div>;
-    }
-    
     const language = getLanguage(selectedFile);
     
     return (
@@ -315,6 +337,23 @@ const CodeBrowser = ({ rootDir = 'static/code-samples', defaultOpenFile = null})
       </div>
     );
   };
+
+  const renderLoadingOverlay = () => {
+    if (loadingFile) {
+      return (
+        <div className={styles.loading}>
+          <div className={styles.loadingSpinner}></div>
+          <span>Loading...</span>
+        </div>
+      );
+    }
+    
+    if (error) {
+      return <div className={styles.error}>{error}</div>;
+    }
+    
+    return null;
+  };
   
   if (loading && !fileTree) {
     return <div className={styles.loading}>Loading file explorer...</div>;
@@ -325,18 +364,34 @@ const CodeBrowser = ({ rootDir = 'static/code-samples', defaultOpenFile = null})
   }
   
   return (
-    <div className={`${styles.codeBrowser} ${colorMode === 'dark' ? styles.darkTheme : styles.lightTheme}`}>
-      <div className={styles.fileExplorer}>
-        <div className={styles.explorerHeader}>
+    <div className={`${styles.codeBrowser} ${colorMode === 'dark' ? styles.darkTheme : styles.lightTheme} ${isCollapsed ? styles.collapsed : ''}`}>
+      <div className={`${styles.fileExplorer}`}>
+        <div 
+          className={styles.explorerHeader}
+          onClick={toggleCollapse}
+          onKeyDown={handleKeyDown}
+          role="button"
+          tabIndex={0}
+          aria-expanded={!isCollapsed}
+        >
           <span>EXPLORER</span>
+          <span className={styles.explorerToggleIcon}>
+            {!isCollapsed ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+          </span>
         </div>
-        <div className={styles.fileTree}>
-          {fileTree && renderFileTree(fileTree)}
+        {!isCollapsed && (
+          <div className={styles.fileTree}>
+            {fileTree && renderFileTree(fileTree)}
+          </div>
+        )}
+      </div>
+      
+      {!isCollapsed && (
+        <div className={styles.contentArea}>
+          {renderFileContent()}
+          {renderLoadingOverlay()}
         </div>
-      </div>
-      <div className={styles.contentArea}>
-        {renderFileContent()}
-      </div>
+      )}
     </div>
   );
 };

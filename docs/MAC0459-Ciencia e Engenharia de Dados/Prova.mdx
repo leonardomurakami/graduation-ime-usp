@@ -9,9 +9,10 @@ tags: ['data science', 'neo4j', 'machine learning', 'artigos científicos']
 
 import PdfViewer from '@site/src/components/PdfViewer';
 
-<PdfViewer pdfPath="/ime/MAC0459-Ciencia e Engenharia de Dados/Prova/Prova.pdf"/>
+<PdfViewer pdfPath="/ime/MAC0459-Ciencia e Engenharia de Dados/Prova/Prova.pdf" alt="PDF contendo as instruções oficiais da prova MAC0459"/>
 
 ## Questão 1: Análise de Acidentes Aéreos no Brasil
+
 
 ### **Tarefa:**
 - Formule **cinco perguntas** sobre os dados de acidentes aéreos no Brasil (oito para alunos de pós-graduação).
@@ -77,7 +78,7 @@ import PdfViewer from '@site/src/components/PdfViewer';
 - Discussão sobre a confiabilidade de sistemas de IA em apoio à decisão humana.
 - Avaliação da metodologia do artigo e possíveis melhorias.
 
-<PdfViewer pdfPath="/ime/MAC0459-Ciencia e Engenharia de Dados/Prova/Q3/Resumo.pdf"/>
+<PdfViewer pdfPath="/ime/MAC0459-Ciencia e Engenharia de Dados/Prova/Q3/Resumo.pdf" alt="PDF do resumo e análise crítica do artigo 'Misplaced Trust'"/>
 
 ## Questão 5: Autoavaliação
 
@@ -94,15 +95,15 @@ import PdfViewer from '@site/src/components/PdfViewer';
 - Reflexão sobre o aprendizado e dificuldades enfrentadas ao longo do curso.
 - Sugestões para melhorias na disciplina.
 
-<PdfViewer pdfPath="/ime/MAC0459-Ciencia e Engenharia de Dados/Prova/Q5/Auto-avaliacao.pdf"/>
+<PdfViewer pdfPath="/ime/MAC0459-Ciencia e Engenharia de Dados/Prova/Q5/Auto-avaliacao.pdf" alt="PDF da autoavaliação respondendo questões sobre participação na disciplina"/>
 
 ## Organização dos Arquivos
 
 Os arquivos fornecidos incluem:
-- **Analysis.ipynb**: Notebook contendo a **análise exploratória** dos dados de acidentes aéreos.
-- **create_neo4j_database.ipynb**: Notebook para **geração do banco de dados** Neo4j.
-- **data_models.py**: Definição dos **modelos de dados**.
-- **neo4j_connector.py**: Código para **conexão e execução de queries** no Neo4j.
+- **Analysis.ipynb (Questão 1)**: Notebook contendo a **análise exploratória** dos dados de acidentes aéreos, incluindo visualizações de tendências temporais, distribuição geográfica dos acidentes, análise de causas frequentes e correlações entre variáveis.
+- **create_neo4j_database.ipynb (Questão 1)**: Notebook para **geração do banco de dados** Neo4j, demonstrando a modelagem de dados em grafo, criação de relacionamentos entre aeronaves, ocorrências, fatores contribuintes e localidades.
+- **data_models.py**: Definição dos **modelos de dados** utilizados na implementação.
+- **neo4j_connector.py**: Código para **conexão e execução de queries** no Neo4j, permitindo consultas complexas sobre relacionamentos entre entidades.
 
 ### **Estrutura de Pastas** (segundo `readme.txt`)
 ```plaintext
@@ -110,7 +111,7 @@ Item X > Cenipa > xxxxxx.csv
 ```
 Para reexecutar o código, é necessário descompactar o arquivo **Cenipa.zip** e garantir que os arquivos CSV estejam na pasta correta ou alterar a constante de localização dos dados no notebook.
 
-## Conclusão
+## Conclusão - 
 
 A prova exigiu **conhecimento multidisciplinar**, cobrindo desde **análise exploratória de dados**, modelagem em **Neo4j**, até **aprendizado de máquina** e **revisão de artigos científicos**. A abordagem prática combinada com análise crítica promoveu uma **visão completa da aplicação de técnicas de ciência de dados**.
 
@@ -119,4 +120,3 @@ export default ({ children }) => (
     {children}
   </article>
 );
-
