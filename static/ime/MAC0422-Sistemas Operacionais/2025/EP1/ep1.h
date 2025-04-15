@@ -52,6 +52,7 @@ typedef struct {
     pthread_cond_t cond;           // Condição para controle de execução do simulador
     bool simulation_done;          // Flag para indicar o fim da simulação
     double simulation_start_time;  // Tempo de início da simulação
+    int debug_mode;                 // Debug mode
 } Simulator;
 
 // Funções de escalonamento
