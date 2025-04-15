@@ -11,7 +11,6 @@
 #include <signal.h>
 #include <errno.h>
 #include <stdbool.h>
-#include <sched.h>    // Para CPU_ZERO e CPU_SET
 
 // Definição de constantes
 #define MAX_PROC_NAME 32
@@ -55,19 +54,24 @@ typedef struct {
     int debug_mode;                 // Debug mode
 } Simulator;
 
-// Funções de escalonamento
+// Funcoes de escalonamento
 void* fcfs_scheduler(void* arg);
 void* srtn_scheduler(void* arg);
 void* priority_scheduler(void* arg);
 
-// Funções de processo
+// Funcoes de processo
 void* process_execution(void* arg);
 
-// Funções auxiliares
+// Funcoes de CPU
+static int assign_cpu(Simulator* sim, int process_id);
+static void free_cpu(Simulator* sim, int cpu_id);
+
+// Funcoes auxiliares
 int read_trace_file(Simulator* sim);
 int write_results_file(Simulator* sim);
 void init_simulator(Simulator* sim, int scheduler_type, char* input_file, char* output_file, int num_cpus);
 void cleanup_simulator(Simulator* sim);
 void start_simulation(Simulator* sim);
+void print_cpu_assignments(Simulator* sim);
 
 #endif // EP1_H
