@@ -7,9 +7,9 @@ proc6 5 10 20
 proc7 6 8 16
 proc8 7 6 14
 proc9 8 4 12
-proc10 9 2 10
+proc10 9 2 11
 proc11 10 10 25
 proc12 11 8 20
 proc13 12 6 18
-proc14 13 4 16
-proc15 14 2 14 
+proc14 13 4 17
+proc15 14 2 16

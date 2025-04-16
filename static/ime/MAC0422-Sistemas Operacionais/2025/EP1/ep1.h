@@ -8,12 +8,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <unistd.h>
-#include <time.h>
 #include <sys/time.h>
-#include <signal.h>
-#include <errno.h>
-#include <stdbool.h>
-#include <sched.h>
 
 // Definição de constantes
 #define MAX_PROC_NAME 32
@@ -52,9 +47,9 @@ typedef struct {
     int cpu_assignments[64];       // Mapeamento de CPUs para processos
     pthread_mutex_t mutex;         // Mutex para controle de acesso às variáveis do simulador
     pthread_cond_t cond;           // Condição para controle de execução do simulador
-    bool simulation_done;          // Flag para indicar o fim da simulação
+    int simulation_done;           // Flag para indicar o fim da simulação
     double simulation_start_time;  // Tempo de início da simulação
-    int debug_mode;                 // Debug mode
+    int debug_mode;                // Debug mode
 } Simulator;
 
 // Funcoes de escalonamento
@@ -77,5 +72,7 @@ void init_simulator(Simulator* sim, int scheduler_type, char* input_file, char* 
 void cleanup_simulator(Simulator* sim);
 void start_simulation(Simulator* sim);
 void print_cpu_assignments(Simulator* sim);
+static int compare_priority(const void* a, const void* b);
+static int compare_srtn(const void* a, const void* b);
 
 #endif // EP1_H
