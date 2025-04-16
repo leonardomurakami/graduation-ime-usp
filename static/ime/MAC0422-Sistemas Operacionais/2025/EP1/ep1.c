@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include "ep1.h"
 
 // Variavel global para o simulador
@@ -167,6 +168,20 @@ void print_cpu_assignments(Simulator* sim) {
     pthread_mutex_unlock(&sim->mutex);
 }
 
+// Funcao para definir a afinidade de CPU de uma thread
+static int set_thread_affinity(pthread_t thread, int cpu_id) {
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+    CPU_SET(cpu_id, &cpuset);
+    
+    int result = pthread_setaffinity_np(thread, sizeof(cpu_set_t), &cpuset);
+    if (result != 0) {
+        fprintf(stderr, "Erro ao definir afinidade de CPU: %s\n", strerror(result));
+        return -1;
+    }
+    return 0;
+}
+
 // Funcao para atribuir uma CPU a um processo de forma atomica
 // Retorna o ID da CPU atribuida ou -1 se nao houver CPU disponivel
 static int assign_cpu(Simulator* sim, int process_id) {
@@ -178,6 +193,16 @@ static int assign_cpu(Simulator* sim, int process_id) {
         if (sim->cpu_assignments[i] == -1) {
             sim->cpu_assignments[i] = process_id;
             assigned_cpu = i;
+            
+            // Define a afinidade de CPU para o processo
+            Process* proc = &sim->processes[process_id];
+            if (proc->thread) {  // Se a thread já existe
+                if (set_thread_affinity(proc->thread, assigned_cpu) != 0) {
+                    // Se falhar em definir a afinidade, libera a CPU
+                    sim->cpu_assignments[i] = -1;
+                    assigned_cpu = -1;
+                }
+            }
             break;
         }
     }
@@ -198,6 +223,11 @@ static void free_cpu(Simulator* sim, int cpu_id) {
 // Funcao de execucao do processo (thread)
 void* process_execution(void* arg) {
     Process* proc = (Process*)arg;
+    
+    // Define a afinidade de CPU se já estiver atribuída
+    if (proc->cpu_assigned >= 0) {
+        set_thread_affinity(pthread_self(), proc->cpu_assigned);
+    }
     
     while (!proc->is_completed) {
         pthread_mutex_lock(&proc->mutex);

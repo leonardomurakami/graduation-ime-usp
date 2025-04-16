@@ -9,7 +9,7 @@ proc8 6 13 1
 proc9 4 12 1
 proc10 2 11 0
 proc11 21 31 0
-proc12 11 22 0
+proc12 14 25 0
 proc13 6 18 1
 proc14 4 17 0
 proc15 2 16 0

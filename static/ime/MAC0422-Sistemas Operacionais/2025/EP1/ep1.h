@@ -1,6 +1,8 @@
 #ifndef EP1_H
 #define EP1_H
 
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,6 +13,7 @@
 #include <signal.h>
 #include <errno.h>
 #include <stdbool.h>
+#include <sched.h>
 
 // Definição de constantes
 #define MAX_PROC_NAME 32
@@ -65,6 +68,7 @@ void* process_execution(void* arg);
 // Funcoes de CPU
 static int assign_cpu(Simulator* sim, int process_id);
 static void free_cpu(Simulator* sim, int cpu_id);
+static int set_thread_affinity(pthread_t thread, int cpu_id);
 
 // Funcoes auxiliares
 int read_trace_file(Simulator* sim);
