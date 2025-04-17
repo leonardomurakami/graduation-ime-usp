@@ -4,87 +4,75 @@
 #define true 1
 #define false 0
 
-// Variavel global para o simulador
+// variavel global para o simulador
 Simulator simulator;
 
-// Funcao para obter o tempo atual em segundos
+// funcao para obter o tempo atual em segundos
 double get_current_time() {
     struct timeval tv;
     gettimeofday(&tv, NULL);
     return tv.tv_sec + tv.tv_usec / 1000000.0;
 }
 
-// Funcao para "consumir" tempo de CPU (operacao de loop que consome ciclos)
-void consume_cpu_time(int seconds) {
-    double start_time = get_current_time();
-    double current_time;
+// funcao para consumir tempo de CPU
+// lendario do_stuff
+void do_stuff() {
     volatile unsigned long long dummy = 0;
-    
-    do {
-        // Operacao que consome ciclos de CPU - carga intensiva
-        for (int i = 0; i < 10000000; i++) {
-            dummy += i * i;
-            dummy ^= (dummy >> 2);
-        }
-        
-        current_time = get_current_time();
-    } while (current_time - start_time < seconds);
+    for (int i = 0; i < 1000000; i++) {
+        dummy += i * i;
+        dummy ^= (dummy >> 2);
+    }
 }
 
-// Funcao para inicializar o simulador
+// funcao para inicializar o simulador
 void init_simulator(Simulator* sim, int scheduler_type, char* input_file, char* output_file, int num_cpus) {
-    // Inicializa as variaveis do simulador
+    // variaveis simulador
     sim->scheduler_type = scheduler_type;
-    // Arquivo de entrada
     strncpy(sim->input_file, input_file, 255);
     sim->input_file[255] = '\0';
-    // Arquivo de saida
     strncpy(sim->output_file, output_file, 255);
     sim->output_file[255] = '\0';
-    // Processos
     sim->num_processes = 0;
-    // Preempcoes
     sim->preemptions = 0;
-    // Tempo da simulacao
     sim->simulation_time = 0;
     sim->simulation_done = false;
-    sim->simulation_start_time = get_current_time();  // Registra tempo de inicio da simulacao
+    sim->simulation_start_time = get_current_time();  // registra tempo de inicio da simulacao
     
-    // Define o numero de CPUs com base no parametro ou no numero disponivel
+    // define o numero de CPUs com base no parametro ou no numero disponivel
     if (num_cpus > 0) {
         sim->num_cpus = num_cpus < sysconf(_SC_NPROCESSORS_ONLN) ? num_cpus : sysconf(_SC_NPROCESSORS_ONLN);
     } else {
-        // Descobre o numero de CPUs disponiveis
+        // descobre o numero de CPUs disponiveis
         sim->num_cpus = sysconf(_SC_NPROCESSORS_ONLN);
         if (sim->num_cpus <= 0) {
-            sim->num_cpus = 1; // Garante pelo menos uma CPU
+            sim->num_cpus = 1; // garante pelo menos uma CPU
         }
     }
         
-    // Inicializa as atribuicoes de CPU
+    // inicializa as atribuicoes de CPU
     for (int i = 0; i < 64; i++) {
         sim->cpu_assignments[i] = -1; // -1 indica CPU livre
     }
     
-    // Inicializa o mutex e a condicao
+    // inicializa o mutex e a condicao
     pthread_mutex_init(&sim->mutex, NULL);
     pthread_cond_init(&sim->cond, NULL);
 }
 
-// Funcao para limpar recursos do simulador
+// funcao para limpar recursos do simulador
 void cleanup_simulator(Simulator* sim) {
-    // Libera o mutex e a condicao
+    // libera o mutex e a condicao
     pthread_mutex_destroy(&sim->mutex);
     pthread_cond_destroy(&sim->cond);
     
-    // Libera recursos de cada processo
+    // libera recursos de cada processo
     for (int i = 0; i < sim->num_processes; i++) {
         pthread_mutex_destroy(&sim->processes[i].mutex);
         pthread_cond_destroy(&sim->processes[i].cond);
     }
 }
 
-// Funcao para ler o arquivo de trace
+// funcao para ler o arquivo de trace
 int read_trace_file(Simulator* sim) {
     FILE* file = fopen(sim->input_file, "r");
     if (!file) {
@@ -96,19 +84,19 @@ int read_trace_file(Simulator* sim) {
     char name[MAX_PROC_NAME + 1];
     int t0, dt, deadline;
     
-    // Le os processos do arquivo
+    // le os processos do arquivo
     while (fscanf(file, "%s %d %d %d", name, &t0, &dt, &deadline) == 4 && count < MAX_PROCESSES) {
         Process* proc = &sim->processes[count];
         
-        // Copia os dados lidos para a estrutura do processo
+        // copia os dados lidos para a estrutura do processo
         strncpy(proc->name, name, MAX_PROC_NAME);
         proc->name[MAX_PROC_NAME] = '\0';
         proc->t0 = t0;
         proc->dt = dt;
-        // Normaliza o deadline adicionando o tempo de inicio da simulacao
+        // normaliza o deadline adicionando o tempo de inicio da simulacao
         proc->deadline = deadline;
         
-        // Inicializa campos adicionais
+        // inicializa campos adicionais
         proc->remaining_time = dt;
         proc->start_time = -1;
         proc->finish_time = -1;
@@ -116,7 +104,7 @@ int read_trace_file(Simulator* sim) {
         proc->is_completed = 0;
         proc->cpu_assigned = -1;
         
-        // Inicializa mutex e condicao para o processo
+        // inicializa mutex e condicao para o processo
         pthread_mutex_init(&proc->mutex, NULL);
         pthread_cond_init(&proc->cond, NULL);
         
@@ -129,7 +117,7 @@ int read_trace_file(Simulator* sim) {
     return count;
 }
 
-// Funcao para escrever os resultados no arquivo de saida
+// funcao para escrever os resultados no arquivo de saida
 int write_results_file(Simulator* sim) {
     FILE* file = fopen(sim->output_file, "w");
     if (!file) {
@@ -137,23 +125,23 @@ int write_results_file(Simulator* sim) {
         return -1;
     }
     
-    // Escreve uma linha para cada processo
+    // escreve uma linha para cada processo
     for (int i = 0; i < sim->num_processes; i++) {
         Process* proc = &sim->processes[i];
-        int tr = proc->finish_time - proc->t0; // Tempo de resposta (tf - t0)
-        int cumpriu = (proc->finish_time <= proc->deadline) ? 1 : 0; // Verificacao de deadline
+        int tr = proc->finish_time - proc->t0; // tempo de resposta (tf - t0)
+        int cumpriu = (proc->finish_time <= proc->deadline) ? 1 : 0; // verificacao de deadline
         
         fprintf(file, "%s %d %d %d\n", proc->name, tr, proc->finish_time, cumpriu);
     }
     
-    // Escreve a linha extra com o numero de preempcoes
+    // escreve a linha extra com o numero de preempcoes
     fprintf(file, "%d\n", sim->preemptions);
     
     fclose(file);
     return 0;
 }
 
-// Funcao para imprimir o estado atual das atribuicoes de CPU
+// funcao para imprimir o estado atual das atribuicoes de CPU
 void print_cpu_assignments(Simulator* sim) {
     pthread_mutex_lock(&sim->mutex);
     printf("\nCPU Assignments:\n");
@@ -170,7 +158,7 @@ void print_cpu_assignments(Simulator* sim) {
     pthread_mutex_unlock(&sim->mutex);
 }
 
-// Funcao para definir a afinidade de CPU de uma thread
+// funcao para definir a afinidade de CPU de uma thread
 static int set_thread_affinity(pthread_t thread, int cpu_id) {
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);
@@ -184,31 +172,31 @@ static int set_thread_affinity(pthread_t thread, int cpu_id) {
     return 0;
 }
 
-// Funcao para atribuir uma CPU a um processo de forma atomica
-// Retorna o ID da CPU atribuida ou -1 se nao houver CPU disponivel
+// funcao para atribuir uma CPU a um processo de forma atomica
+// retorna o ID da CPU atribuida ou -1 se nao houver CPU disponivel
 static int assign_cpu(Simulator* sim, int process_id) {
     pthread_mutex_lock(&sim->mutex);
     int assigned_cpu = -1;
     
-    // Verifica se o processo já está rodando em alguma CPU
+    // verifica se o processo já está rodando em alguma CPU
     for (int i = 0; i < sim->num_cpus; i++) {
         if (sim->cpu_assignments[i] == process_id) {
             pthread_mutex_unlock(&sim->mutex);
-            return i; // Retorna a CPU atual do processo
+            return i; // retorna a CPU atual do processo
         }
     }
     
-    // Procura uma CPU livre
+    // procura uma CPU livre
     for (int i = 0; i < sim->num_cpus; i++) {
         if (sim->cpu_assignments[i] == -1) {
             sim->cpu_assignments[i] = process_id;
             assigned_cpu = i;
             
-            // Define a afinidade de CPU para o processo
+            // define a afinidade de CPU para o processo
             Process* proc = &sim->processes[process_id];
             if (proc->thread) {  // Se a thread já existe
                 if (set_thread_affinity(proc->thread, assigned_cpu) != 0) {
-                    // Se falhar em definir a afinidade, libera a CPU
+                    // se falhar em definir a afinidade, libera a CPU
                     sim->cpu_assignments[i] = -1;
                     assigned_cpu = -1;
                 }
@@ -221,7 +209,7 @@ static int assign_cpu(Simulator* sim, int process_id) {
     return assigned_cpu;
 }
 
-// Funcao para liberar uma CPU de forma atomica
+// funcao para liberar uma CPU de forma atomica
 static void free_cpu(Simulator* sim, int cpu_id) {
     if (cpu_id >= 0 && cpu_id < sim->num_cpus) {
         pthread_mutex_lock(&sim->mutex);
@@ -230,9 +218,11 @@ static void free_cpu(Simulator* sim, int cpu_id) {
     }
 }
 
-// Funcao de execucao do processo (thread)
+// funcao de execucao do processo (thread)
 void* process_execution(void* arg) {
     Process* proc = (Process*)arg;
+    double start_execution_time;
+    double current_time;
     
     // Define a afinidade de CPU se já estiver atribuída
     if (proc->cpu_assigned >= 0) {
@@ -242,50 +232,111 @@ void* process_execution(void* arg) {
     while (!proc->is_completed) {
         pthread_mutex_lock(&proc->mutex);
         
-        // Se nao estiver rodando, aguarda sinal do escalonador
-        if (!proc->is_running) {
+        // se nao estiver rodando, aguarda sinal do escalonador
+        while (!proc->is_running && !proc->is_completed) {
             pthread_cond_wait(&proc->cond, &proc->mutex);
+        }
+        
+        // se o processo terminou, libera o mutex e sai do loop
+        if (proc->is_completed) {
             pthread_mutex_unlock(&proc->mutex);
-            continue;
+            break;
         }
         
+        // registra o tempo de inicio da execucao
+        start_execution_time = get_current_time();
         pthread_mutex_unlock(&proc->mutex);
         
-        // Executa o processo (consome CPU)
-        consume_cpu_time(1); // Executa por 1 segundo por vez
-        
-        pthread_mutex_lock(&proc->mutex);
-        
-        // Atualiza o tempo restante
-        if (proc->remaining_time > 0) {
-            proc->remaining_time--;
-            
-            // Se o processo terminou
-            if (proc->remaining_time == 0) {
-                proc->is_completed = 1;
-                proc->is_running = 0;
+        // executa o processo continuamente
+        while (1) {
+            // verifica se o processo foi preemptado ou completou
+            pthread_mutex_lock(&proc->mutex);
+            if (!proc->is_running || proc->is_completed) {
+                // calcula quanto tempo o processo executou
+                current_time = get_current_time();
+                double execution_time = current_time - start_execution_time;
                 
-                pthread_mutex_lock(&simulator.mutex);
-                proc->finish_time = (int)(get_current_time() - simulator.simulation_start_time);
-                pthread_mutex_unlock(&simulator.mutex);
-                
-                // Libera a CPU
-                if (proc->cpu_assigned >= 0) {
-                    free_cpu(&simulator, proc->cpu_assigned);
-                    proc->cpu_assigned = -1;
+                // atualiza o tempo restante
+                if (proc->remaining_time > 0) {
+                    int time_consumed = (int)execution_time;
+                    if (time_consumed > 0) {
+                        proc->remaining_time -= time_consumed;
+                        
+                        if (simulator.debug_mode) {
+                            printf("Processo %s executou por %d segundos. Tempo restante: %d\n", 
+                                   proc->name, time_consumed, proc->remaining_time);
+                        }
+                        
+                        if (proc->remaining_time <= 0) {
+                            proc->is_completed = 1;
+                            proc->is_running = 0;
+                            proc->remaining_time = 0;
+                            
+                            pthread_mutex_lock(&simulator.mutex);
+                            proc->finish_time = (int)(current_time - simulator.simulation_start_time);
+                            pthread_mutex_unlock(&simulator.mutex);
+                            
+                            // libera a CPU
+                            if (proc->cpu_assigned >= 0) {
+                                free_cpu(&simulator, proc->cpu_assigned);
+                                proc->cpu_assigned = -1;
+                            }
+                            
+                            pthread_cond_signal(&simulator.cond);
+                        }
+                    }
                 }
-                
-                pthread_cond_signal(&simulator.cond);
+                pthread_mutex_unlock(&proc->mutex);
+                break;
             }
+            pthread_mutex_unlock(&proc->mutex);
+            
+            // simula trabalho da CPU
+            do_stuff();
+            
+            // verifica o tempo periodicamente para atualizar o estado
+            pthread_mutex_lock(&proc->mutex);
+            current_time = get_current_time();
+            double elapsed = current_time - start_execution_time;
+            if (elapsed >= 1.0) { // atualiza a cada segundo
+                int time_consumed = (int)elapsed;
+                if (time_consumed > 0) {
+                    proc->remaining_time -= time_consumed;
+                    start_execution_time = current_time;
+                    
+                    if (simulator.debug_mode) {
+                        printf("Processo %s executou por %d segundos. Tempo restante: %d\n", 
+                               proc->name, time_consumed, proc->remaining_time);
+                    }
+                    
+                    if (proc->remaining_time <= 0) {
+                        proc->is_completed = 1;
+                        proc->is_running = 0;
+                        proc->remaining_time = 0;
+                        
+                        pthread_mutex_lock(&simulator.mutex);
+                        proc->finish_time = (int)(current_time - simulator.simulation_start_time);
+                        pthread_mutex_unlock(&simulator.mutex);
+                        
+                        if (proc->cpu_assigned >= 0) {
+                            free_cpu(&simulator, proc->cpu_assigned);
+                            proc->cpu_assigned = -1;
+                        }
+                        
+                        pthread_cond_signal(&simulator.cond);
+                        pthread_mutex_unlock(&proc->mutex);
+                        break;
+                    }
+                }
+            }
+            pthread_mutex_unlock(&proc->mutex);
         }
-        
-        pthread_mutex_unlock(&proc->mutex);
     }
     
     return NULL;
 }
 
-// Funcao de comparacao para o SRTN
+// funcao de comparacao para o SRTN
 static int compare_srtn(const void* a, const void* b) {
     Process* proc1 = &simulator.processes[*(int*)a];
     Process* proc2 = &simulator.processes[*(int*)b];
@@ -301,7 +352,7 @@ static int compare_srtn(const void* a, const void* b) {
     return rt1 - rt2;
 }
 
-// Funcao de comparacao para o escalonador de prioridade
+// funcao de comparacao para o escalonador de prioridade
 static int compare_priority(const void* a, const void* b) {
     Process* proc1 = &simulator.processes[*(int*)a];
     Process* proc2 = &simulator.processes[*(int*)b];
@@ -317,7 +368,7 @@ static int compare_priority(const void* a, const void* b) {
     return slack1 - slack2;
 }
 
-// Implementacao do escalonador FCFS (First-Come First-Served)
+// implementacao do escalonador FCFS (First-Come First-Served)
 void* fcfs_scheduler(void* arg) {
     Simulator* sim = (Simulator*)arg;
     double simulation_start = get_current_time();
@@ -340,18 +391,18 @@ void* fcfs_scheduler(void* arg) {
     }
     
     while (1) {
-        // Atualiza tempo atual
+        // atualiza tempo atual
         current_time = (int)(get_current_time() - simulation_start);
         sim->simulation_time = current_time;
         
-        // Saida de debug apenas quando o tempo muda
+        // saida de debug apenas quando o tempo muda
         if (sim->debug_mode && current_time != last_debug_time) {
             printf("\nTime: %d\n", current_time);
             print_cpu_assignments(sim);
             last_debug_time = current_time;
         }
         
-        // Verifica processos completados
+        // verifica processos completados
         int all_completed = true;
         for (int i = 0; i < sim->num_processes; i++) {
             pthread_mutex_lock(&sim->processes[i].mutex);
@@ -371,31 +422,31 @@ void* fcfs_scheduler(void* arg) {
             break;
         }
         
-        // Tenta escalonar novos processos
+        // tenta escalonar novos processos
         for (int i = 0; i < sim->num_processes; i++) {
             Process* proc = &sim->processes[i];
             
             pthread_mutex_lock(&proc->mutex);
             
-            // Pula se o processo nao esta pronto, ja esta rodando, ou completado
+            // pula se o processo nao esta pronto, ja esta rodando, ou completado
             if (current_time < proc->t0 || proc->is_running || proc->is_completed || proc->start_time != -1) {
                 pthread_mutex_unlock(&proc->mutex);
                 continue;
             }
             
-            // Tenta atribuir uma CPU
+            // tenta atribuir uma CPU
             int cpu_id = assign_cpu(sim, i);
             if (cpu_id >= 0) {
                 if (sim->debug_mode) {
                     printf("Iniciando processo %s na CPU %d no tempo %d\n", proc->name, cpu_id, current_time);
                 }
                 
-                // Inicializa processo
+                // inicializa processo
                 proc->start_time = current_time;
                 proc->is_running = 1;
                 proc->cpu_assigned = cpu_id;
                 
-                // Cria thread e inicia processo
+                // cria thread e inicia processo
                 pthread_create(&proc->thread, NULL, process_execution, proc);
                 pthread_cond_signal(&proc->cond);
             }
@@ -403,19 +454,19 @@ void* fcfs_scheduler(void* arg) {
             pthread_mutex_unlock(&proc->mutex);
         }
         
-        // Pequeno sleep para evitar busy-waiting
+        // pequeno sleep para evitar busy waiting
         usleep(10000); // sleep de 10ms
     }
     
     return NULL;
 }
 
-// Implementacao do escalonador SRTN (Shortest Remaining Time Next)
+// implementacao do escalonador SRTN (Shortest Remaining Time Next)
 void* srtn_scheduler(void* arg) {
     Simulator* sim = (Simulator*)arg;
     double simulation_start = get_current_time();
     int current_time;
-    int last_debug_time = -1;  // Rastreia ultimo tempo de saida de debug
+    int last_debug_time = -1;  // rastreia ultimo tempo de saida de debug
     
     if (sim->debug_mode) {
         printf("\n=== SRTN Scheduler Debug ===\n");
@@ -433,18 +484,18 @@ void* srtn_scheduler(void* arg) {
     }
     
     while (1) {
-        // Atualiza tempo atual
+        // atualiza tempo atual
         current_time = (int)(get_current_time() - simulation_start);
         sim->simulation_time = current_time;
         
-        // Saida de debug apenas quando o tempo muda
+        // saida de debug apenas quando o tempo muda
         if (sim->debug_mode && current_time != last_debug_time) {
             printf("\nTempo: %d\n", current_time);
             print_cpu_assignments(sim);
             last_debug_time = current_time;
         }
         
-        // Verifica processos completados
+        // verifica processos completados
         int all_completed = true;
         for (int i = 0; i < sim->num_processes; i++) {
             pthread_mutex_lock(&sim->processes[i].mutex);
@@ -464,7 +515,7 @@ void* srtn_scheduler(void* arg) {
             break;
         }
         
-        // Identifica processos disponiveis e ordena por tempo restante
+        // identifica processos disponiveis e ordena por tempo restante
         int available_processes[MAX_PROCESSES];
         int num_available = 0;
         
@@ -478,10 +529,10 @@ void* srtn_scheduler(void* arg) {
             pthread_mutex_unlock(&proc->mutex);
         }
         
-        // Ordena por tempo restante usando qsort
+        // ordena por tempo restante usando qsort
         qsort(available_processes, num_available, sizeof(int), compare_srtn);
         
-        // Tenta escalonar processos
+        // tenta escalonar processos
         for (int i = 0; i < num_available; i++) {
             Process* proc = &sim->processes[available_processes[i]];
             
@@ -493,7 +544,7 @@ void* srtn_scheduler(void* arg) {
                 continue;
             }
             
-            // Tenta atribuir uma CPU livre primeiro
+            // tenta atribuir uma CPU livre primeiro
             int cpu_id = assign_cpu(sim, available_processes[i]);
             if (cpu_id >= 0) {
                 if (sim->debug_mode) {
@@ -501,7 +552,7 @@ void* srtn_scheduler(void* arg) {
                            proc->name, cpu_id, current_time, proc->remaining_time);
                 }
                 
-                // Inicializa processo se ainda nao foi iniciado
+                // inicializa processo se ainda nao foi iniciado
                 if (proc->start_time == -1) {
                     proc->start_time = current_time;
                     pthread_create(&proc->thread, NULL, process_execution, proc);
@@ -517,7 +568,7 @@ void* srtn_scheduler(void* arg) {
             pthread_mutex_unlock(&proc->mutex);
         }
         
-        // Verifica oportunidades de preempcao apenas se nao houver CPUs livres
+        // verifica se ha CPUs livres, so havera preempcao se nao houver CPUs livres
         int free_cpus = 0;
         for (int i = 0; i < sim->num_cpus; i++) {
             if (sim->cpu_assignments[i] == -1) {
@@ -580,7 +631,7 @@ void* srtn_scheduler(void* arg) {
             }
         }
         
-        // Pequeno sleep para evitar espera ocupada
+        // Pequeno sleep para evitar busy waiting
         usleep(10000); // sleep de 10ms
     }
     
@@ -641,7 +692,6 @@ void* priority_scheduler(void* arg) {
             break;
         }
         
-        // Identifica processos disponiveis e calcula prioridades
         int available_processes[MAX_PROCESSES];
         int priorities[MAX_PROCESSES];
         int num_available = 0;
@@ -652,14 +702,13 @@ void* priority_scheduler(void* arg) {
             pthread_mutex_lock(&proc->mutex);
             if (current_time >= proc->t0 && !proc->is_completed && !proc->is_running) {
                 available_processes[num_available] = i;
-                // Prioridade = deadline - (tempo_atual + tempo_restante)
+                // Prioridade = deadline - (tempo_atual + tempo_restante) [LST - Least Slack Time]
                 priorities[num_available] = proc->deadline - (current_time + proc->remaining_time);
                 num_available++;
             }
             pthread_mutex_unlock(&proc->mutex);
         }
         
-        // Ordena por prioridade usando qsort
         qsort(available_processes, num_available, sizeof(int), compare_priority);
         
         // Tenta escalonar processos
@@ -668,7 +717,7 @@ void* priority_scheduler(void* arg) {
             
             pthread_mutex_lock(&proc->mutex);
             
-            // Pula se o processo ja esta rodando ou completado
+            // pula se o processo ja esta rodando ou completado
             if (proc->is_running || proc->is_completed) {
                 pthread_mutex_unlock(&proc->mutex);
                 continue;
@@ -707,7 +756,7 @@ void* priority_scheduler(void* arg) {
         }
         
         if (free_cpus == 0 && num_available > 0) {
-            // Procura o processo com maior prioridade (menor folga) entre os disponiveis
+            // Procura o processo com maior prioridade (menor folga) entre os disponiveis (algoritmo LST - Least Slack Time)
             Process* highest_priority_proc = &sim->processes[available_processes[0]];
             pthread_mutex_lock(&highest_priority_proc->mutex);
             int highest_priority = priorities[0];
@@ -768,11 +817,9 @@ void* priority_scheduler(void* arg) {
     return NULL;
 }
 
-// Funcao para iniciar a simulacao
 void start_simulation(Simulator* sim) {
     pthread_t scheduler_thread;
     
-    // Escolhe o escalonador com base no tipo especificado
     switch (sim->scheduler_type) {
         case 1:
             pthread_create(&scheduler_thread, NULL, fcfs_scheduler, sim);
@@ -851,27 +898,18 @@ int main(int argc, char* argv[]) {
             return EXIT_FAILURE;
         }
     }
-
-    // Inicializa simulador
+    
     init_simulator(&simulator, scheduler_type, input_file, output_file, num_cpus);
     simulator.debug_mode = debug_mode;
-
-    // Le o arquivo de trace
     if (read_trace_file(&simulator) <= 0) {
         fprintf(stderr, "Erro ao ler o arquivo de trace ou arquivo vazio.\n");
         return EXIT_FAILURE;
     }
-    
-    // Inicia a simulacao
     start_simulation(&simulator);
-    
-    // Escreve os resultados
     if (write_results_file(&simulator) != 0) {
         fprintf(stderr, "Erro ao escrever o arquivo de saida.\n");
         return EXIT_FAILURE;
     }
-    
-    // Limpa os recursos
     cleanup_simulator(&simulator);
     
     return EXIT_SUCCESS;

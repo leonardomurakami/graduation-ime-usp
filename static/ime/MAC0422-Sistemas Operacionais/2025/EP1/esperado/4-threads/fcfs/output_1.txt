@@ -1,0 +1,16 @@
+Process1 15 15 1
+Process2 16 16 1
+Process3 14 15 1
+Process4 15 16 1
+Process5 16 21 0
+Process6 18 23 0
+Process7 15 21 0
+Process8 17 23 0
+Process9 16 23 1
+Process10 19 26 0
+Process11 16 24 1
+Process12 23 31 0
+Process13 21 30 0
+Process14 17 27 0
+Process15 21 32 0
+0
