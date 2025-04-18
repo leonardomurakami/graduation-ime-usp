@@ -1,0 +1,13 @@
+Process1 10 10 1
+Process2 10 11 1
+Process3 12 14 0
+Process4 13 16 0
+Process5 29 33 0
+Process6 29 34 0
+Process7 30 36 0
+Process8 30 37 0
+Process9 7 15 0
+Process10 9 18 0
+Process11 10 20 0
+Process12 6 17 0
+7

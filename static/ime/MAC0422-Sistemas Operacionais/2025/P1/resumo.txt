@@ -1,0 +1,88 @@
+Computador Moderno:
+ - 1+ Processadores
+ - Memoria
+ - Discos
+ - Diversos dispositivos de I/O (mouse, monitor, impressora, placas de rede, etc.)
+    - Aplicacoes farao uso desses recursos
+    - Aplicacoes precisam saber como usar esses recursos
+    - O dev nao deve ter que escrever a rotina para ler algo da placa de rede sempre
+
+Porque ter um SO:
+ - Agir como uma camada de software que facilita a vida das Aplicacoes
+
+Principal Interacao com o SO é pedir para ele executar outas aplicações, como por exemplo
+ - Aplicações via shell
+ - GUI
+
+SOs:
+ - grandes
+ - complexos
+ - tempo de vida longos
+ - evolui sem ter muitas partes "jogadas fora" (se o hardware nao muda, para que mudar o SO)
+ - grande parte do codigo relacionada com drivers
+ - software que roda em modo kernel (segundo alguns autores, com algumas partes que rodam em modo usuario)
+ - SOs possuem 2 tarefas principais:
+    - Abstrair os recuross de baixo nivel para as aplicacoes e para os programadores
+    - gerenciar os recursos de baixo nivel
+
+Gerenciador de recursos:
+ - exemplo: dois usuarios querem usar a impressora, nao da para imprimir duas coisas ao mesmo tempo
+ - o SO cuida da arbitragem dos recursos. ele permite a alocacao controlada e organizada de processadores, memoria, dispositivos i/o, etc.
+ - o SO precisa gerenciar e proteger os dispositivos e dados para que aplicacoes nao facam acessos indevidos
+ 
+ - Tempo: os usuarios e programas tem rodadas para usar aquele recurso. Primeiro um usa, depois outro usa e assim por diante (ex: Processador)
+ - Espaco: os usuarios e programas ficam com parte do recurso. Um usa 90%, outro usa 5% e outra usa os outros 5% (ex: Memoria)
+
+Tipos de Escalonamento de Processos:
+ - Os algoritmos de escalonamento podem ser organizados em classes:
+    - Escalonamento em Lote:
+        - Tarefas periodicas sendo realizadas. Faz mais sentido nao preempcao ou preempcao com altos intervalos de tempo (reduz mudancas de contexto o que faz sentido se nao ha usuarios interagindo com o sistema)
+        - Vazao, tempo de relogio (fim - submissao), utilizacao da CPU
+    - Escalonamento Interativo:
+        - Para programas genericos eh importante evitar monopolio da CPU por um processo (ou intencional ou por bug).
+        - Tempo de resposta, proporcionalidade (considerando expectativa do usuario)
+    - Escalonamento em tempo real:
+        - O tempo eh conhecido. A depender do sistema nem precisa de preempcao considerando que os processos trabalham em conjunto em um hardware especifico para um proposito especifico
+        - Atender os prazos, previsibilidade
+ - Em todos os sistemas: Justica, Garantia da Politica e Balanceamento
+
+FCFS (Lote)
+ - First-Come First-Served
+ - Mais simples algoritmo de escalonamento
+ - Ordena os processos prontos em fila por ordem de chegada e executa nessa ordem
+ - Cada processo roda ate o final ou ate ser bloqueado. Nao ha preempcao
+ - Quando o processo bloqueado estiver pronto, ele vai para o fim da fila como se fosse um processo novo
+ - Possivel problema: Processos curtos que cheguem depois de processos longos podem demorar muito para executar
+
+SJF (Lote)
+ - Shortest Job First
+ - Ordena os processos prontos em uma fila por ordem do tempo de execucao deles. Do mais curto para o mais longo e executa
+ - Cada processo roda ate o final ou ate ser bloqueado.
+ - Embora nao esteja bem definido, quando o processo eh bloqueado ele eh reordenado na fila como se fosse um processo novo que acabou de chegar
+ - Precisa saber o tempo total de execucao do processo e o ideal eh que todos os processos cheguem ao mesmo tempo
+ - Possivel problema: Processos curtos que cheguem em excesso podem fazer processos longos demorarem muito para serem executados
+
+SRTN (Lote)
+ - Shortest Remaining Time Next
+ - Versao com preempcao do SJF (a fila continua sendo ordenada pelo tempo de execucao)
+ - Quando um novo processo chega, o tempo de execucao dele é comparado com o tempo que falta do processo que está executando. Se o novo processo é mais curso, ele passa a executar e o atual vai pra fila de prontos. A fila continua sendo ordenada pelo tempo de execucao
+ - A preempcao ocorre apenas na chegada de um novo processo
+ - Embora nao esteja bem definido, vamos considerar que se o processo bloqueou por causa de I/O quando ele esta pronto ele se comporta como um processo novo
+
+Round Robin (Interativo)
+ - A cada processo é dado um intervalo de tempo para ele executar (quantum)
+ - Se ao fim do quantum o processo ainda esta executando (nao tiver sido bloqueado antes), ocorre preempcao
+ - Se houver bloqueio por I/O, o proximo é executado
+ - Embora nao esteja bem definido, quando o processo bloqueado esta pronto ele vai para o fim da fila
+ - O tamanho do quantum precisa ser bem definido, quantum muito baixo aumenta o overhead do escalonador. Quantum muito alto reduz a interatividade notada pelos usuarios
+
+Escalonamento com Prioridade (Interativo)
+ - Similar ao Round Robin, mas agora cada processo possui uma prioridade associada
+ - Processos com mais prioridade ganham mais quantum que processos com menos, ou comecam com uma prioridade grande e vao diminuindo. Quando ficar menor que o proximo da fila, da espaco pro proximo.
+ - No GNU/Linux a prioridade é um numero inteiro que varia de -20 (maximo de prioridade) para + 19 (minimo de prioridade) e pode ser atribuida no shell com os comandos nice ou renice.
+ - Em C, ha a chamada de sistema nice. Colocar -20 em uma compilacao demorada tem efeitos perceptiveis
+ - Existem varias ideias para usar os numeros das prioridades. Importante ter cuidado para nao causar starvation
+
+Multiplas Filas (Interativo)
+
+Agora os processos 
