@@ -37,7 +37,7 @@ def calculate_statistics(data):
     return mean, std, ci
 
 # Directory paths
-base_dir = 'inesperado/4-threads'
+base_dir = 'inesperado/6-threads'
 algorithms = ['fcfs', 'srtn', 'priority']
 
 # Collect data for each algorithm
