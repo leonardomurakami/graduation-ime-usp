@@ -1,21 +1,21 @@
 {
-  "name": "EP0",
-  "path": "EP0",
+  "name": "programa0",
+  "path": "programa0",
   "type": "directory",
   "children": [
     {
       "name": "arb.h",
-      "path": "EP0/arb.h",
+      "path": "programa0/arb.h",
       "type": "file"
     },
     {
       "name": "asgt.cpp",
-      "path": "EP0/asgt.cpp",
+      "path": "programa0/asgt.cpp",
       "type": "file"
     },
     {
       "name": "feedback.txt",
-      "path": "EP0/feedback.txt",
+      "path": "programa0/feedback.txt",
       "type": "file"
     }
   ]

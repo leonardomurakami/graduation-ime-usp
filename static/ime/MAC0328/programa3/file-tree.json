@@ -1,21 +1,21 @@
 {
-  "name": "EP3",
-  "path": "EP3",
+  "name": "programa3",
+  "path": "programa3",
   "type": "directory",
   "children": [
     {
       "name": "asgt.cpp",
-      "path": "EP3/asgt.cpp",
+      "path": "programa3/asgt.cpp",
       "type": "file"
     },
     {
       "name": "digraph.h",
-      "path": "EP3/digraph.h",
+      "path": "programa3/digraph.h",
       "type": "file"
     },
     {
       "name": "feedback.txt",
-      "path": "EP3/feedback.txt",
+      "path": "programa3/feedback.txt",
       "type": "file"
     }
   ]

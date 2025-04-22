@@ -1,16 +1,16 @@
 {
-  "name": "EP1",
-  "path": "EP1",
+  "name": "programa1",
+  "path": "programa1",
   "type": "directory",
   "children": [
     {
       "name": "feedback.txt",
-      "path": "EP1/feedback.txt",
+      "path": "programa1/feedback.txt",
       "type": "file"
     },
     {
       "name": "main.cpp",
-      "path": "EP1/main.cpp",
+      "path": "programa1/main.cpp",
       "type": "file"
     }
   ]
