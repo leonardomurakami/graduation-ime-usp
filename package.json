@@ -6,7 +6,7 @@
     "compile-pdfs": "node scripts/compile-tex.js",
     "generate-code-jsons": "node scripts/generate-code-jsons.js",
     "docusaurus": "docusaurus",
-    "prebuild": "npm run generate-code-jsons",
+    "prebuild": "npm run compile-pdfs && npm run generate-code-jsons",
     "build": "docusaurus build",
     "prestart": "npm run generate-code-jsons",
     "start": "docusaurus start",
