@@ -27,7 +27,7 @@ Textris é uma implementação em Python do clássico jogo Tetris que oferece ta
 1. Clone o repositório:
 ```bash
 git clone [URL_DO_REPOSITÓRIO]
-cd MAC0216-Tecnicas de Programacao I/ep3
+cd MAC0216-Tecnicas de Programacao I/programa3
 ```
 
 2. Instale as dependências usando o comando make:

@@ -11,7 +11,7 @@ tags: ['bash', 'scripts', 'automação', 'dados']
 
 import PdfViewer from '@site/src/components/PdfViewer';
 
-<PdfViewer pdfPath="/ime/MAC0216/EP2/enunciado.pdf"/>
+<PdfViewer pdfPath="/ime/MAC0216/programa2/enunciado.pdf"/>
 
 ## Descrição do Problema
 
@@ -87,7 +87,7 @@ verificar_diretorio_dados() {
     if [ ! -d "$DATA_DIR" ]; then
         echo "ERRO: Não há dados baixados."
         echo "Para baixar os dados antes de gerar as estatísticas, use:"
-        echo "./ep2_servico156.sh <nome do arquivo com URLs de dados do Serviço 156>"
+        echo "./programa2_servico156.sh <nome do arquivo com URLs de dados do Serviço 156>"
         exit 1
     fi
 }
@@ -426,7 +426,7 @@ done
 ## Exemplo de Execução
 
 ```bash
-$ ./ep2.sh urls.txt
+$ ./programa2.sh urls.txt
 Este programa mostra estatísticas do Serviço 156 da Prefeitura de São Paulo
 Escolha uma opção de operação:
 1) selecionar_arquivo

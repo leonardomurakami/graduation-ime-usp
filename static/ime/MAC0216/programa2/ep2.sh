@@ -44,7 +44,7 @@ verificar_diretorio_dados() {
     if [ ! -d "$DATA_DIR" ]; then
         echo "ERRO: Não há dados baixados."
         echo "Para baixar os dados antes de gerar as estatísticas, use:"
-        echo "./ep2_servico156.sh <nome do arquivo com URLs de dados do Serviço 156>"
+        echo "./programa2_servico156.sh <nome do arquivo com URLs de dados do Serviço 156>"
         exit 1
     fi
 }
