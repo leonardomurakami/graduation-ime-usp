@@ -1,0 +1,58 @@
+# EP1: Shell (uspsh) e Simulador de Processos (ep1)
+
+Este projeto consiste na implementação de dois programas em C para a disciplina MAC0422 - Sistemas Operacionais:
+
+1.  **`uspsh`**: Um shell simples que permite a execução de comandos externos específicos e possui alguns comandos internos implementados com chamadas de sistema.
+2.  **`ep1`**: Um simulador de processos que lê a descrição de processos de um arquivo de trace e simula sua execução usando um dos três algoritmos de escalonamento especificados (FCFS, SRTN, Prioridade baseada em Deadline).
+
+## Compilação
+
+O projeto inclui um `Makefile` para facilitar a compilação.
+
+* **Compilar ambos os programas (`uspsh` e `ep1`):**
+    ```bash
+    make
+    ```
+    ou
+    ```bash
+    make all
+    ```
+
+* **Compilar apenas o shell `uspsh`:**
+    ```bash
+    make uspsh
+    ```
+
+* **Compilar apenas o simulador `ep1`:**
+    ```bash
+    make ep1
+    ```
+
+* **Limpar arquivos compilados (objetos e executáveis):**
+    ```bash
+    make clean
+    ```
+
+## Execução
+
+### Shell (`uspsh`)
+
+Após a compilação, execute o shell com:
+
+```bash
+./uspsh
+```
+
+### Escalonador de Processos (`ep1`)
+
+Após a compilação, execute com:
+
+```bash
+./ep1 <algoritmo> <arquivo-entrada> <arquivo-saida> [--cpu numero-cpu] [--debug]
+```
+
+Os algoritmos disponiveis são:
+ 
+ - (1) FCFS
+ - (2) SRTN
+ - (3) Prioridade utilizando o deadline como criterio (LST)
