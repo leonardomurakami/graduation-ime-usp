@@ -6,6 +6,7 @@
 
 #define MAX_SIDE_BY_SIDE 10
 #define MAX_CYCLISTS 12500  // Maximum possible cyclists (5 * 2500)
+#define LAP_COMPLETION_BUFFER_SIZE 1000  // Size of circular buffer for lap completions
 
 typedef struct {
     int id;                  // Cyclist identifier
@@ -21,6 +22,7 @@ typedef struct {
     int final_position;      // Final position in the race
     int final_time;          // Time when the cyclist finished the race
     pthread_t thread;        // Thread identifier
+    pthread_mutex_t mutex;   // Mutex for cyclist state
 } Cyclist;
 
 // Structure to track elimination lap completions
@@ -28,6 +30,7 @@ typedef struct {
     int cyclist_id;          // ID of the cyclist who completed the lap
     int lap_number;          // The lap number that was completed
     int completion_time;     // Time when the lap was completed
+    pthread_mutex_t mutex;   // Mutex for this completion record
 } LapCompletion;
 
 typedef struct {
@@ -44,11 +47,15 @@ typedef struct {
     pthread_mutex_t global_mutex;  // Mutex for global variables (cyclists_in_race, elimination state)
     pthread_mutex_t clock_mutex;   // Mutex for clock
     pthread_cond_t clock_cond;     // Condition variable for clock
+    pthread_mutex_t leader_mutex;  // Mutex for race leader updates
 
     // State for "Miss and out" elimination logic
     int current_elimination_lap;    // The even lap we are currently tracking for elimination (starts at 2)
-    LapCompletion *lap_completions; // Array to track lap completions in order
-    int num_completions;            // Number of lap completions recorded
+    LapCompletion *lap_completions; // Circular buffer to track lap completions
+    int completion_head;            // Index of the oldest completion in the buffer
+    int completion_tail;            // Index where the next completion will be written
+    int num_completions;            // Number of valid completions in the buffer
+    pthread_mutex_t completion_mutex; // Mutex for lap completion buffer
 } Race;
 
 // Function prototypes
