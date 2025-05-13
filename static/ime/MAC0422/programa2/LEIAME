@@ -1,0 +1,58 @@
+Simulador de Corrida Ciclística por Eliminação
+=========================================
+
+Este programa simula uma corrida ciclística por eliminação seguindo o critério Miss and out conforme especificado no enunciado do EP2.
+
+Compilação
+----------
+
+Para compilar o programa, execute o seguinte comando:
+
+    make
+
+Este comando irá gerar o executável `ep2`.
+
+Execução
+--------
+
+O programa deve ser executado com os seguintes parâmetros:
+
+    ./ep2 d k <i|e> [-debug]
+
+Onde:
+- `d`: tamanho da pista em metros (100 <= d <= 2500)
+- `k`: número de ciclistas (5 <= k <= 5*d)
+- `i`: usar abordagem ingênua para sincronização (um mutex para toda a pista)
+- `e`: usar abordagem eficiente para sincronização (um mutex para cada posição da pista)
+- `-debug`: (opcional) imprimir informações de debug na saída de erro
+
+Exemplos de uso:
+
+1. Pista de 100 metros com 20 ciclistas, abordagem ingênua:
+   
+   ./ep2 100 20 i
+
+2. Pista de 200 metros com 30 ciclistas, abordagem eficiente:
+   
+   ./ep2 200 30 e
+
+3. Pista de 500 metros com 100 ciclistas, abordagem eficiente, com debug:
+   
+   ./ep2 500 100 e -debug
+
+Saída
+-----
+
+A saída do programa inclui:
+- Relatório a cada volta completada, mostrando as posições de todos os ciclistas
+- Notificações quando um ciclista quebra ou é eliminado
+- Relatório final, mostrando o resultado da corrida
+
+Se a opção `-debug` for utilizada, em vez dos relatórios de volta, o programa mostrará o estado da pista a cada 60ms na saída de erro (stderr). O relatório final ainda será mostrado na saída padrão.
+
+Limpeza
+-------
+
+Para remover o executável gerado, execute:
+
+    make clean 
