@@ -1,79 +1,178 @@
 #ifndef EP2_H
 #define EP2_H
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <pthread.h>
 #include <stdbool.h>
+#include <stdatomic.h>
+#include <unistd.h>
+#include <sys/time.h>
+#include <string.h>
 
-#define MAX_SIDE_BY_SIDE 10
-#define MAX_CYCLISTS 12500  // Maximum possible cyclists (5 * 2500)
-#define LAP_COMPLETION_BUFFER_SIZE 1000  // Size of circular buffer for lap completions
+/* ========== Definicoes de constantes ========== */
+#define MAIN_THREAD_NANO_SLEEP 1000
+#define CYCLIST_THREAD_NANO_SLEEP 10
+#define DEFAULT_BASE_TIME_DELTA 2
+#define DEFAULT_APPROACH 'e'  // 'e' para eficiente, 'i' para ingenuo (naive)
+#define BREAKDOWN_PROBABILITY 0.1  // 10% de chance de quebrar apos BREAKDOWN_CHECK_INTERVAL voltas
+#define BREAKDOWN_CHECK_INTERVAL 5  // verifica quebras a cada n voltas
+#define TIME_DELTA 60
 
-typedef struct {
-    int id;                  // Cyclist identifier
-    int position;            // Current position in the track
-    int lane;                // Current lane (0 is innermost)
-    int lap;                 // Current lap
-    int last_lap_time;       // Time when the last lap was completed
-    int last_speed;          // Speed in the last lap (30 or 60 km/h)
-    int current_speed;       // Current speed (30 or 60 km/h)
-    bool eliminated;         // Whether the cyclist is eliminated
-    bool broken;             // Whether the cyclist has broken down
-    int broken_lap;          // Lap when the cyclist broke down
-    int final_position;      // Final position in the race
-    int final_time;          // Time when the cyclist finished the race
-    pthread_t thread;        // Thread identifier
-    pthread_mutex_t mutex;   // Mutex for cyclist state
-} Cyclist;
+/* ========== Constantes de velocidade ========== */
+#define SPEED_30KMH 1
+#define SPEED_60KMH 2
 
-// Structure to track elimination lap completions
-typedef struct {
-    int cyclist_id;          // ID of the cyclist who completed the lap
-    int lap_number;          // The lap number that was completed
-    int completion_time;     // Time when the lap was completed
-    pthread_mutex_t mutex;   // Mutex for this completion record
-} LapCompletion;
+/* ========== Constantes de probabilidade ========== */
+#define PROB_30KMH_TO_60KMH 0.75  // 75% chance de acelerar de 30km/h para 60km/h
+#define PROB_60KMH_STAYS_60KMH 0.45  // 45% chance de manter 60km/h
 
-typedef struct {
-    int d;                   // Track length in meters
-    int k;                   // Number of cyclists
-    bool efficient;          // Whether to use efficient or naive approach
-    bool debug;              // Whether to print debug information
-    int clock;               // Global clock (in ms)
-    int lap_leader;          // Current lap of the race leader
-    int cyclists_in_race;    // Number of cyclists still in the race
-    Cyclist *cyclists;       // Array of cyclists
-    int **track;             // Track matrix: track[position][lane] = cyclist_id or -1 if empty
-    pthread_mutex_t *track_mutex;  // Mutex for each position of the track (efficient approach)
-    pthread_mutex_t global_mutex;  // Mutex for global variables (cyclists_in_race, elimination state)
-    pthread_mutex_t clock_mutex;   // Mutex for clock
-    pthread_cond_t clock_cond;     // Condition variable for clock
-    pthread_mutex_t leader_mutex;  // Mutex for race leader updates
+/* ========== Dimensoes da pista ========== */
+#define MAX_LANES 10  // numero maximo de faixas na pista
 
-    // State for "Miss and out" elimination logic
-    int current_elimination_lap;    // The even lap we are currently tracking for elimination (starts at 2)
-    LapCompletion *lap_completions; // Circular buffer to track lap completions
-    int completion_head;            // Index of the oldest completion in the buffer
-    int completion_tail;            // Index where the next completion will be written
-    int num_completions;            // Number of valid completions in the buffer
-    pthread_mutex_t completion_mutex; // Mutex for lap completion buffer
-} Race;
+/* ========== Constantes de UI ========== */
+#define RANK_FRAME_WIDTH 40  // largura do quadro de exibicao da classificacao
 
-// Function prototypes
+/* ========== Configuracoes de cores do terminal ========== */
+extern bool colors_enabled;  // flag global para habilitar/desabilitar cores
+
+/* ========== Definicoes de cores e controle do terminal ========== */
+#define RESET       (colors_enabled ? "\033[0m" : "")
+#define BOLD        (colors_enabled ? "\033[1m" : "")
+#define BLACK       (colors_enabled ? "\033[30m" : "")
+#define RED         (colors_enabled ? "\033[31m" : "")
+#define GREEN       (colors_enabled ? "\033[32m" : "")
+#define YELLOW      (colors_enabled ? "\033[33m" : "")
+#define BLUE        (colors_enabled ? "\033[34m" : "")
+#define MAGENTA     (colors_enabled ? "\033[35m" : "")
+#define CYAN        (colors_enabled ? "\033[36m" : "")
+#define WHITE       (colors_enabled ? "\033[37m" : "")
+#define BG_BLACK    (colors_enabled ? "\033[40m" : "")
+#define BG_RED      (colors_enabled ? "\033[41m" : "")
+#define BG_GREEN    (colors_enabled ? "\033[42m" : "")
+#define BG_YELLOW   (colors_enabled ? "\033[43m" : "")
+#define BG_BLUE     (colors_enabled ? "\033[44m" : "")
+#define BG_MAGENTA  (colors_enabled ? "\033[45m" : "")
+#define BG_CYAN     (colors_enabled ? "\033[46m" : "")
+#define BG_WHITE    (colors_enabled ? "\033[47m" : "")
+
+/* ========== Estruturas de dados ========== */
+
+/* Estrutura representando um ciclista */
+typedef struct Cyclist cyclist_t;
+struct Cyclist {
+    int number;           // numero de identificacao do ciclista
+    int pos_x, pos_y;     // coordenadas de posicao na pista
+    int arrived_flag;     // flag de sincronizacao
+    int continue_flag;    // flag de sincronizacao
+    int laps;             // numero de voltas completadas
+    int speed;            // 1: 30km/h, 2: 60km/h
+    int time_delta;       // tempo ate a proxima movimentacao
+    pthread_t thread_id;
+    cyclist_t *next;
+    bool round_completed; // indica se o ciclista completou sua volta atual
+    bool broken_down;     // indica se o ciclista quebrou
+};
+
+typedef struct RankCell {
+    int lap;           // numero de volta
+    int count;         // numero de ciclistas ativos nesta volta
+    int *cyclist_ids;  // array de numeros de identificacao dos ciclistas ordenados pela posicao nesta volta
+    int size;          // tamanho do array de identificacoes e tempos
+    int *times;        // para o ciclista na posicao i no rank[], indica o tempo que ele cruzou a linha de chegada nesta volta
+} RankCell;
+typedef RankCell *Rank;
+
+/* Estrutura de lista encadeada */
+typedef struct RankNode {
+    Rank rank;
+    struct RankNode *next;
+} RankNode;
+typedef RankNode *RankList;
+
+/* ========== Variaveis globais ========== */
+
+/* Variaveis globais relacionadas a pista */
+extern cyclist_t ***track;
+extern cyclist_t *head;  // ponteiro para o inicio da lista encadeada de ciclistas
+extern int track_size, num_cyclists;
+extern pthread_mutex_t **mutex;
+extern pthread_mutex_t global_mutex;
+extern char approach;  // 'i' para ingenuo, 'e' para eficiente
+
+/* Variaveis globais relacionadas ao status da corrida */
+extern _Atomic int active_cyclists, num_breakdowns;
+extern int total_laps;
+extern bool cyclist_broke_down;
+extern bool final_laps;
+extern bool waiting_for_second_in_final_laps;
+extern _Atomic long long int current_time;
+
+/* Variaveis globais relacionadas a classificacao */
+extern pthread_mutex_t insert_mutex;
+extern Rank final_rank;
+extern Rank breakdown_rank;
+extern RankList rank_list;
+
+/* Variaveis de debug e desempenho */
+extern long total_memory;
+extern int debug_parameter;
+extern int base_time_delta;
+
+/* ========== Prototipos de funcoes ========== */
+
+/* Funcoes de terminal */
+void clear_screen();
+void move_cursor_to_home();
+void hide_cursor();
+void show_cursor();
+
+/* Funcoes de utilidade */
+double random_double(double min, double max);
+
+/* Funcoes de classificacao */
+void adjust_first_place(Rank rank, int winner);
+void insert_cyclist_in_rank(Rank rank, int cyclist_id, int time);
+void insert_cyclist(RankList list, int size, int lap, int cyclist_id, int time);
+void destroy_rank(Rank rank);
+void destroy_rank_list(RankList list);
+void print_rank(RankList list, int lap);
+void print_final_rank(Rank rank);
+void print_breakdown_rank(Rank rank);
+int get_last_place(RankList list, int lap);
+int get_new_last_place(RankList list, int lap, int cyclist_id);
+int get_first_place(RankList list, int lap);
+Rank create_rank(int lap, int size);
+Rank find_rank(RankList list, int lap);
+RankList create_rank_list();
+RankList remove_rank(RankList list);
+RankList remove_ranks_by_lap(RankList list, int lap);
+
+/* Funcoes de thread de ciclista */
 void *cyclist_thread(void *arg);
-void initialize_race(Race *race, int d, int k, bool efficient, bool debug);
-void start_race(Race *race);
-void cleanup_race(Race *race);
-void print_track_debug(Race *race);
-void print_lap_report(Race *race);
-void print_final_report(Race *race);
-void check_eliminations(Race *race);
-bool is_race_finished(Race *race);
-bool all_cyclists_ready(Race *race);
-int random_between(int min, int max);
-void update_cyclist_speed(Cyclist *cyclist);
-bool check_cyclist_breakdown(Cyclist *cyclist);
-bool try_move_cyclist(Race *race, Cyclist *cyclist);
-bool can_overtake(Race *race, Cyclist *cyclist, int target_position);
-void sort_cyclists_by_position(Race *race);
+void move_forward(cyclist_t *cyclist);
+void move_to_outer_lane(cyclist_t *cyclist);
+void move_to_inner_lane(cyclist_t *cyclist);
+void set_cyclist_speed(cyclist_t *cyclist);
+void check_cyclists_ahead(cyclist_t *cyclist);
+void handle_finish_line(cyclist_t *cyclist);
 
-#endif /* EP2_H */
+/* Funcoes de thread de coordenador */
+void *coordinator_thread(void *arg);
+void display_track();
+void eliminate_cyclist(cyclist_t *cyclist_head, int cyclist_number, bool should_print);
+void eliminate_broken_down(cyclist_t *cyclist_head);
+void declare_winner(int winner);
+void declare_elimination(int cyclist_number);
+void declare_breakdown(int cyclist_number);
+
+/* Funcoes do programa principal */
+void destroy_track();
+void clean_up();
+void initialize_variables();
+void create_coordinator_thread();
+void create_cyclist_threads();
+void join_cyclist_threads();
+void join_coordinator_thread();
+
+#endif /* EP2_H */ 

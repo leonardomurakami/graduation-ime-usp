@@ -7,10 +7,7 @@ all: ep2
 ep2: ep2.c ep2.h
 	$(CC) $(CFLAGS) -o ep2 ep2.c $(LDLIBS)
 
-build-perf: ep2.c ep2.h
-	$(CC) $(CFLAGS) -pg -o ep2 ep2.c $(LDLIBS)
-
 clean:
 	rm -f ep2 *.o
 
-.PHONY: all clean build-perf 
+.PHONY: all clean 
