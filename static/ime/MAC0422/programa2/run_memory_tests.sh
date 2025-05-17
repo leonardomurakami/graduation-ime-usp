@@ -36,7 +36,6 @@ for k in "${K_VALUES[@]}"; do
                 
                 echo "Completed iteration $iteration. Massif output saved to $OUTPUT_FILE"
 
-                sleep 5
             done
             
             echo "Completed all iterations for d=$d, k=$k, approach=$approach"

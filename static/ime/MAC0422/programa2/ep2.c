@@ -18,8 +18,6 @@ _Atomic int active_cyclists, num_breakdowns;
 _Atomic long long int current_time = 0;
 
 bool cyclist_broke_down;
-bool final_laps = false;
-bool waiting_for_second_in_final_laps = false;
 
 pthread_mutex_t **mutex;
 pthread_mutex_t global_mutex;
@@ -777,7 +775,7 @@ void declare_winner(int winner) {
     
     // Mensagem
     char message[50];
-    sprintf(message, "Cyclist %d won the race!", winner);
+    sprintf(message, "Cyclist %d ganhou a corrida!", winner);
     int msg_len = strlen(message);
     int msg_left_padding = (RANK_FRAME_WIDTH - msg_len) / 2;
     int msg_right_padding = RANK_FRAME_WIDTH - msg_len - msg_left_padding - 2;
@@ -872,6 +870,7 @@ void *coordinator_thread(void *arg)
     int last_elimination_lap = 0; // menor volta local do coordenador
     int highest_lap = 0;  // maior volta do coordenador
     int winner = -1;
+    bool winner_found = false;        // Flag para vencedor identificado
 
     while (true) {
         if (active_cyclists <= 0) {
@@ -902,19 +901,84 @@ void *coordinator_thread(void *arg)
         
         if (highest_lap != max_lap) highest_lap = max_lap;
         
+        // Verifica se algum ciclista completou o total de voltas
+        if (!winner_found && max_lap >= total_laps) {
+            // Verifica se existe ranking para esta volta
+            Rank max_lap_rank = find_rank(rank_list, max_lap);
+            if (max_lap_rank != NULL) {
+                winner = max_lap_rank->cyclist_ids[0]; // Primeiro colocado
+                winner_id = winner;
+                winner_found = true;
+                
+                // Imediatamente encerra a corrida quando alguém completa todas as voltas
+                for (cyclist_t *cyclist = cyclist_head->next; cyclist != head; cyclist = cyclist->next) {
+                    if (cyclist->number != winner) {
+                        // Elimina todos os outros ciclistas
+                        eliminate_cyclist(cyclist_head, cyclist->number, true);
+                        active_cyclists--;
+                    }
+                }
+                
+                // Elimina o vencedor por último
+                eliminate_cyclist(cyclist_head, winner, false);
+                active_cyclists--;
+                
+                // Ajusta a classificação final
+                adjust_first_place(final_rank, winner);
+                
+                if (!debug_parameter) {
+                    print_rank(rank_list, max_lap);
+                }
+                
+                pthread_exit(0);
+            }
+        }
+        
         // controla voltas e eliminacoes
         while (min_lap > 0 && last_elimination_lap < min_lap) {
             if (last_elimination_lap > 0 && active_cyclists > 1 && !debug_parameter) {
-                print_rank(rank_list, last_elimination_lap);
+                // Verifica se existe ranking para esta volta antes de imprimir
+                Rank lap_rank = find_rank(rank_list, last_elimination_lap);
+                if (lap_rank != NULL) {
+                    print_rank(rank_list, last_elimination_lap);
+                }
             }
             last_elimination_lap++;
             
             // a cada 2 voltas, elimina o ultimo colocado
             if (last_elimination_lap % 2 == 0) {
-                // se temos apenas 2 ciclistas restantes, declara o primeiro como vencedor
-                if (active_cyclists == 2) {
-                    winner = get_first_place(rank_list, last_elimination_lap);
-                    int last = get_last_place(rank_list, last_elimination_lap);
+                // Verifica se existe ranking para esta volta antes de prosseguir
+                Rank current_rank = find_rank(rank_list, last_elimination_lap);
+                if (current_rank == NULL) {
+                    // Não há ranking para esta volta, continue para a próxima iteração
+                    continue;
+                }
+                
+                // se um vencedor já foi encontrado E temos apenas 2 ciclistas restantes
+                if (winner_found && active_cyclists == 2) {
+                    int last = current_rank->cyclist_ids[current_rank->count-1]; // Último colocado
+                    
+                    // elimina o ultimo colocado
+                    eliminate_cyclist(cyclist_head, last, true);
+                    active_cyclists--;
+                    
+                    // elimina o vencedor tambem para terminar a corrida
+                    eliminate_cyclist(cyclist_head, winner, false);
+                    active_cyclists--;
+                    
+                    // ajusta a classificacao final e sai da thread
+                    adjust_first_place(final_rank, winner);
+                    
+                    if (!debug_parameter) {
+                        print_rank(rank_list, last_elimination_lap);
+                    }
+                    
+                    pthread_exit(0);
+                } else if (active_cyclists == 2 && !winner_found) {
+                    // Sem vencedor definido, mas só restam 2 ciclistas
+                    // Declara o primeiro como vencedor
+                    winner = current_rank->cyclist_ids[0]; // Primeiro colocado
+                    int last = current_rank->cyclist_ids[current_rank->count-1]; // Último colocado
                     winner_id = winner;
                     
                     // elimina o ultimo colocado
@@ -925,19 +989,17 @@ void *coordinator_thread(void *arg)
                     eliminate_cyclist(cyclist_head, winner, false);
                     active_cyclists--;
                     
-                    
                     // ajusta a classificacao final e sai da thread
                     adjust_first_place(final_rank, winner);
                     
                     if (!debug_parameter) {
                         print_rank(rank_list, last_elimination_lap);
                     }
-
                     
                     pthread_exit(0);
                 } else {
                     // caso normal: elimina o ultimo colocado
-                    int last = get_last_place(rank_list, last_elimination_lap);
+                    int last = current_rank->cyclist_ids[current_rank->count-1]; // Último colocado
                     eliminate_cyclist(cyclist_head, last, true);
                 }
             }
@@ -1130,6 +1192,10 @@ void eliminate_broken_down(cyclist_t *cyclist_head) {
             free(to_remove);
             
             num_breakdowns++;
+            
+            // Cada quebra reduz o total de voltas em 2
+            total_laps -= 2;
+            if (total_laps < 1) total_laps = 1; // Garante no mínimo 1 volta
         } else {
             previous = current;
             current = current->next;
