@@ -1,0 +1,72 @@
+Maratona de Programacao:
+ - Programacao rapida e eficiente
+ - Pode ser sozinha ou em grupo
+ - Desafios de programacao (ex: busca binaria)
+ - Como funcionam as provas de programacao?
+  - Diversos problemas
+  - Correcao em tempo real
+  - Apenas 1 computador
+  - Ganha quem resolve mais
+ - Etapas:
+  - Seletiva Interna
+  - Sub-regional
+  - Final Brasileira
+  - Final LATAM
+  - Final Mundial
+
+MaratonUSP:
+ - Grupo de estudos para maratonas de programacao
+ - Tambem ajudam para outras competicoes como: Codeforces, Facebook Hacker Cup, Huawei
+ - Organizam:
+  - Aulas (BixeCamp)
+  - Listas
+  - Simulados
+  - Mashups
+  - Rolês
+ - O que estao fazendo agora?
+  - BixeCamp 2025
+   - Aulas e Simulados introdutorios
+  - Maratona Feminina
+   - Para mulheres e pessoas nao-binarias
+   - Competicao individual
+   - Duas fases
+   - Otima para iniciar na programacao competitiva
+ - Por que participar?
+  - Entrevistas de Emprego (entrevistas tecnicas FAANG/Leetcode)
+ - Resultados
+  - 1º Lugar Programadores da America 2025
+  - 2º Lugar Final LATAM 2024, México (Classificacao para a Final Mundial)
+  
+
+FLUSP:
+ - FLOSS @ USP (Free Libre Open Source Software)
+ - Historia:
+  - Laboratorio de Metodos Ageis (2º semestre de 2018)
+  - 20% de todas as contribuicoes no linux-iio no periodo
+  - Interesse em continuar contribuindo para o kernel
+ - Objetivos:
+  - Contribuir para FLOSS
+   - Aprender com códigos de sucesso
+   - Interagir com a comunidade e empresas
+  - Compartilhar Conhecimento
+   - Primeiros passos e diretrizes
+   - Do's and dont's
+  - Oportunidades
+   - GSoC (Google Summer of Code)/Outreachy
+   - Empregos/estagios
+ - Valores:
+  - Liberdade de codigo e conhecimento
+  - Organizacao horizontal
+  - Compartilhamento mutuo de conhecimento
+  - Revisao é tao importante quanto desenvolvimento
+  - Respeito a todes
+ - Motivacoes:
+  - Contribuir com um dos projetos mais usados no mundo
+  - Desafios de programacao e projetos
+  - Interagir com desenvolvedores do mundo todo
+  - Interagir com grandes players (Intel, IBM, RedHat...)
+ - Recomendações:
+  - Conforto com C e ponteiros
+  - Conforto com terminal e interface de linha de comando
+  - Desejo de ler/escrever codigo de baixo nivel
+  

@@ -1,0 +1,31 @@
+Mari Bravo
+ - Por que decidiu pela Ciência da Computação?
+  - Ambos os pais fizeram e seguiram carreira com CC
+  - Teve acesso a computadores desde cedo através dele
+  - Sabia sobre o curso e sobre a carreira
+  - Mercado de trabalho em crescimento
+ - BCC: 2003-2006
+    - Não sabia programar quando entrou, mas desde a primeira matéria sempre gostou muito
+    - Também era novidade Linux e Software Livre, se interessou pelo tema e participou diversas vezes do extinto FISL (Fórum Internacional de Software Livre)
+    - Por fim começou a aprender métodos ágeis nas disciplinas de Engenharia de Software 
+ - Por que Mestrado?
+  - Não tinha necessidade/urgência de começar a trabalhar
+  - Queria trabalhar com métodos ágeis, porém nas empresas que entrevistou ainda usavam metodologias mais antigas e não tinham essa cultura
+  - Não tinha um interesse claro na carreira acadêmica, porém tinha vontade de aprender mais sobre métodos ágeis e o mestrado seria um caminho para isso
+  - "Provavelmente a melhor decisão da minha carreira"
+ - Mestrado: 2007-2011
+  - Tema: Abordagens para o Ensino de Práticas de Programação Extrema
+  - Linha de pesquisa bem nova pro departamento
+  - Em paralelo ao mestrado, se envolveu com várias atividades complementares
+  - Conseguiu se envolver com a comunidade ágil e conheceu melhor o mercado
+  - Desenvolveu muitas "soft skills" relevantes nesse período
+ - Carreira: 2011-Hoje
+  - ThoughtWorks - consultoria referencia internacional em metodos ageis
+   - Objetivo de vivenciar metodos ageis no mercado
+   - Participou de varios projetos e se desenvolveu como lider tecnica e consultora
+  - Amazon - departamento de varejo no Brasil
+   - Desenvolvuimento de sistemas ligados a calculo de impostos e emissao de notas fiscais
+   - Desafios tecnicos interessantes, principalmente com a escala dos sistemas e evolucao da arquitetura legada
+  - Wildlife Studios - desenvolvimento de jogos mobile
+   - Tecnologias completamente novas, principalmente no desenvolvimento do jogo
+   - Muito conhecimento de backend e engenharia de software ainda se aplica 100%

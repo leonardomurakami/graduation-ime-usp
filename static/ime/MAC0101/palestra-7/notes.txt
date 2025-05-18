@@ -1,0 +1,43 @@
+IMEsec
+- Areas de estudos
+ - Criptografia
+ - Engenharia Reversa
+ - Pwning
+ - Web (vulnerabilidades)
+ - Redes (exemplo: MitM)
+ - Forense
+ - Mobile
+
+Rede linux
+ - O que é GNU?
+  - Richard Stalman
+    - 1971 -> MIT Programador
+    - 1983 -> Projeto GNU (GNU is not Unix)
+    - Criou muitos pacotes de usuario uteis (GCC e GNU Make)
+    - 1991 -> Faltava algo para o projeto continuar, faltava o kernel
+    - 1991 -> Linux Lancado com licenca nao compativel com o projeto GNU (nao permitia comercializacao)
+    - 1992 -> Linus trocou a licenca do Linux para uma compativel com o GNU
+ - E a rede Linux?
+  - Somos uma rede de computadores rodando debian (distro de GNU/Linux)
+  - Cuida da gestao e manutencao dos computadores e dos servidores da rede
+ - Historia da rede linux
+  - 1995 -> Grupo de Usuarios Linux (GUL) grupo de estudos com sala cedida pelo IME
+  - 1997 -> Torna se uma rede aberta para estudantes de BCC, recebendo mais salas e mais computadores
+  - 1999 -> Torna-se a primeira pro-alino apoiada pela USP. Todos os alunos da graduacao possuem direito
+  - 2024 - > Premio PIPA por inovacao
+ - O que oferece?
+  - Servidores de Processamento
+   - Maquina GOKU e Maquina VEGETA
+  - Impressoras + Scanner
+   - Cotas mensais de ate 75 impressoes
+  - Site Estatico
+    - Criado automaticamente junto com sua conta
+  - Cursos RedHat
+   - Curso de SysAdmin 
+   - Red Hat Application Development I: Programming in Java
+  - Grupo de Estudos IMEsys
+ - Como é a administracao
+  - Formado por alunos do BCC, independente, orientados pelos professores
+  - Bolsa Pro-aluno
+  - Experiencia DevOps
+   

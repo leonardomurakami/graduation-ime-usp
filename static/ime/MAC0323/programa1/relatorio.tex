@@ -1,0 +1,100 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[brazilian]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{geometry}
+\geometry{a4paper, margin=2.5cm}
+
+\title{MAC0323 - EP1: Relatório}
+\author{Leonardo Heidi Almeida Murakami\\11260186}
+\date{Maio 2025}
+
+\begin{document}
+
+\maketitle
+
+\section{Análise da Complexidade de Tempo para a Detecção de Ciclos}
+
+A detecção de ciclos no grafo direcionado é implementada utilizando o algoritmo de busca em profundidade (DFS) na classe \texttt{CycleDetector}. Cada vértice é visitado exatamente uma vez pelo algoritmo DFS, e para cada vértice, exploramos todas as arestas adjacentes.
+
+Seja $V$ o número de vértices e $E$ o número de arestas no grafo:
+
+\begin{itemize}
+    \item Cada vértice é processado uma única vez devido à tabela hash \texttt{visited} que rastreia os vértices já visitados.
+    \item Para cada vértice, examinamos todas as suas arestas adjacentes.
+    \item As operações de consulta e inserção na tabela hash têm complexidade de tempo de $O(1)$ em caso médio.
+\end{itemize}
+
+Portanto, a complexidade de tempo para a detecção de ciclos é:
+\begin{align}
+    O(V + E)
+\end{align}
+
+Esta é a complexidade ótima para a detecção de ciclos em um grafo direcionado, pois precisamos examinar cada vértice e cada aresta pelo menos uma vez.
+
+No pior caso, onde temos colisões frequentes na tabela hash, a complexidade poderia se aproximar de $O(V \cdot L + E \cdot L)$, onde $L$ é o comprimento máximo das listas de colisão na tabela hash. No entanto, com uma função de hash bem distribuída e uma tabela de tamanho adequado (997 no nosso caso), o valor esperado de $L$ é pequeno, mantendo a complexidade próxima de $O(V + E)$.
+
+\newpage
+
+\section{Análise da Complexidade de Tempo para a Listagem de Caminhos}
+
+A listagem de todos os caminhos entre dois vértices implementada na classe \texttt{PathFinder} também utiliza busca em profundidade, mas sua complexidade é significativamente maior que a detecção de ciclos.
+
+No pior caso, para um grafo direcionado completo (onde cada vértice tem uma aresta para todos os outros vértices), o número de caminhos possíveis entre dois vértices pode ser exponencial.
+
+Seja $V$ o número de vértices:
+
+\begin{itemize}
+    \item Para encontrar todos os caminhos simples (sem ciclos) entre dois vértices, o algoritmo potencialmente explora todas as combinações possíveis de vértices intermediários.
+    \item No pior caso, em um grafo completo, cada vértice (exceto o destino) pode ter até $V-1$ opções de próximo vértice.
+    \item Para cada caminho, podemos ter de 0 até $V-2$ vértices intermediários entre o vértice de origem e o destino.
+    \item Isso resulta em uma complexidade de $O(2^V)$, pois cada vértice pode ser incluído ou não no caminho (exceto origem e destino).
+\end{itemize}
+
+Portanto, a complexidade de tempo para a listagem de todos os caminhos no pior caso é:
+\begin{align}
+    O(2^V)
+\end{align}
+
+Esta complexidade exponencial é inevitável, pois o número de caminhos possíveis entre dois vértices em um grafo denso pode ser exponencial em relação ao número de vértices.
+
+Na implementação, a tabela hash \texttt{visited} é utilizada para evitar ciclos, garantindo que cada caminho seja acíclico, mas isso não reduz a complexidade exponencial no pior caso. No entanto, para grafos esparsos, o número de caminhos e, consequentemente, a complexidade, pode ser muito menor.
+
+\section{Uso de Assistentes de IA}
+
+\subsection{Como utilizei assistentes de IA na resolução}
+
+Utilizei o assistente de IA Claude da Anthropic em raras ocasiões durante o desenvolvimento do EP1:
+
+\begin{enumerate}
+    \item Para a criação do arquivo \texttt{Makefile}: Como o foco do exercício era na implementação dos algoritmos de grafos e estruturas de dados em Java, utilizei o Claude para gerar um Makefile básico que simplificasse a compilação e execução do projeto. O Makefile gerado contém comandos padrão para compilar os arquivos Java e executar o programa principal, sem nenhuma lógica complexa. Utilizado apenas por conveniência.
+    
+    \item Para adicionar um comentário de depuração no arquivo \texttt{PathFinder.java}: No método \texttt{dfs} da classe \texttt{PathFinder}, há um comentário de depuração (marcado como "AI Generated Debug Print") que foi gerado pelo Claude. Este comentário sugere um código para imprimir o caminho atual sendo explorado durante a execução do algoritmo, o que seria útil para depuração. Foi utilizado para entender porque o algoritmo não estava imprimindo todos os caminhos possíveis, apenas o primeiro que encontrava.
+
+    \item Para a geração do template LaTeX deste relatório: Utilizei o Claude para gerar a estrutura básica do documento LaTeX para este relatório. O assistente criou o template com as seções necessárias (análise de complexidade para detecção de ciclos, análise de complexidade para listagem de caminhos e uso de assistentes de IA), mas todo o conteúdo e análises matemáticas foram desenvolvidos por mim, com base na minha compreensão dos algoritmos implementados.
+
+    \item Para a criação do arquivo de teste utilizado para testar a \texttt{Main.java}. 
+\end{enumerate}
+
+\subsection{Quais partes pedi ajuda ou esclarecimentos}
+
+Não solicitei ajuda ou esclarecimentos sobre o funcionamento dos algoritmos ou estruturas de dados implementados. O código dos algoritmos de detecção de ciclos (DFS), busca de caminhos, implementação da tabela hash e listas de adjacência foram desenvolvidos por mim com base no meu conhecimento prévio e no conhecimento adquirido nas aulas e materiais de referência da disciplina, principalmente os resumos disponíveis no site da disciplina no moodle.
+
+\subsection{Se compreendi totalmente o que implementei}
+
+Sim, compreendi totalmente todas as implementações do EP1. Cada estrutura de dados e algoritmo implementado foi baseado nos conceitos estudados na disciplina:
+
+\begin{itemize}
+    \item \textbf{MyHashTable}: Implementei uma tabela hash com encadeamento para resolução de colisões, compreendendo completamente o funcionamento da função de hash, inserção, busca e a estrutura de nós encadeados.
+    \item \textbf{SimpleList}: Implementei uma lista ligada simples com operações básicas, compreendendo o funcionamento da estrutura de nós e os métodos para adicionar elementos, verificar existência e percorrer a lista.
+    \item \textbf{DirectedGraph}: Implementei a representação de um grafo direcionado usando listas de adjacência armazenadas em uma tabela hash.
+    \item \textbf{CycleDetector}: Implementei e compreendi completamente o algoritmo de detecção de ciclos usando DFS, incluindo o uso das estruturas auxiliares para rastrear vértices visitados e em processamento.
+    \item \textbf{PathFinder}: Compreendi e implementei o algoritmo para encontrar todos os caminhos entre dois vértices usando DFS, incluindo o backtracking necessário para explorar todos os caminhos possíveis.
+\end{itemize}
+
+As únicas partes onde utilizei IA foram por pura conveniência, sempre em elementos que não afetariam o entendimento dos algoritmos centrais do exercício ou tornariam o exercício extremamente trivial, apenas auxiliam no bom desenvolvimento de todo o exercício.
+
+\end{document}
