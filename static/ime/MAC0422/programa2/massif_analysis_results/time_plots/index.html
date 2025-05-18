@@ -1,0 +1,121 @@
+
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Memory Usage Over Time Analysis</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; }
+                    h1, h2 { color: #333; }
+                    .section { margin-bottom: 30px; }
+                    .plot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+                    .plot-item { border: 1px solid #ddd; padding: 10px; border-radius: 5px; }
+                    .plot-item img { max-width: 100%; height: auto; }
+                    .plot-item p { margin: 10px 0 5px; }
+                    .no-data { color: #999; font-style: italic; }
+                </style>
+            </head>
+            <body>
+                <h1>Memory Usage Over Time Analysis</h1>
+            
+                <div class="section">
+                    <h2>Efficient Approach</h2>
+            <div class="plot-grid">
+                        <div class="plot-item">
+                            <p>Track Size d=100</p>
+                            <a href="efficient/memory_time_d100.png" target="_blank">
+                                <img src="efficient/memory_time_d100.png" alt="Memory usage for d=100">
+                            </a>
+                        </div>
+                        
+                        <div class="plot-item">
+                            <p>Track Size d=250</p>
+                            <a href="efficient/memory_time_d250.png" target="_blank">
+                                <img src="efficient/memory_time_d250.png" alt="Memory usage for d=250">
+                            </a>
+                        </div>
+                        
+                        <div class="plot-item">
+                            <p>Track Size d=500</p>
+                            <a href="efficient/memory_time_d500.png" target="_blank">
+                                <img src="efficient/memory_time_d500.png" alt="Memory usage for d=500">
+                            </a>
+                        </div>
+                        
+                        <div class="plot-item">
+                            <p>Cyclists k=10</p>
+                            <a href="efficient/memory_time_k10.png" target="_blank">
+                                <img src="efficient/memory_time_k10.png" alt="Memory usage for k=10">
+                            </a>
+                        </div>
+                        
+                        <div class="plot-item">
+                            <p>Cyclists k=25</p>
+                            <a href="efficient/memory_time_k25.png" target="_blank">
+                                <img src="efficient/memory_time_k25.png" alt="Memory usage for k=25">
+                            </a>
+                        </div>
+                        
+                        <div class="plot-item">
+                            <p>Cyclists k=50</p>
+                            <a href="efficient/memory_time_k50.png" target="_blank">
+                                <img src="efficient/memory_time_k50.png" alt="Memory usage for k=50">
+                            </a>
+                        </div>
+                        </div></div>
+                <div class="section">
+                    <h2>Ingenuous Approach</h2>
+            <div class="plot-grid">
+                        <div class="plot-item">
+                            <p>Track Size d=100</p>
+                            <a href="ingenuous/memory_time_d100.png" target="_blank">
+                                <img src="ingenuous/memory_time_d100.png" alt="Memory usage for d=100">
+                            </a>
+                        </div>
+                        
+                        <div class="plot-item">
+                            <p>Track Size d=250</p>
+                            <a href="ingenuous/memory_time_d250.png" target="_blank">
+                                <img src="ingenuous/memory_time_d250.png" alt="Memory usage for d=250">
+                            </a>
+                        </div>
+                        
+                        <div class="plot-item">
+                            <p>Track Size d=500</p>
+                            <a href="ingenuous/memory_time_d500.png" target="_blank">
+                                <img src="ingenuous/memory_time_d500.png" alt="Memory usage for d=500">
+                            </a>
+                        </div>
+                        
+                        <div class="plot-item">
+                            <p>Cyclists k=10</p>
+                            <a href="ingenuous/memory_time_k10.png" target="_blank">
+                                <img src="ingenuous/memory_time_k10.png" alt="Memory usage for k=10">
+                            </a>
+                        </div>
+                        
+                        <div class="plot-item">
+                            <p>Cyclists k=25</p>
+                            <a href="ingenuous/memory_time_k25.png" target="_blank">
+                                <img src="ingenuous/memory_time_k25.png" alt="Memory usage for k=25">
+                            </a>
+                        </div>
+                        
+                        <div class="plot-item">
+                            <p>Cyclists k=50</p>
+                            <a href="ingenuous/memory_time_k50.png" target="_blank">
+                                <img src="ingenuous/memory_time_k50.png" alt="Memory usage for k=50">
+                            </a>
+                        </div>
+                        </div></div>
+                <div class="section">
+                    <h2>Approach Comparison</h2>
+                    <div style="text-align: center;">
+                        <a href="memory_comparison_sample.png" target="_blank">
+                            <img src="memory_comparison_sample.png" alt="Memory usage comparison" style="max-width: 80%; height: auto;">
+                        </a>
+                    </div>
+                </div>
+                
+            </body>
+            </html>
+            
