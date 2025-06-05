@@ -1,1035 +1,1418 @@
-#define _DEFAULT_SOURCE // Or _POSIX_C_SOURCE >= 200809L for barriers, rand_r
 #define _GNU_SOURCE
 #include "ep2.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <pthread.h>
-#include <unistd.h>
-#include <time.h>
-#include <errno.h>
-#include <limits.h> // For INT_MAX
 
-// --- Global Variable Definitions ---
-int d;
-int k;
-char concurrency_mode;
-bool debug_mode = false;
+/*===============================================*/
+/*================   GLOBALS   ==================*/
+/*===============================================*/
+cyclist_t ***track;
+cyclist_t *head;
 
-int **pista = NULL;
-CyclistInfo *cyclists = NULL;
-ResultInfo *final_results = NULL;
+int track_size, num_cyclists;
+int base_time_delta = DEFAULT_BASE_TIME_DELTA;
+int total_laps;
+int winner_id;
+int debug_parameter = 0;
+bool colors_enabled = false;  // cores desativadas por default 
 
-int num_active_cyclists;
-int num_finished_cyclists = 0;
-unsigned long long simulation_time_ms = 0;
-bool race_over = false;
-int current_lap_leader = 0; // Tracks the maximum lap number completed by any cyclist
+_Atomic int active_cyclists, num_breakdowns;
+_Atomic long long int current_time = 0;
 
-// Synchronization primitives
-pthread_mutex_t global_lock;
-pthread_mutex_t *track_mutexes = NULL;
-pthread_mutex_t print_mutex = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t results_mutex = PTHREAD_MUTEX_INITIALIZER;
-pthread_barrier_t step_barrier_start;
-pthread_barrier_t step_barrier_end;
+bool cyclist_broke_down;
 
+pthread_mutex_t **mutex;
+pthread_mutex_t global_mutex;
+pthread_mutex_t insert_mutex;
+pthread_t coordinator;
 
-pthread_mutex_t track_lock;  // Single mutex for small tracks
+Rank final_rank;
+Rank breakdown_rank;
+RankList rank_list;
 
-volatile bool cleanup_requested = false;  // Flag to signal threads to exit
+char approach = DEFAULT_APPROACH;  // abordagem: 'i' para ingenua, 'e' para eficiente
 
-// --- Helper Functions ---
+/*===============================================*/
+/*================    UTILS    ==================*/
+/*===============================================*/
 
-// Thread-safe random integer between min and max (inclusive)
-int get_random_int(int min, int max, unsigned int *seedp) {
-    if (min > max) return min; // Basic error check
-    return min + rand_r(seedp) % (max - min + 1);
+// retorna um real aleatorio no intervalo [min, max]
+double random_double(double min, double max) {
+    double r1 = (double)rand() / RAND_MAX;
+    double r2 = (double)rand() / RAND_MAX;
+    double d = r1 + r2 / (RAND_MAX + 1.0);
+    return min + d * (max - min);
 }
 
-// Thread-safe random double between 0.0 and 1.0
-double get_random_double(unsigned int *seedp) {
-    return (double)rand_r(seedp) / RAND_MAX;
+/*===============================================*/
+/*==============   TERMINAL UTILS   =============*/
+/*===============================================*/
+
+// Limpa a tela do terminal
+void clear_screen() {
+    printf("\033[2J");
 }
 
-// Comparison function for sorting lap ranks by time (ascending)
-int compare_lap_ranks(const void *a, const void *b) {
-    LapRankEntry *entryA = (LapRankEntry *)a;
-    LapRankEntry *entryB = (LapRankEntry *)b;
-    if (entryA->crossing_time < entryB->crossing_time) return -1;
-    if (entryA->crossing_time > entryB->crossing_time) return 1;
-    return 0; // Should ideally not happen with ulonglong times, but handle anyway
+// Move o cursor para a posicao inicial (top-left)
+void move_cursor_to_home() {
+    printf("\033[H");
 }
 
-// Comparison function for sorting final results
-int compare_final_ranks(const void *a, const void *b) {
-    ResultInfo *resA = (ResultInfo *)a;
-    ResultInfo *resB = (ResultInfo *)b;
-
-    // Broken cyclists come last
-    if (resA->final_state == BROKEN && resB->final_state != BROKEN) return 1;
-    if (resA->final_state != BROKEN && resB->final_state == BROKEN) return -1;
-    if (resA->final_state == BROKEN && resB->final_state == BROKEN) {
-         // Sort broken by lap number descending (broke later = better)
-        if (resA->broken_lap > resB->broken_lap) return -1;
-        if (resA->broken_lap < resB->broken_lap) return 1;
-        return 0;
-    }
-
-     // Eliminated cyclists come after finished but before broken
-    if (resA->final_state == ELIMINATED && resB->final_state == FINISHED) return 1;
-    if (resA->final_state == FINISHED && resB->final_state == ELIMINATED) return -1;
-    if (resA->final_state == ELIMINATED && resB->final_state == ELIMINATED) {
-         // Sort eliminated by laps completed descending
-        if (resA->completed_laps > resB->completed_laps) return -1;
-        if (resA->completed_laps < resB->completed_laps) return 1;
-         // If same laps, sort by finish time ascending (eliminated earlier is worse)
-        if (resA->finish_time_ms < resB->finish_time_ms) return -1;
-        if (resA->finish_time_ms > resB->finish_time_ms) return 1;
-        return 0;
-    }
-
-    // Finished cyclists sorted by rank (which is based on finish time)
-    if (resA->rank < resB->rank) return -1;
-    if (resA->rank > resB->rank) return 1;
-    return 0;
+// Esconde o cursor
+void hide_cursor() {
+    printf("\033[?25l");
 }
 
-// --- Initialization ---
+// Mostra o cursor
+void show_cursor() {
+    printf("\033[?25h");
+}
 
-void initialize_simulation(int argc, char *argv[]) {
-    // 1. Parse Arguments
-    if (argc < 4 || argc > 5) {
-        fprintf(stderr, "Usage: %s <d> <k> <i|e> [-debug]\n", argv[0]);
-        exit(EXIT_FAILURE);
+/*===============================================*/
+/*==============   RANK FUNCTIONS   =============*/
+/*===============================================*/
+
+// Cria um Rank vazio e retorna um ponteiro para ele
+Rank create_rank(int lap, int size) {
+    Rank rank = malloc(sizeof(RankCell));
+    rank->lap = lap;
+    rank->count = 0;
+    rank->cyclist_ids = malloc(size * sizeof(int));
+
+    rank->times = malloc(size * sizeof(int));
+    rank->size = size;
+    return rank;
+}
+
+// Insere um ciclista em uma estrutura Rank sem utilizar listas encadeadas
+// Esta estrutura e reutilizada para armazenar a classificacao final da corrida
+void insert_cyclist_in_rank(Rank rank, int cyclist_id, int time) {
+    rank->cyclist_ids[rank->count] = cyclist_id;
+    rank->times[rank->count] = time;
+    (rank->count)++;
+}
+
+
+// Insere um ciclista com ID cyclist_id no tempo t em uma lista
+void insert_cyclist(RankList list, int size, int lap, int cyclist_id, int time) {
+    Rank rank = NULL; // Rank da volta correspondente
+    if (list->rank == NULL) { // lista vazia
+        list->rank = create_rank(lap, size);
+        rank = list->rank;
     }
-
-    d = atoi(argv[1]);
-    k = atoi(argv[2]);
-    concurrency_mode = argv[3][0];
-
-    if ((d < 100 || d > 2500) || (k < 5 || k > 5 * d) || (concurrency_mode != 'i' && concurrency_mode != 'e')) {
-        fprintf(stderr, "Invalid arguments:\n");
-        fprintf(stderr, "  100 <= d <= 2500\n");
-        fprintf(stderr, "  5 <= k <= 5*d\n");
-        fprintf(stderr, "  mode must be 'i' or 'e'\n");
-        exit(EXIT_FAILURE);
-    }
-
-    if (argc == 5 && strcmp(argv[4], "-debug") == 0) {
-        debug_mode = true;
-    }
-
-    num_active_cyclists     = k;
-    num_finished_cyclists   = 0;
-    simulation_time_ms      = 0;
-    race_over               = false;
-    current_lap_leader      = 0;
-
-    // Seed the main random number generator (for initial placement, tie-breaks)
-    srand(time(NULL));
-
-    // 3. Allocate Memory
-    pista = (int **)malloc(d * sizeof(int *));
-    if (!pista) { perror("Failed to allocate pista rows"); exit(EXIT_FAILURE); }
-    for (int i = 0; i < d; ++i) {
-        pista[i] = (int *)malloc(MAX_LANES * sizeof(int));
-        if (!pista[i]) { perror("Failed to allocate pista columns"); exit(EXIT_FAILURE); }
-        for (int j = 0; j < MAX_LANES; ++j) {
-            pista[i][j] = -1; // Initialize track as empty
-        }
-    }
-
-    cyclists = (CyclistInfo *)malloc(k * sizeof(CyclistInfo));
-    if (!cyclists) { perror("Failed to allocate cyclists"); exit(EXIT_FAILURE); }
-
-    final_results = (ResultInfo *)malloc(k * sizeof(ResultInfo));
-     if (!final_results) { perror("Failed to allocate final_results"); exit(EXIT_FAILURE); }
-
-
-    // 4. Initialize Synchronization Primitives
-    if (pthread_mutex_init(&global_lock, NULL) != 0) {
-        perror("Mutex init failed (global_lock)"); exit(EXIT_FAILURE);
-    }
-    if (pthread_mutex_init(&print_mutex, NULL) != 0) {
-        perror("Mutex init failed (print_mutex)"); exit(EXIT_FAILURE);
-    }
-     if (pthread_mutex_init(&results_mutex, NULL) != 0) {
-        perror("Mutex init failed (results_mutex)"); exit(EXIT_FAILURE);
-    }
-
-    if (concurrency_mode == 'e') {
-        if (d < SMALL_TRACK_THRESHOLD) {
-            if (pthread_mutex_init(&track_lock, NULL) != 0) {
-                perror("Mutex init failed (track_lock)"); exit(EXIT_FAILURE);
+    else { // lista nao vazia
+        RankList current_list = list;
+        while (1) { // procura se ja existe um rank para esta volta
+            if (current_list->rank->lap == lap) {
+                rank = current_list->rank;
+                break;
             }
-        } else {
-            track_mutexes = (pthread_mutex_t *)malloc(d * sizeof(pthread_mutex_t));
-            if (!track_mutexes) { perror("Failed to allocate track mutexes"); exit(EXIT_FAILURE); }
-            for (int i = 0; i < d; ++i) {
-                if (pthread_mutex_init(&track_mutexes[i], NULL) != 0) {
-                    perror("Mutex init failed (track_mutexes)"); exit(EXIT_FAILURE);
-                }
-            }
+            if (current_list->next == NULL) break;
+            else current_list = current_list->next;
+        }
+        if (rank == NULL) { // Nao existe, precisa criar
+            RankList new_list = create_rank_list();
+            rank = create_rank(lap, size);
+            current_list->next = new_list;
+            new_list->rank = rank;
         }
     }
-
-    // Initialize barriers (k cyclists + 1 main thread)
-    // All cyclist threads participate in barriers regardless of state (running or ghosted)
-    if (pthread_barrier_init(&step_barrier_start, NULL, k + 1) != 0) {
-         perror("Barrier init failed (step_barrier_start)"); exit(EXIT_FAILURE);
-    }
-    if (pthread_barrier_init(&step_barrier_end, NULL, k + 1) != 0) {
-        perror("Barrier init failed (step_barrier_end)"); exit(EXIT_FAILURE);
-    }
-
-
-    // 5. Initialize Cyclists
-    for (int i = 0; i < k; ++i) {
-        cyclists[i].id = i;
-        cyclists[i].state = RUNNING;
-        cyclists[i].current_speed = BASE_SPEED; // Start at 30km/h for lap 1
-        cyclists[i].effective_speed = BASE_SPEED;
-        cyclists[i].current_meter = -1; // Will be set by initialize_cyclist_positions
-        cyclists[i].current_lane = -1;
-        cyclists[i].laps_completed = 0;
-        cyclists[i].time_to_move_ms = METER_TIME_SLOW_MS; // Time for first meter at 30km/h
-        cyclists[i].last_crossing_time = 0;
-        cyclists[i].lap_rank = 0;
-        cyclists[i].needs_main_update = false;
-        cyclists[i].rand_seed = time(NULL) ^ (i << 16); // Simple unique seed per thread
-        cyclists[i].broken_lap = -1;
-    }
-
-    initialize_cyclist_positions();
-
-    printf("Simulation Started: d=%d, k=%d, mode=%c, debug=%s\n",
-           d, k, concurrency_mode, debug_mode ? "true" : "false");
-}
-
-// Place cyclists randomly at the start line (meter 0)
-// Max 5 wide, potentially spilling back to meter d-1, d-2 etc. if needed
-void initialize_cyclist_positions() {
-    int *start_order = malloc(k * sizeof(int));
-    if (!start_order) { perror("Failed to allocate start_order"); exit(EXIT_FAILURE); }
-    for(int i=0; i<k; ++i) start_order[i] = i;
-
-    // Shuffle the starting order
-    for (int i = k - 1; i > 0; --i) {
-        int j = rand() % (i + 1);
-        int temp = start_order[i];
-        start_order[i] = start_order[j];
-        start_order[j] = temp;
-    }
-
-    int current_meter = 0;
-    int current_row = 0; // Row within the starting block (0 = front)
-    int lane_in_row = 0; // Position within the row (0-4)
-
-    for (int i = 0; i < k; ++i) {
-        int cyclist_id = start_order[i];
-
-        // Find the specific meter and lane for this starting position
-        int place_meter = (d + current_meter - current_row) % d; // Start at meter 0, go backwards
-        int place_lane = lane_in_row;
-
-        cyclists[cyclist_id].current_meter = place_meter;
-        cyclists[cyclist_id].current_lane = place_lane;
-        pista[place_meter][place_lane] = cyclist_id; // Place on track
-
-        // Move to next starting slot
-        lane_in_row++;
-        if (lane_in_row >= 5) { // Max 5 wide
-            lane_in_row = 0;
-            current_row++;
-        }
-    }
-    free(start_order);
-     printf("Initial positions assigned.\n");
-     if (debug_mode) print_track_state(); // Show initial state if debugging
+    rank->cyclist_ids[rank->count] = cyclist_id;
+    rank->times[rank->count] = time;
+    (rank->count)++;
 }
 
 
-// --- Cyclist Thread ---
+// Cria uma lista encadeada de Ranks, com o primeiro rank de tamanho 'size'
+// e retorna um ponteiro para a lista criada
+RankList create_rank_list() {
+    RankList list = malloc(sizeof(RankNode));
+    list->rank = NULL;
+    list->next = NULL;
+    return list;
+}
 
-void *ciclista_func(void *arg) {
-    int id = *(int *)arg;
-    CyclistInfo *me = &cyclists[id];
-    unsigned int *my_seed = &me->rand_seed;
+// Destroi um Rank
+void destroy_rank(Rank rank) {
+    free(rank->cyclist_ids);
+    free(rank->times);
+    free(rank);
+}
 
-    while (!race_over && !cleanup_requested) {
-        // Use timed barrier wait instead
-        struct timespec timeout;
-        clock_gettime(CLOCK_REALTIME, &timeout);
-        timeout.tv_sec += BARRIER_TIMEOUT_SEC;
+// Recebe uma RankList list e remove o rank do inicio da lista
+RankList remove_rank(RankList list) {
+    Rank rank = list->rank;
+    RankList next_list = list->next;
+    destroy_rank(rank);
+    free(list);
+    return next_list;
+}
+
+// Recebe uma RankList list e remove ranks menores que 'lap'
+RankList remove_ranks_by_lap(RankList list, int lap) {
+    if (list == NULL) return NULL;
+    if (list != NULL && list->rank != NULL && list->next != NULL && list->rank->lap < lap) {
+        list = remove_rank(list);
+    }
+    return list;
+}
+
+// Destroi uma lista de ranks
+void destroy_rank_list(RankList list) {
+    while (list != NULL && list->rank != NULL)
+        list = remove_rank(list);
+}
+
+// Imprime a lista de classificacao de uma volta especifica com cores e atualizacao do terminal
+void print_rank(RankList list, int lap) {
+    Rank rank = NULL;
+    for (RankList current = list; current != NULL; current = current->next)
+        if (current->rank->lap == lap) {
+            rank = current->rank;
+            break;
+        }
+    if (rank == NULL) {
+        printf("%sERRO! Volta nao encontrada na lista de classificacao. (volta %d)%s\n", RED, lap, RESET);
+        return;
+    }
+    
+    // Limpa a tela e move o cursor para a posicao inicial
+    // Usado para depuracao e para um programa mais interativo 
+    // (a tela limpa a cada volta, inves de printar todo o trace)
+
+    // clear_screen();
+    // move_cursor_to_home();
+    
+    // Borda superior
+    printf("%s%s┌", BOLD, YELLOW);
+    for (int i = 0; i < RANK_FRAME_WIDTH - 2; i++) printf("─");
+    printf("┐\n");
+    
+    // Titulo
+    char title[50];
+    sprintf(title, "== CLASSIFICACAO - VOLTA %d ==", lap);
+    int title_len = strlen(title);
+    int left_padding = (RANK_FRAME_WIDTH - title_len) / 2;
+    int right_padding = RANK_FRAME_WIDTH - title_len - left_padding - 2;
+    printf("│%*s%s%*s│\n", left_padding, "", title, right_padding, "");
+    
+    // Separador
+    printf("├");
+    for (int i = 0; i < RANK_FRAME_WIDTH - 2; i++) printf("─");
+    printf("┤\n");
+    
+    // Cabecalho da tabela
+    printf("│ %sCiclista    Pos     Tempo (ms)%s", BOLD, RESET);
+    printf("%*s│\n", RANK_FRAME_WIDTH - 33, "");
+    
+    // Separador
+    printf("├");
+    for (int i = 0; i < RANK_FRAME_WIDTH - 2; i++) printf("─");
+    printf("┤%s\n", RESET);
+    
+    for (int i = 0; i < rank->count; i++) {
+        char* color = RESET;
         
-        int barrier_result = pthread_barrier_wait(&step_barrier_start);
-        if (barrier_result != 0 && barrier_result != PTHREAD_BARRIER_SERIAL_THREAD) {
-            fprintf(stderr, "Warning: Cyclist %d barrier wait error (start)\n", id);
-            me->state = BROKEN;
-            me->needs_main_update = true;
+        // Atribui cores com base na posicao
+        if (i == 0) color = GREEN;       // 1 lugar - Verde
+        else if (i == 1) color = CYAN;   // 2 lugar - Ciano
+        else if (i == 2) color = BLUE;   // 3 lugar - Azul
+        else if (i == rank->count-1) color = RED; // Ultimo lugar - Vermelho
+        
+        printf("%s%s│ %s%-10d %-7d %-10d%s%*s│%s\n", 
+               BOLD, YELLOW,
+               color, 
+               rank->cyclist_ids[i], 
+               i+1, 
+               rank->times[i],
+               RESET,
+               RANK_FRAME_WIDTH - 32, // ajuste para corresponder a largura de todos os itens formatados
+               "",
+               RESET);
+    }
+    
+    // Borda inferior
+    printf("%s%s└", BOLD, YELLOW);
+    for (int i = 0; i < RANK_FRAME_WIDTH - 2; i++) printf("─");
+    printf("┘%s\n\n", RESET);
+}
+
+// Imprime a lista de classificacao final com cores
+void print_final_rank(Rank rank) {
+    // Limpa a tela e move o cursor para a posicao inicial
+    // Usado mais para debug e para um programa mais limpinho/interativo
+    
+    // clear_screen();
+    // move_cursor_to_home();
+    
+    // Borda superior
+    printf("%s%s┌", BOLD, YELLOW);
+    for (int i = 0; i < RANK_FRAME_WIDTH - 2; i++) printf("─");
+    printf("┐\n");
+    
+    // Titulo
+    char title[] = "== CLASSIFICACAO FINAL ==";
+    int title_len = strlen(title);
+    int left_padding = (RANK_FRAME_WIDTH - title_len) / 2;
+    int right_padding = RANK_FRAME_WIDTH - title_len - left_padding - 2;
+    printf("│%*s%s%*s│\n", left_padding, "", title, right_padding, "");
+    
+    // Separador
+    printf("├");
+    for (int i = 0; i < RANK_FRAME_WIDTH - 2; i++) printf("─");
+    printf("┤\n");
+    
+    // Cabecalho da tabela
+    printf("│ %sCiclista    Pos     Tempo%s", BOLD, RESET);
+    printf("%*s│\n", RANK_FRAME_WIDTH - 28, "");
+    
+    // Separador
+    printf("├");
+    for (int i = 0; i < RANK_FRAME_WIDTH - 2; i++) printf("─");
+    printf("┤%s\n", RESET);
+    
+    for (int i = rank->count - 1; i >= 0; i--) {
+        char* color = RESET;
+        int position = rank->count - i;
+        
+        // Atribui cores com base na posicao
+        if (position == 1) color = GREEN;       // 1º lugar - Verde
+        else if (position == 2) color = CYAN;   // 2º lugar - Ciano
+        else if (position == 3) color = BLUE;   // 3º lugar - Azul
+        else if (position == rank->count) color = RED; // Último lugar - Vermelho
+        
+        printf("%s%s│ %s%-10d %-7d %-10d%s%*s│%s\n", 
+               BOLD, YELLOW,
+               color, 
+               rank->cyclist_ids[i], 
+               position, 
+               rank->times[i],
+               RESET,
+               RANK_FRAME_WIDTH - 32, // ajuste para corresponder à largura de todos os itens formatados
+               "",
+               RESET);
+    }
+    
+    // Borda inferior
+    printf("%s%s└", BOLD, YELLOW);
+    for (int i = 0; i < RANK_FRAME_WIDTH - 2; i++) printf("─");
+    printf("┘%s\n\n", RESET);
+    
+    // Nao mostre o cursor aqui, pois podemos ter mais coisas para exibir (ciclistas quebrados, etc)
+}
+
+// Imprime a lista de classificacao de quebra de classificacao com cores
+void print_breakdown_rank(Rank rank) {
+    printf("%s%s┌", BOLD, MAGENTA);
+    for (int i = 0; i < RANK_FRAME_WIDTH - 2; i++) printf("─");
+    printf("┐\n");
+    
+    // Titulo
+    char title[] = "== CLASSIFICACAO DE BREAKDOWN ==";
+    int title_len = strlen(title);
+    int left_padding = (RANK_FRAME_WIDTH - title_len) / 2;
+    int right_padding = RANK_FRAME_WIDTH - title_len - left_padding - 2;
+    printf("│%*s%s%*s│\n", left_padding, "", title, right_padding, "");
+    
+    // Separador
+    printf("├");
+    for (int i = 0; i < RANK_FRAME_WIDTH - 2; i++) printf("─");
+    printf("┤\n");
+    
+    // Cabecalho da tabela
+    printf("│ %sCiclista    Volta que quebrou%s", BOLD, RESET);
+    printf("%*s│\n", RANK_FRAME_WIDTH - 32, "");
+    
+    // Separador
+    printf("├");
+    for (int i = 0; i < RANK_FRAME_WIDTH - 2; i++) printf("─");
+    printf("┤%s\n", RESET);
+    
+    for (int i = rank->count - 1; i >= 0; i--) {
+        printf("%s%s│ %s%-10d %-15d%s%*s│%s\n", 
+               BOLD, MAGENTA,
+               RED, 
+               rank->cyclist_ids[i], 
+               rank->times[i],
+               RESET,
+               RANK_FRAME_WIDTH - 29, // ajuste para a largura de itens formatados
+               "",
+               RESET);
+    }
+    
+    // Borda inferior
+    printf("%s%s└", BOLD, MAGENTA);
+    for (int i = 0; i < RANK_FRAME_WIDTH - 2; i++) printf("─");
+    printf("┘%s\n\n", RESET);
+}
+
+// Recebe uma RankList list e uma volta e retorna um ponteiro para o Rank
+// daquela volta.
+Rank find_rank(RankList list, int lap) {
+    Rank rank = NULL;
+    RankList current_list = list;
+    while (1) { // procura se ja existe um rank para esta volta
+        if (current_list->rank->lap == lap) {
+            rank = current_list->rank;
             break;
         }
+        if (current_list->next == NULL) break;
+        else current_list = current_list->next;
+    }
+    return rank;
+}
 
-        // Check if race ended while waiting or cleanup requested
-        if (race_over || cleanup_requested) {
-            // Wait for end barrier before exiting
-            pthread_barrier_wait(&step_barrier_end);
+// Recebe uma lista de ranks por volta e retorna o ultimo colocado no final
+// dessa volta. Se houver mais de um ultimo colocado, seleciona aleatoriamente um
+int get_last_place(RankList list, int lap) {
+    Rank rank = find_rank(list, lap);
+    if (rank == NULL) {
+        printf("ERRO! Volta nao encontrada na funcao get_last_place. (volta %d)\n", lap);
+        exit(1);
+    }
+    return rank->cyclist_ids[rank->count-1];
+}
+
+// Recebe uma lista de ranks por volta, uma volta e um numero de ciclista.
+// A funcao remove o ciclista do rank dessa volta e retorna um novo ultimo colocado
+int get_new_last_place(RankList list, int lap, int cyclist_id) {
+    Rank rank = find_rank(list, lap);
+    if (rank == NULL) {
+        printf("ERRO! Volta nao encontrada na funcao get_new_last_place. (volta %d)\n", lap);
+        exit(1);
+    }
+    
+    int index = -1;
+    for (int i = 0; i < rank->count; i++) {
+        if (rank->cyclist_ids[i] == cyclist_id) {
+            index = i;
             break;
         }
+    }
+    
+    if (index == -1) {
+        printf("ERRO! Ciclista %d nao encontrado no rank da volta %d\n", cyclist_id, lap);
+        exit(1);
+    }
+    
+    // Desloca os ciclistas restantes
+    for (int i = index; i < rank->count - 1; i++) {
+        rank->cyclist_ids[i] = rank->cyclist_ids[i+1];
+        rank->times[i] = rank->times[i+1];
+    }
+    
+    rank->count--;
+    return rank->cyclist_ids[rank->count-1];
+}
 
-        // --- Simulation Logic for one time step (only if RUNNING) ---
-        if (me->state == RUNNING) {
-            me->time_to_move_ms -= TIME_STEP_MS;
+// Recebe um rank e o numero do ciclista vencedor. A funcao ajusta as posicoes
+// da classificacao final para que o vencedor seja o primeiro lugar, ja que sua thread
+// foi a primeira a ser destruida na ultima volta.
+void adjust_first_place(Rank rank, int winner) {
+    if (rank == NULL) {
+        printf("ERRO! Rank nulo em adjust_first_place.\n");
+        exit(1);
+    }
+    
+    // Encontra o vencedor no rank
+    int index = -1;
+    for (int i = 0; i < rank->count; i++) {
+        if (rank->cyclist_ids[i] == winner) {
+            index = i;
+            break;
+        }
+    }
+    
+    if (index == -1) {
+        // Se o vencedor nao esta no rank, adiciona-o
+        insert_cyclist_in_rank(rank, winner, current_time);
+        index = rank->count - 1;
+        printf("Vencedor %d adicionado à classificacao final\n", winner);
+    }
+    
+    // Troca o vencedor com o primeiro lugar (ultima posicao no array)
+    int temp_id = rank->cyclist_ids[rank->count-1];
+    int temp_time = rank->times[rank->count-1];
+    
+    rank->cyclist_ids[rank->count-1] = rank->cyclist_ids[index];
+    rank->times[rank->count-1] = rank->times[index];
+    
+    rank->cyclist_ids[index] = temp_id;
+    rank->times[index] = temp_time;
+}
 
-            if (me->time_to_move_ms <= 0) {
-                // Time to attempt moving 1 meter
-                int current_m = me->current_meter;
-                int current_l = me->current_lane;
-                int target_m = (current_m - 1 + d) % d;  // Move backward by 1 meter, with wrap-around
-                int target_l = current_l; // Assume same lane initially
+// Recebe uma lista de ranks por volta e retorna o primeiro lugar dessa volta.
+int get_first_place(RankList list, int lap) {
+    Rank rank = find_rank(list, lap);
+    if (rank == NULL) {
+        printf("ERRO! Volta nao encontrada na funcao get_first_place. (volta %d)\n", lap);
+        exit(1);
+    }
+    return rank->cyclist_ids[0];
+}
 
-                bool can_move = false;
-                me->effective_speed = me->current_speed; // Assume target speed initially
+/*===============================================*/
+/*=============   CYCLIST THREADS   =============*/
+/*===============================================*/
 
-                // --- Acquire Locks (Naive or Efficient) ---
-                if (concurrency_mode == 'i') {
-                    pthread_mutex_lock(&global_lock);
-                } else { // Efficient mode
-                    if (d < SMALL_TRACK_THRESHOLD) {
-                        pthread_mutex_lock(&track_lock);
+void *cyclist_thread(void *arg)
+{
+    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
+    struct timespec ts;
+    ts.tv_sec = 0;
+    ts.tv_nsec = CYCLIST_THREAD_NANO_SLEEP;
+
+    cyclist_t *cyclist = (cyclist_t *) arg;
+
+    // primeira volta sempre a 30km/h (1m a cada 120ms)
+    cyclist->speed = SPEED_30KMH;
+    cyclist->time_delta = 2; // base_time_delta - cyclist->speed;
+    
+    while (true) {
+        if (true) { // Tarefa da thread
+            cyclist->round_completed = false;
+            cyclist->time_delta = cyclist->time_delta - 1;  // Sempre decrementa em 1
+            
+            if (cyclist->time_delta <= 0) { // Velocidade permite que o ciclista avance a cada iteracao
+                bool advanced = false;
+                int attempt_count = 0;
+                
+                while (attempt_count++ < 2) { // Tenta avancar algumas vezes
+                    // Abordagem de acesso a pista
+                    if (approach == 'i') {
+                        // Abordagem ingena: um unico mutex para toda a pista
+                        pthread_mutex_lock(&global_mutex);
+                        
+                        int next_pos = (cyclist->pos_x + 1) % track_size;
+                        if (track[cyclist->pos_y][next_pos] == NULL) {
+                            // Posicao a frente esta livre, move o ciclista
+                            track[cyclist->pos_y][next_pos] = cyclist;
+                            track[cyclist->pos_y][cyclist->pos_x] = NULL;
+                            cyclist->pos_x = next_pos;
+                            advanced = true;
+                        }
+                        
+                        pthread_mutex_unlock(&global_mutex);
+                        if (advanced) break;
                     } else {
-                        // For larger tracks, use a more sophisticated locking strategy
-                        int lock1_idx = current_m;
-                        int lock2_idx = target_m;
-                        
-                        // Always lock in ascending order to prevent deadlocks
-                        if (lock1_idx > lock2_idx) {
-                            int temp = lock1_idx;
-                            lock1_idx = lock2_idx;
-                            lock2_idx = temp;
-                        }
-                        
-                        // Use trylock with timeout to prevent deadlocks
-                        struct timespec timeout;
-                        clock_gettime(CLOCK_REALTIME, &timeout);
-                        timeout.tv_sec += 1; // 1 second timeout
-                        
-                        if (pthread_mutex_timedlock(&track_mutexes[lock1_idx], &timeout) != 0) {
-                            // Failed to acquire first lock, skip this move
-                            me->time_to_move_ms = METER_TIME_SLOW_MS;
-                            continue;
-                        }
-                        
-                        if (lock1_idx != lock2_idx) {
-                            if (pthread_mutex_timedlock(&track_mutexes[lock2_idx], &timeout) != 0) {
-                                // Failed to acquire second lock, release first and skip move
-                                pthread_mutex_unlock(&track_mutexes[lock1_idx]);
-                                me->time_to_move_ms = METER_TIME_SLOW_MS;
-                                continue;
+                        // Abordagem eficiente: mutex por posicao na pista
+                        if (pthread_mutex_trylock(&mutex[cyclist->pos_y][(cyclist->pos_x + 1) % track_size]) == 0) {
+                            if (track[cyclist->pos_y][(cyclist->pos_x + 1) % track_size] == NULL) {
+                                // A posicao a frente esta livre
+                                move_forward(cyclist);
+                                pthread_mutex_unlock(&mutex[cyclist->pos_y][cyclist->pos_x]);
+                                advanced = true;
+                                break;
+                            } else {
+                                pthread_mutex_unlock(&mutex[cyclist->pos_y][(cyclist->pos_x + 1) % track_size]);
                             }
-                        }
-                    }
-                }
-
-                // --- Check for Blocking and Overtaking ---
-                bool target_occupied = false;
-                int blocking_cyclist_id = -1;
-                bool blocked_by_slow_cyclist = false;
-
-                // Check target lane first
-                if (pista[target_m][target_l] != -1) {
-                    target_occupied = true;
-                    blocking_cyclist_id = pista[target_m][target_l];
-                    // Check if blocker is going at 30km/h
-                    if (cyclists[blocking_cyclist_id].current_speed == BASE_SPEED) {
-                        blocked_by_slow_cyclist = true;
-                    }
-                }
-
-                if (!target_occupied) {
-                    can_move = true;
-                } else {
-                    // Target lane occupied, try to overtake using outer lanes
-                    for (int check_lane = target_l + 1; check_lane < MAX_LANES; ++check_lane) {
-                        if (pista[target_m][check_lane] == -1) {
-                            // Found a free outer lane
-                            target_l = check_lane; // Update target lane
-                            can_move = true;
-                            break;
-                        }
-                    }
-
-                    // If still can't move, we are blocked
-                    if (!can_move) {
-                        // If blocked by a slow cyclist, must slow down
-                        if (blocked_by_slow_cyclist) {
-                            me->effective_speed = BASE_SPEED;
-                        }
-                        // If blocked by a fast cyclist, maintain current speed
-                        // (no need to change effective_speed)
-                    }
-                }
-
-
-                // --- Update Position if Moved ---
-                if (can_move) {
-                    pista[current_m][current_l] = -1; // Leave old spot
-                    pista[target_m][target_l] = id;   // Enter new spot
-                    me->current_meter = target_m;
-                    me->current_lane = target_l;
-                    me->needs_main_update = true; // Signal main thread
-
-                    // --- Lap Completion Logic ---
-                    if (target_m == 0) { // Crossed the finish line
-                        me->laps_completed++;
-                        me->last_crossing_time = simulation_time_ms; // Record time
-
-                        // Decide speed for NEXT lap (after completing this one)
-                        double chance_60;
-                        if (me->current_speed == BASE_SPEED) {
-                            chance_60 = 0.75;
-                        } else { // Was 60km/h
-                            chance_60 = 0.45;
-                        }
-                        if (get_random_double(my_seed) < chance_60) {
-                            me->current_speed = FAST_SPEED;
                         } else {
-                            me->current_speed = BASE_SPEED;
-                        }
-
-                        // --- Breaking Check ---
-                        if (me->laps_completed > 0 && (me->laps_completed % BREAK_CHECK_LAPS == 0)) {
-                            if (get_random_double(my_seed) < BREAK_PROBABILITY) {
-                                me->state = BROKEN;
-                                me->broken_lap = me->laps_completed;
-                                me->needs_main_update = true;
-                                
-                                // Remove self from track (already have lock)
-                                pista[target_m][target_l] = -1;
-                                
-                                // Don't exit thread, just signal main thread and continue as ghost
-                                pthread_mutex_lock(&print_mutex);
-                                printf(">>> Cyclist %d BROKE on lap %d at time %llu ms <<<\n",
-                                       id, me->laps_completed, simulation_time_ms);
-                                pthread_mutex_unlock(&print_mutex);
-                            }
-                        }
-                    } // End lap completion
-
-                    // Reset timer for next meter based on CHOSEN speed for next lap
-                     // Add back any "negative" time from the previous step
-                    long long remaining_time = me->time_to_move_ms; // This is <= 0
-                    me->time_to_move_ms = (me->current_speed == FAST_SPEED) ? METER_TIME_FAST_MS : METER_TIME_SLOW_MS;
-                    me->time_to_move_ms += remaining_time; // Adjust for overshoot
-
-
-                } else { // Could not move (blocked)
-                     // Reset timer based on EFFECTIVE speed (forced 30km/h)
-                     long long remaining_time = me->time_to_move_ms; // This is <= 0
-                     me->time_to_move_ms = METER_TIME_SLOW_MS; // Blocked, so takes 120ms for this meter
-                     me->time_to_move_ms += remaining_time;
-                }
-
-
-                // --- Release Locks ---
-                if (concurrency_mode == 'i') {
-                    pthread_mutex_unlock(&global_lock);
-                } else { // Efficient mode
-                    if (d < SMALL_TRACK_THRESHOLD) {
-                        pthread_mutex_unlock(&track_lock);
-                    } else {
-                        int lock1_idx = current_m;
-                        int lock2_idx = target_m;
-                        if (lock1_idx > lock2_idx) {
-                            int temp = lock1_idx;
-                            lock1_idx = lock2_idx;
-                            lock2_idx = temp;
-                        }
-                        pthread_mutex_unlock(&track_mutexes[lock2_idx]);
-                        if (lock1_idx != lock2_idx) {
-                            pthread_mutex_unlock(&track_mutexes[lock1_idx]);
+                            nanosleep(&ts, NULL); // Espera um pouco para tentar novamente
                         }
                     }
                 }
-
-            } // End if (time_to_move_ms <= 0)
-        } // End if (state == RUNNING)
-
-        // --- Wait for end of time step (ALL threads, regardless of state) ---
-        barrier_result = pthread_barrier_wait(&step_barrier_end);
-        if (barrier_result != 0 && barrier_result != PTHREAD_BARRIER_SERIAL_THREAD) {
-            fprintf(stderr, "Warning: Cyclist %d barrier wait error (end)\n", id);
-            if (me->state == RUNNING) {
-                me->state = BROKEN;
-                me->needs_main_update = true;
+                
+                if (!advanced) {
+                    // Se nao conseguiu avancar diretamente, tenta ultrapassar
+                    // usando faixas externas
+                    move_to_outer_lane(cyclist);
+                }
+                
+                // Verifica se cruzou a linha de chegada
+                if (cyclist->pos_x == 0) {
+                    handle_finish_line(cyclist);
+                }
+                
+                // Reinicia o tempo para o proximo movimento com base na velocidade atual
+                if (cyclist->speed == SPEED_30KMH) { // 30km/h: 1m a cada 120ms
+                    cyclist->time_delta = 2;
+                } else if (cyclist->speed == SPEED_60KMH) { // 60km/h: 1m a cada 60ms
+                    cyclist->time_delta = 1;
+                }
             }
-            break;
+            
+            cyclist->round_completed = true;
+            nanosleep(&ts, NULL);
+
+            // tenta voltar para a faixa interna
+            // fazemos isso para que o ciclista nao fique preso na faixa externa apos algumas ultrapassagens
+            move_to_inner_lane(cyclist);
         }
-    }
 
-    // If thread is exiting due to an error, make sure we update the state
-    if (me->state == RUNNING) {
-        me->needs_main_update = true;
+        // barreira de sincronizacao
+        cyclist->arrived_flag = 1;
+        while (!cyclist->continue_flag) usleep(1);
+        cyclist->continue_flag = 0;
     }
-
+    
     return NULL;
 }
 
-// --- Main Simulation Loop ---
-
-void run_simulation() {
-    // Create cyclist threads
-    int **thread_args = malloc(k * sizeof(int*));
-    if (!thread_args) { perror("Failed to allocate thread args"); exit(EXIT_FAILURE); }
+// Define a velocidade do ciclista
+void set_cyclist_speed(cyclist_t *cyclist) {
+    // primeira volta sempre a 30km/h
+    if (cyclist->laps < 1) {
+        cyclist->speed = SPEED_30KMH;
+        return;
+    }
     
-    int barrier_result; // Variable to store barrier wait results
+    double prob = random_double(0, 1);
     
-    for (int i = 0; i < k; ++i) {
-        // Allocate memory for each thread's argument
-        thread_args[i] = malloc(sizeof(int));
-        if (!thread_args[i]) { 
-            perror("Failed to allocate thread arg"); 
-            // Clean up previous allocations
-            for (int j = 0; j < i; j++) {
-                free(thread_args[j]);
-            }
-            free(thread_args);
-            exit(EXIT_FAILURE); 
+    if (cyclist->speed == SPEED_30KMH) {
+        // se estava a 30km/h, 75% de chance de ir para 60km/h
+        if (prob < PROB_30KMH_TO_60KMH) {
+            cyclist->speed = SPEED_60KMH; // 60km/h
+        } else {
+            cyclist->speed = SPEED_30KMH; // 30km/h
         }
-        
-        // Set the thread argument value
-        *thread_args[i] = i;
-        
-        // Create the thread with its own argument
-        if (pthread_create(&cyclists[i].thread_id, NULL, ciclista_func, thread_args[i]) != 0) {
-            perror("Failed to create cyclist thread");
-            // Clean up allocations
-            for (int j = 0; j <= i; j++) {
-                free(thread_args[j]);
-            }
-            free(thread_args);
-            exit(EXIT_FAILURE);
+    } else { // cyclist->speed == SPEED_60KMH
+        // se estava a 60km/h, 45% de chance de continuar a 60km/h
+        if (prob < PROB_60KMH_STAYS_60KMH) {
+            cyclist->speed = SPEED_60KMH; // 60km/h
+        } else {
+            cyclist->speed = SPEED_30KMH; // 30km/h
         }
     }
+    
+    // verifica ciclistas afrente e ajusta a velocidade se necessario
+    check_cyclists_ahead(cyclist);
+}
 
-    int last_reported_lap = -1; // Track when lap reports were printed
-    int active_cyclists_local = k; // Local count for loop condition
-
-    while (active_cyclists_local > 1 && !race_over && !cleanup_requested) {
-        // --- Start Barrier ---
-        barrier_result = pthread_barrier_wait(&step_barrier_start);
-        if (barrier_result != 0 && barrier_result != PTHREAD_BARRIER_SERIAL_THREAD) {
-            fprintf(stderr, "Warning: Main thread barrier wait error (start)\n");
-            race_over = true;
-            break;
-        }
-
-        // --- Advance Time ---
-        simulation_time_ms += TIME_STEP_MS;
-
-        // --- End Barrier (Wait for cyclists to finish their step) ---
-        barrier_result = pthread_barrier_wait(&step_barrier_end);
-        if (barrier_result != 0 && barrier_result != PTHREAD_BARRIER_SERIAL_THREAD) {
-            fprintf(stderr, "Warning: Main thread barrier wait error (end)\n");
-            race_over = true;
-            break;
-        }
-
-        // --- Main Thread Processing (Post-Step) ---
-        if (race_over) break; // Exit if error occurred
-
-        int max_lap_this_step = 0;
-        bool lap_completed_this_step = false;
-        active_cyclists_local = 0; // Recount active cyclists
-
-        // Lock results mutex for updating final results and counts
-        pthread_mutex_lock(&results_mutex);
-
-        for (int i = 0; i < k; ++i) {
-            if (cyclists[i].needs_main_update) {
-                 // Check if cyclist broke or was eliminated/finished externally
-                if (cyclists[i].state != RUNNING && cyclists[i].state != FINISHED) { // FINISHED state is handled below
-                    // Record result if not already done
-                    bool found = false;
-                    for(int j=0; j<num_finished_cyclists; ++j) {
-                        if (final_results[j].id == i) {
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found) {
-                         record_final_result(i, cyclists[i].state, -1, cyclists[i].last_crossing_time, cyclists[i].laps_completed, cyclists[i].broken_lap);
+// verifica se ha ciclistas afrente impedindo uma velocidade maior
+void check_cyclists_ahead(cyclist_t *cyclist) {
+    // se o ciclista esta a 60km/h, verifica se ha alguem a 30km/h afrente
+    if (cyclist->speed == SPEED_60KMH) {
+        int next_pos = (cyclist->pos_x + 1) % track_size;
+        
+        if (approach == 'i') {
+            pthread_mutex_lock(&global_mutex);
+            
+            // verifica se ha um ciclista na mesma fila e posicao afrente
+            if (track[cyclist->pos_y][next_pos] != NULL) {
+                cyclist_t *ahead = track[cyclist->pos_y][next_pos];
+                if (ahead->speed == SPEED_30KMH) {
+                    // ha um ciclista a 30km/h afrente, ajusta velocidade
+                    cyclist->speed = SPEED_30KMH;
+                }
+            }
+            
+            pthread_mutex_unlock(&global_mutex);
+        } else {
+            // abordagem eficiente
+            if (pthread_mutex_trylock(&mutex[cyclist->pos_y][next_pos]) == 0) {
+                if (track[cyclist->pos_y][next_pos] != NULL) {
+                    cyclist_t *ahead = track[cyclist->pos_y][next_pos];
+                    if (ahead->speed == SPEED_30KMH) {
+                        // ha um ciclista a 30km/h afrente, ajusta velocidade
+                        cyclist->speed = SPEED_30KMH;
                     }
                 }
-                cyclists[i].needs_main_update = false; // Reset flag
-            }
-
-             // Update leader lap count and check if anyone is still running
-            if (cyclists[i].state == RUNNING) {
-                active_cyclists_local++;
-                if (cyclists[i].laps_completed > max_lap_this_step) {
-                    max_lap_this_step = cyclists[i].laps_completed;
-                }
-                 // Check if the leader completed a new lap THIS step
-                if (cyclists[i].laps_completed > current_lap_leader && cyclists[i].current_meter == 0 && cyclists[i].last_crossing_time == simulation_time_ms) {
-                     lap_completed_this_step = true; // A lap finished now
-                }
+                pthread_mutex_unlock(&mutex[cyclist->pos_y][next_pos]);
             }
         }
-         // Unlock results mutex after processing updates
-        pthread_mutex_unlock(&results_mutex);
-
-
-        // Update global leader lap if necessary
-        if (max_lap_this_step > current_lap_leader) {
-            current_lap_leader = max_lap_this_step;
-        }
-
-        // --- Elimination Logic ---
-        // Check only if a lap was completed this step AND it's an elimination lap
-        if (lap_completed_this_step && current_lap_leader > 0 && (current_lap_leader % 2 == 0)) {
-             // Check if this lap hasn't been processed for elimination yet
-             // (Requires tracking which laps had eliminations)
-             // SIMPLIFICATION: Assume we process elimination once when leader hits lap X*2
-             if (current_lap_leader > last_reported_lap) { // Only eliminate once per even lap
-                 handle_eliminations(current_lap_leader);
-                 // Recalculate active cyclists after potential elimination
-                 active_cyclists_local = 0;
-                 
-                 // Use a try-finally pattern to ensure mutex is released
-                 pthread_mutex_lock(&results_mutex);
-                 for(int i=0; i<k; ++i) {
-                     if (cyclists[i].state == RUNNING) active_cyclists_local++;
-                 }
-                 pthread_mutex_unlock(&results_mutex);
-             }
-        }
-
-
-        // --- Reporting ---
-        if (debug_mode) {
-            print_track_state();  // Only print track state to stderr in debug mode
-        } else if (current_lap_leader > last_reported_lap && lap_completed_this_step) {
-            // Print lap report only in non-debug mode
-            print_lap_report();
-            last_reported_lap = current_lap_leader;
-        }
-
-        // --- Check Race End Condition ---
-        if (active_cyclists_local <= 1) {
-            race_over = true;
-            pthread_mutex_lock(&results_mutex); // Lock for final update
-            // Find the winner (the single remaining RUNNING cyclist)
-            for (int i = 0; i < k; i++) {
-                if (cyclists[i].state == RUNNING) {
-                    cyclists[i].state = FINISHED; // Mark as winner
-                    record_final_result(i, FINISHED, 1, cyclists[i].last_crossing_time, cyclists[i].laps_completed, -1);
-                    break; // Should only be one
-                }
-            }
-             pthread_mutex_unlock(&results_mutex);
-        }
-
-        // Small sleep to prevent busy-waiting if simulation is very fast
-        // usleep(1000); // 1ms - Adjust as needed, or remove if barriers handle timing well
-
-    } // End while loop
-
-    // --- Race Finished ---
-    race_over = true;
-    cleanup_requested = true;
-
-    // Force one more barrier cycle to let threads exit cleanly
-    barrier_result = pthread_barrier_wait(&step_barrier_start);
-    barrier_result = pthread_barrier_wait(&step_barrier_end);
-
-    // Join any remaining threads with timeout
-    struct timespec timeout;
-    clock_gettime(CLOCK_REALTIME, &timeout);
-    timeout.tv_sec += 2; // 2 second timeout for thread joining
-
-    for (int i = 0; i < k; ++i) {
-        if (pthread_timedjoin_np(cyclists[i].thread_id, NULL, &timeout) != 0) {
-            fprintf(stderr, "Warning: Failed to join cyclist thread %d\n", i);
-            pthread_cancel(cyclists[i].thread_id); // Force thread termination if it won't join
-        }
-        free(thread_args[i]); // Free the thread argument
     }
-    free(thread_args); // Free the array of arguments
-
-    // Always print final report to stdout, regardless of debug mode
-    print_final_report();
 }
 
-// --- Elimination Handling ---
-void handle_eliminations(int lap_num) {
-    pthread_mutex_lock(&print_mutex);
-    printf("\n--- Handling Eliminations for Lap %d ---\n", lap_num);
-    pthread_mutex_unlock(&print_mutex);
-
-    LapRankEntry *lap_ranks = malloc(k * sizeof(LapRankEntry));
-    if (!lap_ranks) { perror("Failed to allocate lap_ranks"); return; }
-
-    int runners_in_lap = 0;
-    unsigned long long max_time_in_lap = 0;
-
-    pthread_mutex_lock(&results_mutex);
-    for (int i = 0; i < k; ++i) {
-        // Consider only cyclists who completed the target lap and are still running
-        if (cyclists[i].state == RUNNING && cyclists[i].laps_completed >= lap_num) {
-            lap_ranks[runners_in_lap].id = i;
-            lap_ranks[runners_in_lap].crossing_time = cyclists[i].last_crossing_time;
-
-            if (cyclists[i].last_crossing_time > max_time_in_lap) {
-                max_time_in_lap = cyclists[i].last_crossing_time;
-            }
-            runners_in_lap++;
-        }
-    }
-
-    if (runners_in_lap <= 1) {
-        pthread_mutex_unlock(&results_mutex);
-        free(lap_ranks);
-        pthread_mutex_lock(&print_mutex);
-        printf("   Not enough runners (%d) to eliminate.\n", runners_in_lap);
-        pthread_mutex_unlock(&print_mutex);
-        return;
-    }
-
-    // Find the cyclist(s) with the maximum crossing time (last place)
-    int *last_place_ids = malloc(runners_in_lap * sizeof(int));
-    if (!last_place_ids) {
-        perror("Failed to allocate last_place_ids");
-        pthread_mutex_unlock(&results_mutex);
-        free(lap_ranks);
-        return;
-    }
-    int num_last_place = 0;
-
-    for (int i = 0; i < runners_in_lap; ++i) {
-        if (lap_ranks[i].crossing_time == max_time_in_lap) {
-            last_place_ids[num_last_place++] = lap_ranks[i].id;
-        }
-    }
-
-    // Eliminate one cyclist
-    int eliminated_id = -1;
-    if (num_last_place == 1) {
-        eliminated_id = last_place_ids[0];
-    } else if (num_last_place > 1) {
-        // Tie-breaker: randomly choose one among the last place finishers
-        eliminated_id = last_place_ids[rand() % num_last_place];
-        pthread_mutex_lock(&print_mutex);
-        printf("   Tie break among %d cyclists for last place. Randomly choosing %d.\n", 
-               num_last_place, eliminated_id);
-        pthread_mutex_unlock(&print_mutex);
-    }
-
-    if (eliminated_id != -1) {
-        // Ensure the cyclist is still running before eliminating
-        if (cyclists[eliminated_id].state == RUNNING) {
-            // Remove this cyclist from the track (using appropriate lock)
-            int cyclist_meter = cyclists[eliminated_id].current_meter;
-            int cyclist_lane = cyclists[eliminated_id].current_lane;
-            
-            // Acquire appropriate lock before modifying the track
-            if (concurrency_mode == 'i') {
-                pthread_mutex_lock(&global_lock);
-            } else if (d < SMALL_TRACK_THRESHOLD) {
-                pthread_mutex_lock(&track_lock);
-            } else {
-                pthread_mutex_lock(&track_mutexes[cyclist_meter]);
-            }
-            
-            // Remove cyclist from track
-            if (pista[cyclist_meter][cyclist_lane] == eliminated_id) {
-                pista[cyclist_meter][cyclist_lane] = -1;
-            }
-            
-            // Release lock
-            if (concurrency_mode == 'i') {
-                pthread_mutex_unlock(&global_lock);
-            } else if (d < SMALL_TRACK_THRESHOLD) {
-                pthread_mutex_unlock(&track_lock);
-            } else {
-                pthread_mutex_unlock(&track_mutexes[cyclist_meter]);
-            }
-            
-            // Update cyclist state
-            cyclists[eliminated_id].state = ELIMINATED;
-            cyclists[eliminated_id].needs_main_update = true;
-            record_final_result(eliminated_id, ELIMINATED, -1, 
-                              cyclists[eliminated_id].last_crossing_time, lap_num, -1);
-
-            pthread_mutex_lock(&print_mutex);
-            printf(">>> Cyclist %d ELIMINATED after lap %d at time %llu ms <<<\n",
-                   eliminated_id, lap_num, cyclists[eliminated_id].last_crossing_time);
-            pthread_mutex_unlock(&print_mutex);
-        }
-    }
-
-    pthread_mutex_unlock(&results_mutex);
-    free(last_place_ids);
-    free(lap_ranks);
+// move para frente
+void move_forward(cyclist_t *cyclist) {
+    int next_pos = (cyclist->pos_x + 1) % track_size;
+    track[cyclist->pos_y][next_pos] = cyclist;
+    track[cyclist->pos_y][cyclist->pos_x] = NULL;
+    cyclist->pos_x = next_pos;
 }
 
-void print_track_state() {
-    pthread_mutex_lock(&print_mutex);
-    fprintf(stderr, "\n--- Time: %llu ms ---\n", simulation_time_ms);
-    // Print track (adjust formatting for readability)
-    // Example: Print chunks of the track or transpose lanes/meters
-    int print_width = 100; // How many meters to print per line
-    for (int start_meter = 0; start_meter < d; start_meter += print_width) {
-        fprintf(stderr, "Meters %d to %d:\n", start_meter, (start_meter + print_width - 1 < d) ? start_meter + print_width - 1 : d-1);
-        for (int lane = 0; lane < MAX_LANES; ++lane) {
-            fprintf(stderr, "Lane %d: ", lane);
-            for (int meter = start_meter; meter < d && meter < start_meter + print_width; ++meter) {
-                int cyclist_id = pista[meter][lane];
-                 // Print cyclist ID right-aligned in a 3-char space, or ' . ' if empty
-                 if (cyclist_id != -1) {
-                     fprintf(stderr, "%3d ", cyclist_id);
-                 } else {
-                     fprintf(stderr, " . ");
-                 }
+// procura por uma faixa externa para avancar
+void move_to_outer_lane(cyclist_t *cyclist) {
+    int i, j;
+    bool found_outer_lane = false;
+    
+    if (approach == 'e') {
+        // abordagem eficiente: usa locks especificos
+        for (i = cyclist->pos_y + 1; i < MAX_LANES; i++) { // procura por uma faixa externa livre
+            pthread_mutex_lock(&mutex[i][cyclist->pos_x]);
+            if (track[i][cyclist->pos_x] == NULL) {
+                found_outer_lane = true;
+                break;
             }
-            fprintf(stderr, "\n");
+            pthread_mutex_unlock(&mutex[i][cyclist->pos_x]);
         }
-         fprintf(stderr,"\n");
-    }
-    pthread_mutex_unlock(&print_mutex);
-}
-
-void print_lap_report() {
-    pthread_mutex_lock(&print_mutex);
-    pthread_mutex_lock(&results_mutex);
-
-    printf("\n--- Lap %d Completed (Leader) at %llu ms ---\n", current_lap_leader, simulation_time_ms);
-
-    // Create temporary structure for ranking cyclists in this lap
-    LapRankEntry *lap_ranks = malloc(k * sizeof(LapRankEntry));
-    if (!lap_ranks) {
-        perror("Failed malloc lap_ranks");
-        pthread_mutex_unlock(&results_mutex);
-        pthread_mutex_unlock(&print_mutex);
-        return;
-    }
-
-    int ranked_count = 0;
-    for (int i = 0; i < k; ++i) {
-        if (cyclists[i].state == RUNNING && cyclists[i].laps_completed >= current_lap_leader) {
-            lap_ranks[ranked_count].id = i;
-            lap_ranks[ranked_count].crossing_time = cyclists[i].last_crossing_time;
-            ranked_count++;
+        
+        if (found_outer_lane) {
+            track[i][cyclist->pos_x] = cyclist;
+            track[cyclist->pos_y][cyclist->pos_x] = NULL;
+            cyclist->pos_y = i;
+            pthread_mutex_unlock(&mutex[i][cyclist->pos_x]);
         }
-    }
-
-    // Sort by crossing time
-    qsort(lap_ranks, ranked_count, sizeof(LapRankEntry), compare_lap_ranks);
-
-    printf("Rank | ID | Lap Time (ms) | Position (m, l) | Speed (km/h)\n");
-    printf("--------------------------------------------------------------\n");
-    for (int i = 0; i < ranked_count; ++i) {
-        int id = lap_ranks[i].id;
-        printf("%4d | %2d | %13llu | (%4d, %d) | %11d\n",
-               i + 1, id, lap_ranks[i].crossing_time,
-               cyclists[id].current_meter, cyclists[id].current_lane,
-               cyclists[id].current_speed);
-    }
-
-    // List non-running cyclists
-    printf("Others:\n");
-    for(int i=0; i<k; ++i) {
-        bool listed = false;
-        for(int j=0; j<ranked_count; ++j) if (lap_ranks[j].id == i) listed = true;
-
-        if (!listed) {
-            const char* status_str;
-            switch(cyclists[i].state) {
-                case RUNNING: status_str = "RUNNING"; break;
-                case BROKEN: status_str = "BROKEN"; break;
-                case ELIMINATED: status_str = "ELIMINATED"; break;
-                case FINISHED: status_str = "FINISHED"; break;
-                default: status_str = "UNKNOWN"; break;
-            }
-            printf("     | %2d | %-10s | (%4d, %d) | %11s\n",
-                   i, status_str, cyclists[i].current_meter, 
-                   cyclists[i].current_lane, "-");
-        }
-    }
-
-    free(lap_ranks);
-    pthread_mutex_unlock(&results_mutex);
-    pthread_mutex_unlock(&print_mutex);
-}
-
-// Records the final result for a cyclist
-void record_final_result(int cyclist_id, CyclistState state, int rank, unsigned long long time, int laps, int broken_lap) {
-    // Use a single mutex for the entire results structure
-    pthread_mutex_lock(&results_mutex);
-
-    // Check for duplicate entries atomically
-    bool found = false;
-    for(int i=0; i<num_finished_cyclists; ++i) {
-        if (final_results[i].id == cyclist_id) {
-            found = true;
-            break;
-        }
-    }
-
-    if (!found && num_finished_cyclists < k) {
-        final_results[num_finished_cyclists].id = cyclist_id;
-        final_results[num_finished_cyclists].final_state = state;
-        final_results[num_finished_cyclists].rank = rank;
-        final_results[num_finished_cyclists].finish_time_ms = time;
-        final_results[num_finished_cyclists].completed_laps = laps;
-        final_results[num_finished_cyclists].broken_lap = broken_lap;
-        num_finished_cyclists++;
-    } else if (!found) {
-        fprintf(stderr, "Warning: Tried to record more results than cyclists (%d).\n", cyclist_id);
-    }
-
-    pthread_mutex_unlock(&results_mutex);
-}
-
-
-void print_final_report() {
-    pthread_mutex_lock(&print_mutex);
-    pthread_mutex_lock(&results_mutex);
-
-    printf("\n=============== RACE FINISHED ===============\n");
-    printf("Total Simulation Time: %llu ms\n", simulation_time_ms);
-
-    pthread_mutex_lock(&results_mutex); // Lock for final calculation/sorting
-
-    // Ensure all cyclists have a result recorded
-    if (num_finished_cyclists != k) {
-        printf("Warning: Mismatch in final results count (%d) vs k (%d)\n", num_finished_cyclists, k);
-         // Attempt to record any missing runners as DNF based on their last state
-        for(int i=0; i<k; ++i) {
-            bool found = false;
-            for(int j=0; j<num_finished_cyclists; ++j) {
-                if (final_results[j].id == i) {
-                    found = true;
+        
+        if (found_outer_lane) {
+            for (j = 0; j < MAX_LANES; j++) { // procura por espaco na fila da frente
+                pthread_mutex_lock(&mutex[j][(cyclist->pos_x+1)%track_size]);
+                if (track[j][(cyclist->pos_x+1)%track_size] == NULL) {
+                    track[j][(cyclist->pos_x+1)%track_size] = cyclist;
+                    track[cyclist->pos_y][cyclist->pos_x] = NULL;
+                    cyclist->pos_x = (cyclist->pos_x+1)%track_size;
+                    cyclist->pos_y = j;
+                    pthread_mutex_unlock(&mutex[j][cyclist->pos_x]);
                     break;
                 }
-            }
-            if (!found) {
-                 // Record based on last known state
-                 record_final_result(i, cyclists[i].state, -1, cyclists[i].last_crossing_time, cyclists[i].laps_completed, cyclists[i].broken_lap);
+                pthread_mutex_unlock(&mutex[j][(cyclist->pos_x+1)%track_size]);
             }
         }
-    }
-
-    // Assign ranks to finished cyclists based on time
-    // Create temporary array to sort only FINISHED cyclists by time
-    ResultInfo *finished_sorted = malloc(num_finished_cyclists * sizeof(ResultInfo));
-    int finished_count = 0;
-    if (finished_sorted) {
-        for(int i=0; i<num_finished_cyclists; ++i) {
-            if (final_results[i].final_state == FINISHED) {
-                finished_sorted[finished_count++] = final_results[i];
-            }
-        }
-        // Sort finished cyclists by time (ascending)
-        qsort(finished_sorted, finished_count, sizeof(ResultInfo), compare_final_ranks); // Use compare_final_ranks, it handles FINISHED state
-
-        // Assign ranks based on sorted order
-        for(int i=0; i<finished_count; ++i) {
-            for(int j=0; j<num_finished_cyclists; ++j) {
-                if (final_results[j].id == finished_sorted[i].id) {
-                    final_results[j].rank = i + 1; // Rank is 1-based index
-                    break;
-                }
-            }
-        }
-        free(finished_sorted);
     } else {
-        perror("Failed to allocate for rank sorting");
-        // Ranks might be incorrect if allocation fails
-    }
-
-    // Sort the entire final_results array for printing
-    qsort(final_results, num_finished_cyclists, sizeof(ResultInfo), compare_final_ranks);
-
-    printf("\n--- Final Rankings ---\n");
-    printf("Rank | ID | Status     | Laps | Finish Time (ms) | Broken Lap\n");
-    printf("------------------------------------------------------------------\n");
-
-    for (int i = 0; i < num_finished_cyclists; ++i) {
-        ResultInfo res = final_results[i];
-        const char *status_str;
-        char rank_str[10];
-
-        switch (res.final_state) {
-            case FINISHED:
-                status_str = "FINISHED";
-                snprintf(rank_str, 10, "%d", res.rank);
+        pthread_mutex_lock(&global_mutex);
+        for (i = cyclist->pos_y + 1; i < MAX_LANES; i++) {
+            if (track[i][cyclist->pos_x] == NULL) {
+                found_outer_lane = true;
                 break;
-            case ELIMINATED:
-                status_str = "ELIMINATED";
-                snprintf(rank_str, 10, "DNF");
-                break;
-            case BROKEN:
-                status_str = "BROKEN";
-                snprintf(rank_str, 10, "DNF");
-                break;
-            default: // Should not happen
-                status_str = "UNKNOWN";
-                 snprintf(rank_str, 10, "DNF");
-                break;
-        }
-
-        printf("%4s | %2d | %-10s | %4d | %16llu | %s\n",
-               rank_str,
-               res.id,
-               status_str,
-               res.completed_laps,
-               (res.final_state == FINISHED || res.final_state == ELIMINATED) ? res.finish_time_ms : 0, // Show time only if finished/eliminated normally
-               (res.final_state == BROKEN) ? (sprintf(rank_str, "%d", res.broken_lap), rank_str) : "-"); // Show broken lap#
-    }
-
-    pthread_mutex_unlock(&results_mutex); // Unlock after reading/sorting
-    pthread_mutex_unlock(&print_mutex);
-}
-
-
-// --- Cleanup ---
-
-void cleanup_simulation() {
-    cleanup_requested = true;
-    pthread_mutex_destroy(&global_lock);
-    pthread_mutex_destroy(&print_mutex);
-    pthread_mutex_destroy(&results_mutex);
-    if (concurrency_mode == 'e') {
-        if (d < SMALL_TRACK_THRESHOLD) {
-            pthread_mutex_destroy(&track_lock);
-        } else if (track_mutexes != NULL) {
-            for (int i = 0; i < d; ++i) {
-                pthread_mutex_destroy(&track_mutexes[i]);
             }
-            free(track_mutexes);
         }
-    }
-    pthread_barrier_destroy(&step_barrier_start);
-    pthread_barrier_destroy(&step_barrier_end);
-    if (pista != NULL) {
-        for (int i = 0; i < d; ++i) {
-            free(pista[i]);
+        
+        if (found_outer_lane) {
+            track[i][cyclist->pos_x] = cyclist;
+            track[cyclist->pos_y][cyclist->pos_x] = NULL;
+            cyclist->pos_y = i;
+            
+            // tenta avancar para frente
+            for (j = 0; j < MAX_LANES; j++) {
+                if (track[j][(cyclist->pos_x+1)%track_size] == NULL) {
+                    track[j][(cyclist->pos_x+1)%track_size] = cyclist;
+                    track[cyclist->pos_y][cyclist->pos_x] = NULL;
+                    cyclist->pos_x = (cyclist->pos_x+1)%track_size;
+                    cyclist->pos_y = j;
+                    break;
+                }
+            }
         }
-        free(pista);
+        pthread_mutex_unlock(&global_mutex);
     }
-    free(cyclists);
-    free(final_results);
-    printf("Simulation cleanup complete.\n");
 }
 
-
-// --- Main Function ---
-
-int main(int argc, char *argv[]) {
-    initialize_simulation(argc, argv);
-    run_simulation();
-    cleanup_simulation();
-    return EXIT_SUCCESS;
+// trata o ciclista na linha de chegada. sorteia se ele vai quebrar, se quebrar, ativa a flag broken_down. 
+// se nao, insere ele no rank da volta completada e recalcula sua velocidade.
+void handle_finish_line(cyclist_t *cyclist) {
+    bool broke_down = false;
+    (cyclist->laps)++; // completou a volta ou comecou a corrida
+    
+    // verifica quebra a cada 5 voltas com 10% de chance
+    if (cyclist->laps > 0 && cyclist->laps % BREAKDOWN_CHECK_INTERVAL == 0) {
+        if(random_double(0, 1) < BREAKDOWN_PROBABILITY) {
+            cyclist_broke_down = true;
+            cyclist->broken_down = true;
+            broke_down = true;
+        }
+    }
+    
+    if (!broke_down) {
+        pthread_mutex_lock(&insert_mutex);
+        insert_cyclist(rank_list, num_cyclists, cyclist->laps, cyclist->number, current_time);
+        pthread_mutex_unlock(&insert_mutex);
+        set_cyclist_speed(cyclist);
+    }
 }
+
+// no final do seu movimento, o ciclista trata de se mover para a faixa interna possivel
+void move_to_inner_lane(cyclist_t *cyclist) {
+    bool found = false;
+    int i = cyclist->pos_y;
+    
+    if (approach == 'e') {
+        // eficiente
+        for ( ; i >= 0; i--) {
+            pthread_mutex_lock(&mutex[i][cyclist->pos_x]);
+            if (track[i][cyclist->pos_x] == NULL) {
+                found = true;
+                break;
+            }
+            pthread_mutex_unlock(&mutex[i][cyclist->pos_x]);
+        }
+        
+        if (found) {
+            if (i < cyclist->pos_y) {
+                track[cyclist->pos_y][cyclist->pos_x] = NULL;
+                track[i][cyclist->pos_x] = cyclist;
+                cyclist->pos_y = i;
+            }
+            pthread_mutex_unlock(&mutex[i][cyclist->pos_x]);
+        }
+    } else {
+        // ingenua
+        pthread_mutex_lock(&global_mutex);
+        for (i = cyclist->pos_y - 1; i >= 0; i--) {
+            if (track[i][cyclist->pos_x] == NULL) {
+                found = true;
+                break;
+            }
+        }
+        
+        if (found) {
+            track[cyclist->pos_y][cyclist->pos_x] = NULL;
+            track[i][cyclist->pos_x] = cyclist;
+            cyclist->pos_y = i;
+        }
+        pthread_mutex_unlock(&global_mutex);
+    }
+}
+
+/*===============================================*/
+/*==========    COORDINATOR THREAD    ===========*/
+/*===============================================*/
+
+void declare_winner(int winner) {
+    // Borda superior
+    printf("%s%s┌", BOLD, GREEN);
+    for (int i = 0; i < RANK_FRAME_WIDTH - 2; i++) printf("─");
+    printf("┐\n");
+    
+    // Titulo
+    char title[] = "=== WINNER ===";
+    int title_len = strlen(title);
+    int left_padding = (RANK_FRAME_WIDTH - title_len) / 2;
+    int right_padding = RANK_FRAME_WIDTH - title_len - left_padding - 2;
+    printf("│%*s%s%*s│\n", left_padding, "", title, right_padding, "");
+    
+    // Separador
+    printf("├");
+    for (int i = 0; i < RANK_FRAME_WIDTH - 2; i++) printf("─");
+    printf("┤\n");
+    
+    // Mensagem
+    char message[50];
+    sprintf(message, "Cyclist %d ganhou a corrida!", winner);
+    int msg_len = strlen(message);
+    int msg_left_padding = (RANK_FRAME_WIDTH - msg_len) / 2;
+    int msg_right_padding = RANK_FRAME_WIDTH - msg_len - msg_left_padding - 2;
+    printf("│%*s%s%s%s%*s│\n", 
+           msg_left_padding, "", 
+           BOLD, message, RESET,
+           msg_right_padding, "");
+    
+    // Borda inferior
+    printf("%s%s└", BOLD, GREEN);
+    for (int i = 0; i < RANK_FRAME_WIDTH - 2; i++) printf("─");
+    printf("┘%s\n\n", RESET);
+}
+
+void debug_print_active_cyclists(cyclist_t *cyclist_head) {
+    printf("%s%s┌", BOLD, CYAN);
+    for (int i = 0; i < RANK_FRAME_WIDTH - 2; i++) printf("─");
+    printf("┐\n");
+    
+    // Titulo
+    char title[] = "=== CICLISTAS ATIVOS ===";
+    int title_len = strlen(title);
+    int left_padding = (RANK_FRAME_WIDTH - title_len) / 2;
+    int right_padding = RANK_FRAME_WIDTH - title_len - left_padding - 2;
+    printf("│%*s%s%*s│\n", left_padding, "", title, right_padding, "");
+    
+    // Separador
+    printf("├");
+    for (int i = 0; i < RANK_FRAME_WIDTH - 2; i++) printf("─");
+    printf("┤\n");
+    
+    // Cabecalho
+    printf("│ %sID    Pos(x,y)  Voltas  Veloc  Estado%s", BOLD, RESET);
+    printf("%*s│\n", RANK_FRAME_WIDTH - 40, "");
+    
+    // Separador
+    printf("├");
+    for (int i = 0; i < RANK_FRAME_WIDTH - 2; i++) printf("─");
+    printf("┤%s\n", RESET);
+    
+    // Total atual
+    printf("│ Total de ciclistas ativos: %d%*s│\n", active_cyclists, 
+           RANK_FRAME_WIDTH - 30, "");
+    
+    // Separador
+    printf("├");
+    for (int i = 0; i < RANK_FRAME_WIDTH - 2; i++) printf("─");
+    printf("┤%s\n", RESET);
+    
+    // Lista de ciclistas
+    int count = 0;
+    for (cyclist_t *cyclist = cyclist_head->next; cyclist != head; cyclist = cyclist->next) {
+        char* speed_str = cyclist->speed == SPEED_30KMH ? "30km/h" : "60km/h";
+        char* state = cyclist->broken_down ? "Quebrado" : "OK";
+        
+        printf("│ %-4d  (%3d,%d)   %-6d  %-5s  %-7s%*s│\n",
+               cyclist->number,
+               cyclist->pos_x,
+               cyclist->pos_y,
+               cyclist->laps,
+               speed_str,
+               state,
+               RANK_FRAME_WIDTH - 45,
+               "");
+        count++;
+    }
+    
+    if (count == 0) {
+        printf("│ %sNenhum ciclista ativo%s%*s│\n",
+               BOLD, RESET, 
+               RANK_FRAME_WIDTH - 24, "");
+    }
+    
+    // Borda inferior
+    printf("%s%s└", BOLD, CYAN);
+    for (int i = 0; i < RANK_FRAME_WIDTH - 2; i++) printf("─");
+    printf("┘%s\n\n", RESET);
+}
+
+void *coordinator_thread(void *arg)
+{
+
+    struct timespec ts;
+    ts.tv_sec = 0;
+    ts.tv_nsec = MAIN_THREAD_NANO_SLEEP;
+
+    cyclist_t *cyclist_head = (cyclist_t *) arg;
+
+    /* flags auxiliares */
+    int min_lap = 0;  // minimo de voltas locais dos ciclistas
+    int max_lap = 0;  // maximo de voltas locais dos ciclistas
+    int last_elimination_lap = 0; // menor volta local do coordenador
+    int highest_lap = 0;  // maior volta do coordenador
+    int winner = -1;
+    bool winner_found = false;        // Flag para vencedor identificado
+
+    while (true) {
+        if (active_cyclists <= 0) {
+            pthread_exit(0);  // Sai quando nao ha mais ciclistas
+        }
+        
+        for (cyclist_t *cyclist = cyclist_head->next; cyclist != head; cyclist = cyclist->next) {
+            while (cyclist->arrived_flag == 0 && active_cyclists > 1) {
+                nanosleep(&ts, NULL);
+            }
+            cyclist->arrived_flag = 0;
+        }
+        
+        // trata quebras de ciclistas
+        if (cyclist_broke_down) {
+            eliminate_broken_down(cyclist_head);
+            cyclist_broke_down = false;
+        }
+        
+        // encontra minimo e maximo de voltas dos ciclistas
+        if (active_cyclists > 0) {
+            min_lap = max_lap;
+            for (cyclist_t *cyclist = cyclist_head->next; cyclist != head; cyclist = cyclist->next) {
+                if (max_lap < cyclist->laps) max_lap = cyclist->laps;
+                if (min_lap > cyclist->laps) min_lap = cyclist->laps;
+            }
+        }
+        
+        if (highest_lap != max_lap) highest_lap = max_lap;
+        
+        // Verifica se algum ciclista completou o total de voltas
+        if (!winner_found && max_lap >= total_laps) {
+            // Verifica se existe ranking para esta volta
+            Rank max_lap_rank = find_rank(rank_list, max_lap);
+            if (max_lap_rank != NULL) {
+                winner = max_lap_rank->cyclist_ids[0]; // Primeiro colocado
+                winner_id = winner;
+                winner_found = true;
+                
+                // Imediatamente encerra a corrida quando alguem completa todas as voltas
+                for (cyclist_t *cyclist = cyclist_head->next; cyclist != head; cyclist = cyclist->next) {
+                    if (cyclist->number != winner) {
+                        // Elimina todos os outros ciclistas
+                        eliminate_cyclist(cyclist_head, cyclist->number, true);
+                        active_cyclists--;
+                    }
+                }
+                
+                // Elimina o vencedor por ultimo
+                eliminate_cyclist(cyclist_head, winner, false);
+                active_cyclists--;
+                
+                // Ajusta a classificacao final
+                adjust_first_place(final_rank, winner);
+                
+                if (!debug_parameter) {
+                    print_rank(rank_list, max_lap);
+                }
+                
+                pthread_exit(0);
+            }
+        }
+        
+        // controla voltas e eliminacoes
+        while (min_lap > 0 && last_elimination_lap < min_lap) {
+            if (last_elimination_lap > 0 && active_cyclists > 1 && !debug_parameter) {
+                // Verifica se existe ranking para esta volta antes de imprimir
+                Rank lap_rank = find_rank(rank_list, last_elimination_lap);
+                if (lap_rank != NULL) {
+                    print_rank(rank_list, last_elimination_lap);
+                }
+            }
+            last_elimination_lap++;
+            
+            // a cada 2 voltas, elimina o ultimo colocado
+            if (last_elimination_lap % 2 == 0) {
+                // Verifica se existe ranking para esta volta antes de prosseguir
+                Rank current_rank = find_rank(rank_list, last_elimination_lap);
+                if (current_rank == NULL) {
+                    // nao ha ranking para esta volta, continue para a proxima iteracao
+                    continue;
+                }
+                
+                // se um vencedor ja foi encontrado E temos apenas 2 ciclistas restantes
+                if (winner_found && active_cyclists == 2) {
+                    int last = current_rank->cyclist_ids[current_rank->count-1]; // Último colocado
+                    
+                    // elimina o ultimo colocado
+                    eliminate_cyclist(cyclist_head, last, true);
+                    active_cyclists--;
+                    
+                    // elimina o vencedor tambem para terminar a corrida
+                    eliminate_cyclist(cyclist_head, winner, false);
+                    active_cyclists--;
+                    
+                    // ajusta a classificacao final e sai da thread
+                    adjust_first_place(final_rank, winner);
+                    
+                    if (!debug_parameter) {
+                        print_rank(rank_list, last_elimination_lap);
+                    }
+                    
+                    pthread_exit(0);
+                } else if (active_cyclists == 2 && !winner_found) {
+                    // sem vencedor definido, mas so restam 2 ciclistas
+                    // declara o primeiro como vencedor
+                    winner = current_rank->cyclist_ids[0]; // Primeiro colocado
+                    int last = current_rank->cyclist_ids[current_rank->count-1]; // Último colocado
+                    winner_id = winner;
+                    
+                    // elimina o ultimo colocado
+                    eliminate_cyclist(cyclist_head, last, true);
+                    active_cyclists--;
+                    
+                    // elimina o vencedor tambem para terminar a corrida
+                    eliminate_cyclist(cyclist_head, winner, false);
+                    active_cyclists--;
+                    
+                    // ajusta a classificacao final e sai da thread
+                    adjust_first_place(final_rank, winner);
+                    
+                    if (!debug_parameter) {
+                        print_rank(rank_list, last_elimination_lap);
+                    }
+                    
+                    pthread_exit(0);
+                } else {
+                    // caso normal: elimina o ultimo colocado
+                    int last = current_rank->cyclist_ids[current_rank->count-1]; // ultimo colocado
+                    eliminate_cyclist(cyclist_head, last, true);
+                }
+            }
+        }
+        
+        // avanca o tempo em 60ms
+        current_time += TIME_DELTA;
+        
+        // modo de depuracao: imprime o estado da pista a cada 60ms
+        if (debug_parameter) {
+            display_track();
+        }
+        
+        // remove ranks antigos para economizar memoria
+        if (last_elimination_lap > 0) rank_list = remove_ranks_by_lap(rank_list, last_elimination_lap);
+
+        // permite que os ciclistas continuem
+        for (cyclist_t *cyclist = head->next; cyclist != head; cyclist = cyclist->next) {
+            cyclist->continue_flag = 1;
+        }
+    }
+}
+
+// imprime visualizacao da pista na saida padrao
+void display_track()
+{
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < track_size; j++) {
+            if (track[i][j] != NULL) {
+                printf("%02d ", track[i][j]->number);
+            } else {
+                printf(". ");
+            }
+        }
+        printf("\n");
+    }
+    printf("\n");
+}
+
+void declare_elimination(int cyclist_number) {
+    // Borda superior
+    printf("%s%s┌", BOLD, RED);
+    for (int i = 0; i < RANK_FRAME_WIDTH - 2; i++) printf("─");
+    printf("┐\n");
+    
+    // Titulo
+    char title[] = "=== ELIMINACAO ===";
+    int title_len = strlen(title);
+    int left_padding = (RANK_FRAME_WIDTH - title_len) / 2;
+    int right_padding = RANK_FRAME_WIDTH - title_len - left_padding - 2;
+    printf("│%*s%s%*s│\n", left_padding, "", title, right_padding, "");
+    
+    // Separador
+    printf("├");
+    for (int i = 0; i < RANK_FRAME_WIDTH - 2; i++) printf("─");
+    printf("┤\n");
+    
+    // Mensagem
+    char message[50];
+    sprintf(message, "Cyclist %d foi eliminado!", cyclist_number);
+    int msg_len = strlen(message);
+    int msg_left_padding = (RANK_FRAME_WIDTH - msg_len) / 2;
+    int msg_right_padding = RANK_FRAME_WIDTH - msg_len - msg_left_padding - 2;
+    printf("│%*s%s%s%s%*s│\n", 
+           msg_left_padding, "", 
+           BOLD, message, RESET,
+           msg_right_padding, "");
+    
+    // Borda inferior
+    printf("%s%s└", BOLD, RED);
+    for (int i = 0; i < RANK_FRAME_WIDTH - 2; i++) printf("─");
+    printf("┘%s\n\n", RESET);
+}
+
+void declare_breakdown(int cyclist_number) {
+    // Borda superior
+    printf("%s%s┌", BOLD, MAGENTA);
+    for (int i = 0; i < RANK_FRAME_WIDTH - 2; i++) printf("─");
+    printf("┐\n");
+    
+    // Titulo
+    char title[] = "=== QUEBROU ===";
+    int title_len = strlen(title);
+    int left_padding = (RANK_FRAME_WIDTH - title_len) / 2;
+    int right_padding = RANK_FRAME_WIDTH - title_len - left_padding - 2;
+    printf("│%*s%s%*s│\n", left_padding, "", title, right_padding, "");
+    
+    // Separador
+    printf("├");
+    for (int i = 0; i < RANK_FRAME_WIDTH - 2; i++) printf("─");
+    printf("┤\n");
+    
+    // Mensagem
+    char message[50];
+    sprintf(message, "Cyclist %d quebrou ;-;", cyclist_number);
+    int msg_len = strlen(message);
+    int msg_left_padding = (RANK_FRAME_WIDTH - msg_len) / 2;
+    int msg_right_padding = RANK_FRAME_WIDTH - msg_len - msg_left_padding - 2;
+    printf("│%*s%s%s%s%*s│\n", 
+           msg_left_padding, "", 
+           BOLD, message, RESET,
+           msg_right_padding, "");
+    
+    // Borda inferior
+    printf("%s%s└", BOLD, MAGENTA);
+    for (int i = 0; i < RANK_FRAME_WIDTH - 2; i++) printf("─");
+    printf("┘%s\n\n", RESET);
+}
+
+// recebe um numero de ciclista, remove-o da pista, remove o ciclista
+// com esse numero da estrutura de dados, insere-o na classificacao final,
+// termina sua thread e libera a memoria alocada
+void eliminate_cyclist(cyclist_t *cyclist_head, int cyclist_number, bool should_print) {
+    
+    struct timespec ts;
+    ts.tv_sec = 0;
+    ts.tv_nsec = MAIN_THREAD_NANO_SLEEP;
+    cyclist_t *current, *previous;
+    previous = cyclist_head;
+    
+    for (current = cyclist_head->next; current != head; current = current->next) {
+        if (current->number == cyclist_number) break;
+        previous = current;
+    }
+    
+    if (should_print) {
+        if (!debug_parameter) {
+            declare_elimination(current->number);
+        }
+    }
+
+    if (approach == 'i') {
+        pthread_mutex_lock(&global_mutex);
+        track[current->pos_y][current->pos_x] = NULL;
+        pthread_mutex_unlock(&global_mutex);
+    } else {
+        pthread_mutex_lock(&mutex[current->pos_y][current->pos_x]);
+        track[current->pos_y][current->pos_x] = NULL;
+        pthread_mutex_unlock(&mutex[current->pos_y][current->pos_x]);
+    }
+    
+    insert_cyclist_in_rank(final_rank, current->number, current_time);
+    if (current->thread_id != 0) {
+        pthread_cancel(current->thread_id);
+    }
+    active_cyclists--;
+    previous->next = current->next;
+    nanosleep(&ts, NULL); // dorme para esperar a thread parar
+    free(current);
+}
+
+// verifica se ha ciclistas com a flag broken_down e os elimina:
+// remove-os da pista, remove-os da estrutura de dados, insere-os
+// na classificacao de quebras, termina suas threads e libera a memoria alocada
+void eliminate_broken_down(cyclist_t *cyclist_head) {
+    struct timespec ts;
+    ts.tv_sec = 0;
+    ts.tv_nsec = MAIN_THREAD_NANO_SLEEP;
+    
+    cyclist_t *current = cyclist_head->next;
+    cyclist_t *previous = cyclist_head;
+    
+    while (current != head) {
+        if (current->broken_down) {
+            // remove da pista
+            if (approach == 'i') {
+                pthread_mutex_lock(&global_mutex);
+                track[current->pos_y][current->pos_x] = NULL;
+                pthread_mutex_unlock(&global_mutex);
+            } else {
+                pthread_mutex_lock(&mutex[current->pos_y][current->pos_x]);
+                track[current->pos_y][current->pos_x] = NULL;
+                pthread_mutex_unlock(&mutex[current->pos_y][current->pos_x]);
+            }
+            
+            // insere na classificacao de quebras
+            insert_cyclist_in_rank(breakdown_rank, current->number, current->laps);
+
+            if (!debug_parameter) declare_breakdown(current->number);
+            
+            // atualiza lista encadeada e libera memoria
+            cyclist_t *to_remove = current;
+            current = current->next;
+            previous->next = current;
+            active_cyclists--;
+            
+            // cancela thread e libera memoria
+            pthread_cancel(to_remove->thread_id);
+            nanosleep(&ts, NULL); // dorme para esperar a thread parar
+            free(to_remove);
+            
+            num_breakdowns++;
+            
+            // Cada quebra reduz o total de voltas em 2
+            total_laps -= 2;
+            if (total_laps < 1) total_laps = 1; // Garante no minimo 1 volta
+        } else {
+            previous = current;
+            current = current->next;
+        }
+    }
+}
+
+/*===============================================*/
+/*==========     MAIN FUNCTIONS     =============*/
+/*===============================================*/
+
+void initialize_variables() {
+    /* inicializacao de variaveis */
+    active_cyclists = num_cyclists;
+    num_breakdowns = 0;
+    total_laps = 2 * num_cyclists - 2;
+
+    /* inicializa mutexes */
+    pthread_mutex_init(&insert_mutex, NULL);
+    pthread_mutex_init(&global_mutex, NULL);
+
+    /* cria lista de classificacao por volta */
+    rank_list = create_rank_list();
+    /* cria lista de classificacao final */
+    final_rank = create_rank(0, num_cyclists);
+    breakdown_rank = create_rank(0, num_cyclists);
+
+    /* cria pista como uma matriz de ponteiros e matriz de mutexes para ela */
+    track = malloc(10 * sizeof(cyclist_t**));
+    mutex = malloc(10 * sizeof(pthread_mutex_t *));
+    for (int i = 0; i < 10; i++) {
+        track[i] = malloc(track_size * sizeof(cyclist_t*));
+        if (approach == 'e') {
+            mutex[i] = malloc(track_size * sizeof(pthread_mutex_t));
+        }
+    }
+
+    /* inicializa pista e seus mutexes */
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < track_size; j++) {
+            track[i][j] = NULL;
+            if (approach == 'e') {
+                pthread_mutex_init(&mutex[i][j], NULL);
+            }
+        }
+    }
+
+    /* cria ciclistas e posiciona-os na pista */
+    head = malloc(sizeof(cyclist_t));
+    head->next = head;
+    
+    // posicionamento inicial dos ciclistas
+    int competitor_num = 1;
+    int pos = 0;
+    int lane = 0;
+    
+    // coloca no maximo 5 ciclistas lado a lado na linha de partida
+    for (int i = 0; i < num_cyclists; i++) {
+        cyclist_t *new_cyclist = malloc(sizeof(cyclist_t));
+        track[lane][track_size-1-pos] = new_cyclist;
+        
+        new_cyclist->number = competitor_num++;
+        new_cyclist->arrived_flag = 0;
+        new_cyclist->continue_flag = 0;
+        new_cyclist->pos_x = track_size-1-pos;
+        new_cyclist->pos_y = lane;
+        new_cyclist->laps = -1;
+        new_cyclist->round_completed = false;
+        new_cyclist->speed = SPEED_30KMH; // First lap always at 30km/h
+        new_cyclist->broken_down = false;
+        new_cyclist->next = head->next;
+        head->next = new_cyclist;
+        
+        lane++;
+        if (lane >= 5) {
+            lane = 0;
+            pos++;
+        }
+    }
+}
+
+void create_coordinator_thread() {
+    if (pthread_create(&coordinator, NULL, coordinator_thread, (void*) head)) {
+        printf("\n ERRO criando thread coordenador\n");
+        exit(1);
+    }
+}
+
+void create_cyclist_threads() {
+    for (cyclist_t *cyclist = head->next; cyclist != head; cyclist = cyclist->next) {
+      if (pthread_create(&cyclist->thread_id, NULL, cyclist_thread, (void*) cyclist)) {
+          printf("\n ERRO criando thread %ld\n", cyclist->thread_id);
+          exit(1);
+      }
+    }
+}
+
+void join_cyclist_threads() {
+    if (active_cyclists < 1) {
+        for (cyclist_t *cyclist = head->next; cyclist != head; cyclist = cyclist->next) {
+            if (cyclist->thread_id != 0) {
+                pthread_cancel(cyclist->thread_id);
+            }
+      }
+    }
+    for (cyclist_t *cyclist = head->next; cyclist != head; cyclist = cyclist->next) {
+      if (pthread_join(cyclist->thread_id, NULL)) {
+          printf("\n ERRO juntando thread %ld\n", cyclist->thread_id);
+          exit(1);
+      }
+    }
+}
+
+void join_coordinator_thread() {
+    if (pthread_join(coordinator, NULL)) {
+        printf("\n ERRO juntando thread coordenador\n");
+        exit(1);
+    }
+}
+
+void destroy_track() {
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < track_size; j++) {
+            if (approach == 'e') {
+                pthread_mutex_destroy(&mutex[i][j]);
+            }
+        }
+        free(track[i]);
+    }
+    free(track);
+    if (approach == 'e') {
+        for (int i = 0; i < 10; i++) {
+            free(mutex[i]);
+        }
+        free(mutex);
+    }
+}
+
+void clean_up() {
+    pthread_mutex_destroy(&insert_mutex);
+    pthread_mutex_destroy(&global_mutex);
+
+    destroy_track();
+    destroy_rank_list(rank_list);
+    destroy_rank(final_rank);
+    destroy_rank(breakdown_rank);
+    free(head);
+}
+
+int main(int argc, char const *argv[]) {
+    srand(time(NULL));
+    
+    // inicializa o terminal
+    hide_cursor();
+
+    // verifica argumentos da linha de comando
+    if (argc < 3) {
+        printf("Uso: %s d k <i|e> [-debug] [-color]\n", argv[0]);
+        printf("  d: tamanho da pista (100 <= d <= 2500)\n");
+        printf("  k: numero de ciclistas (5 <= k <= 5 × d)\n");
+        printf("  i|e: abordagem de controle de acesso a pista (i para ingenua, e para eficiente)\n");
+        printf("  -debug: modo de depuracao (opcional)\n");
+        printf("  -color: desativa cores no terminal (opcional)\n");
+        return 1;
+    }
+    
+    track_size = atoi(argv[1]);
+    num_cyclists = atoi(argv[2]);
+    
+    // verifica limites para track_size e num_cyclists
+    if (track_size < 100 || track_size > 2500) {
+        printf("Erro: o tamanho da pista deve estar entre 100 e 2500\n");
+        return 1;
+    }
+    if (num_cyclists < 5 || num_cyclists > 5 * track_size) {
+        printf("Erro: o numero de ciclistas deve estar entre 5 e 5 × d\n");
+        return 1;
+    }
+    
+    // determina a abordagem
+    if (argc > 3) {
+        if (argv[3][0] == 'i' || argv[3][0] == 'e') {
+            approach = argv[3][0];
+        } else {
+            printf("Erro: a abordagem deve ser 'i' <ingenua> ou 'e' <eficiente>\n");
+            return 1;
+        }
+        
+        // Verifica argumentos opcionais
+        for (int i = 4; i < argc; i++) {
+            if (strcmp("-debug", argv[i]) == 0) {
+                debug_parameter = 1;
+            } else if (strcmp("-color", argv[i]) == 0) {
+                colors_enabled = true;  // Disable colors if -color flag is present
+            }
+        }
+    }
+
+    initialize_variables();
+
+    // cria threads
+    
+    create_coordinator_thread();
+    create_cyclist_threads();
+    join_cyclist_threads();
+    join_coordinator_thread();
+
+    if (!debug_parameter) {
+        declare_winner(winner_id);
+    }
+
+    print_final_rank(final_rank);
+    print_breakdown_rank(breakdown_rank);
+    
+    show_cursor();
+
+    clean_up();
+
+    return 0;
+} 

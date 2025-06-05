@@ -1,30 +1,37 @@
-CC = gcc
-CFLAGS = -Wall -g
-LDFLAGS = -lreadline -pthread
+CC=gcc
+CFLAGS=-Wall -Wextra -g -pthread
+LDLIBS=-lm -pthread
 
-EP2_SRCS = ep2.c
-EP2_OBJS = $(EP2_SRCS:.c=.o)
-EP2_TARGET = ep2
+# Default target
+all: ep2
 
-all: $(EP2_TARGET)
+# Help command
+help:
+	@echo "Available commands:"
+	@echo "  make          - Build the program"
+	@echo "  make clean    - Remove generated files"
+	@echo "  make run      - Run with increased thread limit"
+	@echo "  make help     - Display this help message"
+	@echo
+	@echo "Usage examples:"
+	@echo "  make run 2500 12500 e        - Run with track size 2500, 12500 cyclists, efficient approach"
+	@echo "  make run 2000 5000 i -debug  - Run with debug mode and naive approach"
 
-$(EP2_TARGET): $(EP2_OBJS)
-	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+ep2: ep2.c ep2.h
+	$(CC) $(CFLAGS) -o ep2 ep2.c $(LDLIBS)
 
-%.o: %.c
-	$(CC) $(CFLAGS) -c $<
+# Run with arguments: make run <d> <k> <approach>
+run:
+	@if [ "$(filter-out $@,$(MAKECMDGOALS))" = "" ]; then \
+		echo "Usage: make run <d> <k> <approach> [options]"; \
+	else \
+		ulimit -n 16384 && ./ep2 $(filter-out $@,$(MAKECMDGOALS)); \
+	fi
 
 clean:
-	rm -f $(EP2_TARGET) $(EP2_OBJS)
-
-run: 
-	./$(EP2_TARGET)
-
-help:
-	@echo "Available targets:"
-	@echo "  make              - Build program"
-	@echo "  make clean        - Remove all build artifacts"
-	@echo "  make run          - Run the ep2"
-	@echo "  make help         - Show this help message"
+	rm -f ep2 *.o
 
 .PHONY: all clean run help
+
+%:
+	@: 
