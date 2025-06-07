@@ -1,0 +1,51 @@
+MAC0422 - Sistemas Operacionais - EP3
+Gerenciador de Memória com First-Fit, Next-Fit, Best-Fit e Worst-Fit
+
+--------------------
+1. COMPILAÇÃO
+--------------------
+
+Para compilar o projeto, utilize o comando `make` no diretório raiz do projeto.
+Isso irá gerar o executável `ep3`.
+
+    $ make
+
+O `Makefile` fornecido também suporta outros alvos:
+- `make clean`: remove o executável e arquivos objeto.
+- `make help`: exibe os comandos disponíveis.
+
+--------------------
+2. EXECUÇÃO
+--------------------
+
+O programa é executado via linha de comando, seguindo o formato:
+
+    ./ep3 <algoritmo> <arq_in.pgm> <arq_trace> <arq_out.pgm>
+
+Argumentos:
+  <algoritmo>: Número que identifica o algoritmo de alocação:
+               1 - First Fit
+               2 - Next Fit
+               3 - Best Fit
+               4 - Worst Fit
+
+  <arq_in.pgm>: Caminho para o arquivo PGM de entrada, que representa o estado inicial da memória.
+
+  <arq_trace>: Caminho para o arquivo de trace, contendo as requisições de alocação e compactação.
+
+  <arq_out.pgm>: Caminho para o arquivo PGM de saída, que conterá o estado final da memória após a simulação.
+
+Exemplo de uso:
+    ./ep3 1 ep3-exemplo01.pgm trace-firstfit saida_firstfit.pgm
+
+Este comando executa o simulador com o algoritmo "First Fit", utilizando o arquivo `ep3-exemplo01.pgm` como memória inicial, processando as operações do arquivo `trace-firstfit` e salvando o estado final em `saida_firstfit.pgm`.
+
+As requisições que não puderem ser atendidas serão impressas na saída padrão, seguidas pelo número total de falhas.
+
+--------------------
+3. LIMPEZA
+--------------------
+
+Para remover o executável (`ep3`) e os arquivos de compilação intermediários, use o comando:
+
+    $ make clean 

@@ -1,6 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -Wextra -g -pthread
-LDLIBS=-lm -pthread
+CFLAGS=-Wall -Wextra
 
 # Default target
 all: ep3
@@ -13,10 +12,10 @@ help:
 	@echo "  make help     - Display this help message"
 
 ep3: ep3.c ep3.h
-	$(CC) $(CFLAGS) -o ep3 ep3.c $(LDLIBS)
+	$(CC) $(CFLAGS) -o ep3 ep3.c
 
 clean:
-	rm -f ep2 *.o
+	rm -f ep3 *.o
 
 .PHONY: all clean run help
 

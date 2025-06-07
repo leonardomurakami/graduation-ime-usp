@@ -1,123 +1,129 @@
 #ifndef EP3_H
 #define EP3_H
 
-#include <stdio.h> // For FILE*
-#include <stdlib.h> // For exit, atoi
-#include <string.h> // For strcmp, strlen, strncpy, strcspn
-#include <limits.h> // For INT_MAX
+#include <stdio.h> // para FILE*
+#include <stdlib.h> // para exit, atoi
+#include <string.h> // para strcmp, strlen, strncpy, strcspn
+#include <limits.h> // para INT_MAX
+#include <errno.h> // para perror
 
-// Constants for memory and PGM file structure
+
+// ================================================
+// =============CONSTANTES PARA MEMORIA============
+// ================================================
 #define TOTAL_MEMORY_UNITS 65536       // 
 #define PGM_WIDTH 256                  // 
 #define PGM_HEIGHT 256                 // 
 #define PGM_MAX_VAL 255                // 
 
-// PGM header: "P2\n256 256\n255\n"
+// CABECALHO PGM: "P2\n256 256\n255\n"
 // "P2\n" (3 bytes)
 // "256 256\n" (8 bytes)
 // "255\n" (4 bytes)
 #define PGM_HEADER_SIZE 15             // 
 
 #define UNITS_PER_FILE_LINE 16         // 
-// Each line of pixel data: 16 units * 3 chars/unit + 15 spaces + 1 newline = 48 + 15 + 1 = 64 bytes 
+// cada linha de dados de pixel: 16 unidades * 3 chars/unidade + 15 espacos + 1 quebra de linha = 48 + 15 + 1 = 64 bytes 
 #define BYTES_PER_FILE_DATA_LINE 64
 
-#define STATUS_USED 0                  // Represents a black pixel, unit in use 
-#define STATUS_FREE 255                // Represents a white pixel, unit available 
+#define STATUS_USED 0                  // representa um pixel preto, unidade em uso 
+#define STATUS_FREE 255                // representa um pixel branco, unidade disponivel 
 
 #define TRACE_LINE_MAX_LEN 256
-#define MAX_FAILED_REQS 2001 // Max 2000 lines in trace + 1 for safety 
+#define MAX_FAILED_REQS 2001 // maximo 2000 linhas no trace + 1 por seguranca 
 
-// Function Prototypes
+// ================================================
+// =============PROTOTIPOS DE FUNCOES==============
+// ================================================
 
 /**
- * @brief Copies the content of the input PGM file to the output PGM file.
- * This operation is allowed to use memory without the EP's usual restrictions. 
- * @param input_filename Path to the input PGM file.
- * @param output_filename Path to the output PGM file to be created.
+ * @brief copia o conteudo do arquivo PGM de entrada para o arquivo PGM de saida.
+ * esta operacao pode usar memoria sem as restricoes usuais do EP.
+ * @param input_filename caminho para o arquivo PGM de entrada.
+ * @param output_filename caminho para o arquivo PGM de saida a ser criado.
  */
 void copy_pgm_file(const char *input_filename, const char *output_filename);
 
 /**
- * @brief Calculates the file offset for a given memory unit index.
- * The offset points to the start of the 3-character representation of the unit's value.
- * @param unit_index The 0-based index of the memory unit (0 to TOTAL_MEMORY_UNITS - 1).
- * @return The file offset from the beginning of the file.
+ * @brief calcula o offset do arquivo para um dado indice de unidade de memoria.
+ * o offset aponta para o inicio da representacao de 3 caracteres do valor da unidade.
+ * @param unit_index o indice baseado em 0 da unidade de memoria (0 a TOTAL_MEMORY_UNITS - 1).
+ * @return o offset do arquivo a partir do inicio do arquivo.
  */
 long get_unit_file_offset(int unit_index);
 
 /**
- * @brief Reads the status of a memory unit directly from the PGM file.
- * @param fp File pointer to the PGM file, opened in "r+b" mode.
- * @param unit_index The 0-based index of the memory unit.
- * @return The status of the unit (STATUS_FREE or STATUS_USED), or -1 on error.
+ * @brief le o status de uma unidade de memoria diretamente do arquivo PGM.
+ * @param fp ponteiro para o arquivo PGM, aberto no modo "r+b".
+ * @param unit_index o indice baseado em 0 da unidade de memoria.
+ * @return o status da unidade (STATUS_FREE ou STATUS_USED), ou -1 em caso de erro.
  */
 int read_unit_status(FILE *fp, int unit_index);
 
 /**
- * @brief Writes the status of a memory unit directly to the PGM file.
- * Writes "  0" for STATUS_USED or "255" for STATUS_FREE. 
- * @param fp File pointer to the PGM file, opened in "r+b" mode.
- * @param unit_index The 0-based index of the memory unit.
- * @param status The new status to write (STATUS_FREE or STATUS_USED).
+ * @brief escreve o status de uma unidade de memoria diretamente no arquivo PGM.
+ * escreve "  0" para STATUS_USED ou "255" para STATUS_FREE.
+ * @param fp ponteiro para o arquivo PGM, aberto no modo "r+b".
+ * @param unit_index o indice baseado em 0 da unidade de memoria.
+ * @param status o novo status a ser escrito (STATUS_FREE ou STATUS_USED).
  */
 void write_unit_status(FILE *fp, int unit_index, int status);
 
 /**
- * @brief Allocates a block of memory units by marking them as used in the PGM file.
- * @param fp File pointer to the PGM file.
- * @param start_index The starting unit index of the block to allocate.
- * @param size The number of units to allocate.
+ * @brief aloca um bloco de unidades de memoria marcando-as como usadas no arquivo PGM.
+ * @param fp ponteiro para o arquivo PGM.
+ * @param start_index o indice inicial da unidade do bloco a ser alocado.
+ * @param size o numero de unidades a alocar.
  */
 void allocate_memory_units(FILE *fp, int start_index, int size);
 
 /**
- * @brief Implements the First Fit memory allocation algorithm.
- * Finds the first free block large enough for the requested size.
- * @param fp File pointer to the PGM file.
- * @param size_needed The number of contiguous memory units required.
- * @param total_units Total number of units in memory.
- * @return The starting index of the allocated block, or -1 if no suitable block is found.
+ * @brief implementa o algoritmo de alocacao de memoria First Fit.
+ * encontra o primeiro bloco livre grande o suficiente para o tamanho solicitado.
+ * @param fp ponteiro para o arquivo PGM.
+ * @param size_needed o numero de unidades de memoria contiguas necessarias.
+ * @param total_units numero total de unidades na memoria.
+ * @return o indice inicial do bloco alocado, ou -1 se nenhum bloco adequado for encontrado.
  */
 int find_first_fit(FILE *fp, int size_needed, int total_units);
 
 /**
- * @brief Implements the Next Fit memory allocation algorithm.
- * Starts searching from the position after the last allocation.
- * @param fp File pointer to the PGM file.
- * @param size_needed The number of contiguous memory units required.
- * @param total_units Total number of units in memory.
- * @param last_pos Pointer to an integer storing the last allocation position (updated by this function).
- * @return The starting index of the allocated block, or -1 if no suitable block is found.
+ * @brief implementa o algoritmo de alocacao de memoria Next Fit.
+ * comeca a busca a partir da posicao apos a ultima alocacao.
+ * @param fp ponteiro para o arquivo PGM.
+ * @param size_needed o numero de unidades de memoria contiguas necessarias.
+ * @param total_units numero total de unidades na memoria.
+ * @param last_pos ponteiro para um inteiro armazenando a ultima posicao de alocacao (atualizado por esta funcao).
+ * @return o indice inicial do bloco alocado, ou -1 se nenhum bloco adequado for encontrado.
  */
 int find_next_fit(FILE *fp, int size_needed, int total_units, int *last_pos);
 
 /**
- * @brief Implements the Best Fit memory allocation algorithm.
- * Finds the smallest free block that is large enough for the requested size.
- * @param fp File pointer to the PGM file.
- * @param size_needed The number of contiguous memory units required.
- * @param total_units Total number of units in memory.
- * @return The starting index of the allocated block, or -1 if no suitable block is found.
+ * @brief implementa o algoritmo de alocacao de memoria Best Fit.
+ * encontra o menor bloco livre que seja grande o suficiente para o tamanho solicitado.
+ * @param fp ponteiro para o arquivo PGM.
+ * @param size_needed o numero de unidades de memoria contiguas necessarias.
+ * @param total_units numero total de unidades na memoria.
+ * @return o indice inicial do bloco alocado, ou -1 se nenhum bloco adequado for encontrado.
  */
 int find_best_fit(FILE *fp, int size_needed, int total_units);
 
 /**
- * @brief Implements the Worst Fit memory allocation algorithm.
- * Finds the largest free block that is large enough for the requested size.
- * @param fp File pointer to the PGM file.
- * @param size_needed The number of contiguous memory units required.
- * @param total_units Total number of units in memory.
- * @return The starting index of the allocated block, or -1 if no suitable block is found.
+ * @brief implementa o algoritmo de alocacao de memoria Worst Fit.
+ * encontra o maior bloco livre que seja grande o suficiente para o tamanho solicitado.
+ * @param fp ponteiro para o arquivo PGM.
+ * @param size_needed o numero de unidades de memoria contiguas necessarias.
+ * @param total_units numero total de unidades na memoria.
+ * @return o indice inicial do bloco alocado, ou -1 se nenhum bloco adequado for encontrado.
  */
 int find_worst_fit(FILE *fp, int size_needed, int total_units);
 
 /**
- * @brief Compacts the memory in the PGM file.
- * All used blocks are moved to the beginning, and all free blocks to the end. 
- * This is done by reading and writing unit statuses directly in the file.
- * @param fp File pointer to the PGM file.
- * @param total_units Total number of units in memory.
+ * @brief compacta a memoria no arquivo PGM.
+ * todos os blocos usados sao movidos para o inicio, e todos os blocos livres para o final.
+ * isso e feito lendo e escrevendo os status das unidades diretamente no arquivo.
+ * @param fp ponteiro para o arquivo PGM.
+ * @param total_units numero total de unidades na memoria.
  */
 void compact_memory(FILE *fp, int total_units);
 

@@ -1,5 +1,4 @@
 #include "ep3.h"
-#include <errno.h> // para perror
 
 void copy_pgm_file(const char *input_filename, const char *output_filename) {
     FILE *in_file = fopen(input_filename, "rb");
@@ -112,7 +111,7 @@ int find_first_fit(FILE *fp, int size_needed, int total_units) {
 
     for (int i = 0; i < total_units; ++i) {
         int status = read_unit_status(fp, i);
-        if (status == -1) return -1; // Read error
+        if (status == -1) return -1; // erro ao ler o status da unidade
 
         if (status == STATUS_FREE) {
             if (current_block_start == -1) {
@@ -120,93 +119,65 @@ int find_first_fit(FILE *fp, int size_needed, int total_units) {
             }
             current_block_size++;
             if (current_block_size >= size_needed) {
-                return current_block_start; // Found a fit
+                return current_block_start; // encontrou um bloco adequado
             }
-        } else { // Unit is used or error
+        } else { // unidade usada ou erro
             current_block_start = -1;
             current_block_size = 0;
         }
     }
-    return -1; // No suitable block found
+    return -1; // nenhum bloco adequado encontrado
 }
 
 int find_next_fit(FILE *fp, int size_needed, int total_units, int *last_pos) {
     int current_block_start = -1;
     int current_block_size = 0;
     int initial_pos = *last_pos;
-    int i = initial_pos;
-    int wrapped_around = 0;
 
-    do {
-        int status = read_unit_status(fp, i);
-        if (status == -1) return -1; // Read error
+    // procura a partir da ultima posicao ate o final
+    for (int i = 0; i < total_units; i++) {
+        int current_idx = (initial_pos + i) % total_units;
+        int status = read_unit_status(fp, current_idx);
+        
+        if (status == -1) return -1; // erro ao ler o status da unidade
 
         if (status == STATUS_FREE) {
-            if (current_block_start == -1) {
-                current_block_start = i;
+            if (current_block_size == 0) {
+                current_block_start = current_idx;
             }
             current_block_size++;
+            
             if (current_block_size >= size_needed) {
-                // *last_pos = (current_block_start + size_needed) % total_units; // Updated in main
                 return current_block_start;
             }
         } else {
             current_block_start = -1;
             current_block_size = 0;
         }
-
-        i = (i + 1) % total_units;
-        if (i == initial_pos) { // Full circle
-            wrapped_around = 1;
-        }
-    } while (!wrapped_around || (wrapped_around && i != initial_pos && current_block_start == -1) );
-     // The condition can be simplified to run for 'total_units' iterations or until found.
-     // Let's re-evaluate the loop condition for clarity for 'total_units' iterations.
-
-    // Corrected loop structure for Next Fit (scan up to N units)
-    current_block_start = -1;
-    current_block_size = 0;
-    for (int count = 0; count < total_units; ++count) {
-        int current_idx = (initial_pos + count) % total_units;
-        int status = read_unit_status(fp, current_idx);
-        if (status == -1) return -1;
-
-        if (status == STATUS_FREE) {
-            if (current_block_size == 0) { // Start of a new potential block
-                current_block_start = current_idx;
-            }
-            current_block_size++;
-            if (current_block_size >= size_needed) {
-                return current_block_start;
-            }
-        } else { // Block broken
-            current_block_size = 0;
-        }
     }
 
-
-    return -1; // No suitable block found
+    return -1; // nenhum bloco adequado encontrado
 }
 
 
 int find_best_fit(FILE *fp, int size_needed, int total_units) {
     int best_fit_start = -1;
-    int best_fit_size = INT_MAX; // Using INT_MAX from <limits.h>
+    int best_fit_size = INT_MAX; // usando INT_MAX
 
     int current_block_start = -1;
     int current_block_size = 0;
 
     for (int i = 0; i < total_units; ++i) {
         int status = read_unit_status(fp, i);
-        if (status == -1) return -1; // Read error
+        if (status == -1) return -1; // erro ao ler o status da unidade
 
         if (status == STATUS_FREE) {
             if (current_block_start == -1) {
                 current_block_start = i;
             }
             current_block_size++;
-        } else { // Unit is used or end of a block
-            if (current_block_start != -1) { // We just finished a free block
+        } else { // unidade usada ou fim de um bloco
+            if (current_block_start != -1) { // acabamos de terminar um bloco livre
                 if (current_block_size >= size_needed) {
                     if (current_block_size < best_fit_size) {
                         best_fit_size = current_block_size;
@@ -218,7 +189,7 @@ int find_best_fit(FILE *fp, int size_needed, int total_units) {
             current_block_size = 0;
         }
     }
-    // Check last block if the memory ends with a free block
+    // verifica o ultimo bloco se a memoria termina com um bloco livre
     if (current_block_start != -1 && current_block_size >= size_needed) {
         if (current_block_size < best_fit_size) {
             best_fit_start = current_block_start;
@@ -236,15 +207,15 @@ int find_worst_fit(FILE *fp, int size_needed, int total_units) {
 
     for (int i = 0; i < total_units; ++i) {
         int status = read_unit_status(fp, i);
-        if (status == -1) return -1; // Read error
+        if (status == -1) return -1; // erro ao ler o status da unidade
 
         if (status == STATUS_FREE) {
             if (current_block_start == -1) {
                 current_block_start = i;
             }
             current_block_size++;
-        } else { // Unit is used or end of a block
-            if (current_block_start != -1) { // We just finished a free block
+        } else { // unidade usada ou fim de um bloco
+            if (current_block_start != -1) { // acabamos de terminar um bloco livre
                 if (current_block_size >= size_needed) {
                     if (current_block_size > worst_fit_size) {
                         worst_fit_size = current_block_size;
@@ -256,11 +227,10 @@ int find_worst_fit(FILE *fp, int size_needed, int total_units) {
             current_block_size = 0;
         }
     }
-    // Check last block if the memory ends with a free block
+    // verifica o ultimo bloco se a memoria termina com um bloco livre
     if (current_block_start != -1 && current_block_size >= size_needed) {
         if (current_block_size > worst_fit_size) {
             worst_fit_start = current_block_start;
-            // worst_fit_size = current_block_size; // Not strictly needed here
         }
     }
     return worst_fit_start;
