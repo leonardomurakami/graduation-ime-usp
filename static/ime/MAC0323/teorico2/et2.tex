@@ -1,0 +1,92 @@
+\documentclass[11pt,reqno,a4paper]{amsart}
+
+\usepackage{setspace}
+\usepackage[portuguese]{babel}
+\usepackage[utf8]{inputenc} % Or use \usepackage{inputenc}[utf8] if needed by editor
+
+\usepackage{fullpage}
+\usepackage{amsmath}
+\usepackage{amssymb} % For symbols like \lfloor, \rfloor, \min, \max
+\usepackage{amsthm} % Recommended for theorem environments
+\usepackage{enumitem} % Added for custom list labels
+
+% Consistent spacing for displayed math
+\usepackage{mathtools} 
+\mathtoolsset{showonlyrefs=false} % Optional: only number referenced equations
+
+\def\Assin#1{\noindent\textit{Assinatura}\strut\\%:\\
+\framebox[\textwidth]{\phantom{\vrule height#1}}}
+
+\newtheoremstyle{prova_style}{}{}{\itshape}{}{\bfseries}{.}{ }{}
+\theoremstyle{prova_style}
+\newtheorem*{prova}{Prova} % Unnumbered proof environment
+
+% Define lg for logarithm base 2
+\DeclareMathOperator{\lgop}{lg}
+\newcommand{\lgfn}[1]{\lgop #1}
+
+\title{\textsl{
+    MAC0323 Algoritmos e Estruturas de Dados II}\\\vspace{3\jot}
+  Folha de solução}
+\author[MAC0323 Folha de solução]{} % Author is optional or can be filled
+
+\date{13 de Abril de 2025} % Use \date command
+
+\begin{document}
+\parindent=0pt % No paragraph indentation, paragraphs separated by vertical space
+
+\maketitle
+\thispagestyle{empty} 
+\pagestyle{plain}
+\onehalfspace % 1.5 line spacing
+
+\textbf{Nome:} Leonardo Heidi Almeida Murakami\enspace \hfill \enspace
+\textbf{NUSP:} 11260186\enspace\hfill
+
+\bigskip
+
+\textbf{Exercício:} Exercício Teórico II - MAC0323\enspace\hfill\enspace
+
+\bigskip
+\noindent\textbf{SOLUÇÃO}
+
+\section{Exercício 2}
+
+\subsection{Algoritmo Proposto}
+
+\begin{enumerate}[label=(\arabic*)] 
+    \item \textbf{Escolha de um vértice raiz arbitrário:} Selecione um vértice arbitrário $s \in V$. Este vértice será o último na ordenação de remoção, ou seja, $x_n = s$.
+    \item \textbf{Busca em Profundidade (DFS) e Pós-Ordem:} Realize uma DFS em $G$ iniciando pelo vértice $s$. Durante a travessia, compute uma ordenação de pós-ordem (post-order traversal) dos vértices. Denotaremos esta sequência como $P_1, P_2, \dots, P_n$. Pela definição de pós-ordem em uma DFS iniciada em $s$, temos $P_n = s$.
+    \item \textbf{Definição da ordenação de remoção:} A ordenação de remoção desejada $x_1, x_2, \dots, x_n$ é definida diretamente pela sequência de pós-ordem: $x_i = P_i$ para $i=1, \dots, n$.
+\end{enumerate}
+
+\subsection{Demonstração}
+
+Precisamos demonstrar que para a ordenação $x_1, \dots, x_n$ gerada, os grafos $G_k = G - \{x_1, \dots, x_k\}$ são conexos para $k=0, 1, \dots, n-1$. O grafo $G_k$ é o subgrafo de $G$ induzido pelo conjunto de vértices $V'_k = V \setminus \{x_1, \dots, x_k\}$. Utilizando a definição $x_i = P_i$, temos $V'_k = \{P_{k+1}, \dots, P_n\}$.
+
+\begin{itemize}
+    \item Para $k=0$, $G_0 = G[V \setminus \emptyset] = G[V] = G$. O problema estipula que $G$ é conexo, então a condição é satisfeita para $G_0$.
+    \item Para $k \in \{1, \dots, n-1\}$, consideremos o grafo $G_k = G[V'_k]$. Seja $T$ a árvore DFS gerada pela busca em profundidade iniciada em $s=P_n$.
+    
+    Para qualquer vértice $v \in V'_k$:
+    \begin{itemize}
+        \item Se $v=s$ (ou seja, $v=P_n$), ele é a raiz da árvore DFS $T$ e pertence a $V'_k$. 
+        \item Se $v \neq s$, então $v = P_j$ para algum $j \in \{k+1, \dots, n-1\}$. Na árvore DFS $T$, $v$ possui um pai, que denotaremos $\text{pai}(v)$. De acordo com as propriedades da travessia em pós-ordem, um nó é registrado na sequência de pós-ordem somente após todos os seus descendentes na árvore DFS terem sido registrados. Isso implica que o índice de pós-ordem de qualquer nó é menor que o índice de pós-ordem de seu pai. Assim, se $v = P_j$, seu pai $\text{pai}(v)$ será $P_l$ para algum $l > j$. Como $j \ge k+1$, segue que $l > j \ge k+1$, e portanto $l \in \{k+1, \dots, n\}$. Logo, $\text{pai}(v) \in V'_k$.
+    \end{itemize}
+    Isso demonstra que cada vértice $v \in V'_k \setminus \{s\}$ está conectado ao seu pai $\text{pai}(v)$ (que também está em $V'_k$) através de uma aresta da árvore $T$. Como $s=P_n$ é a raiz de $T$ e $s \in V'_k$, todos os vértices em $V'_k$ estão conectados a $s$ dentro de $G[V'_k]$ por meio de caminhos formados por arestas de $T$ (que são um subconjunto das arestas de $G[V'_k]$). Consequentemente, o grafo $G[V'_k]$ é conexo.
+    
+    Esta argumentação é válida para $k=1, \dots, n-1$. Note que para $k=n-1$, $V'_{n-1} = \{P_n\} = \{s\}$. O grafo $G[\{s\}]$ consiste em um único vértice e é, por definição, conexo.
+\end{itemize}
+Portanto, o algoritmo produz uma ordenação que satisfaz as condições do problema.
+
+\subsection{Análise da Eficiência}
+
+A complexidade do algoritmo é determinada pelas suas etapas principais:
+\begin{enumerate}[label=(\arabic*)]
+    \item \textbf{Escolha de um vértice raiz arbitrário:} A seleção de um vértice arbitrário pode ser feita em $O(1)$ (assumindo que os vértices são acessíveis de forma eficiente, por exemplo, como o primeiro elemento de uma lista de adjacência ou através de um índice).
+    \item \textbf{Busca em Profundidade (DFS) e Pós-Ordem:} Uma DFS padrão em um grafo com $n$ vértices e $m$ arestas tem complexidade $O(n+m)$. A computação da sequência de pós-ordem é uma parte natural da DFS (um vértice é adicionado à lista de pós-ordem quando a chamada recursiva da DFS para esse vértice é concluída) e não adiciona sobrecarga significativa à complexidade da DFS.
+    \item \textbf{Definição da ordenação de remoção:} Atribuir a sequência de pós-ordem $P_1, \dots, P_n$ à ordenação $x_1, \dots, x_n$ envolve a manipulação de uma lista de $n$ vértices, o que leva $O(n)$ tempo.
+\end{enumerate}
+Somando as complexidades das etapas, a complexidade total do algoritmo é dominada pela etapa da DFS, resultando em $O(n+m)$.
+
+\end{document}
