@@ -1,0 +1,75 @@
+USPAudioTech
+ - Producao
+  - Foco na criacao, execucao e refinamento
+   - Pre producao: Arranjo, ensaios, etc.
+   - Producao: gravacao, mixagem, etc.
+   - Pos Producao: masterizacao, divulgacao
+  - Uso extensivo de software especializados
+   - Composicao e notacao musical
+   - DAW (Digital Audio Workstation)
+ - DSP
+  - Digital Signal Processing: processamento de audio digital
+  - Manipulacao de Audio
+   - Matematica: teoria, fundamentacao
+   - Aplicacao: Sintese sonora, analise espectral, equalizacao, delay, chorus, reverb, supressao de ruido, pitch shifting, time stretching
+ - Plugins
+  - Instrumentos e efeitos virtuais
+    - Geracao e modificacao de audio
+    - Engenharia de Software: frameworks especializados da teoria de DSP. Design de produto de software
+ - Hardware
+  - Sistemas embarcados
+   - Musicais: interfaces de audio, sintetizadores, pedais
+   - Nao Musicais: dispositivos medicos, satelites, telecomunicacoes
+ - Projetos
+  - Workshops
+   - Do Zero ao Som
+    - Sintese sonora
+    - Introducao ao dsp
+    - Acustica musical
+    - Python e Ableton Livre
+   - Producao Musical
+    - Metodologia da producao musical
+    - Introducao aos softwares tecnicos
+    - Introducao a teoria musical
+    - Demontracao de instrumentos/efeitos virtuais
+  - Grupo de Estudos
+   - Framework JUCE
+    - Framework para aplicacoes de audio
+    - Amplamente usado pela industria
+    - Base de codigo aberto em C++
+    - Para iniciantes e avancados
+    - Criacao de materiais didaticos em portugues
+   - Audiotech Jams
+    - Producao musical
+    - Reuniao presencial
+    - Integracao 
+  - Wavetable Brasileiro
+   - Projeto coletivo
+   - Emulacao do Wavetable do Ableton Live
+
+LEARN (Liga de Estudos em Aprendizado de maquina e Redes Neurais)
+ - Foi comentado o desafio de se elaborar um programa que recebe uma imagem de tamanho arbitrario e define o elemento de maior destaque da imagem
+  - No exemplo, a imagem era de 500x375
+  - Para 3 canais de cores entao, 562500 pixels
+ - Resolver certos problemas apenas com computacao tradicional pode ser complicado demais
+ - Podemos utilizar aprendizado de maquina
+  - Fazer o computador aprender padroes
+  - Exemplo 1: Agente Jogador de Super Mario Bros
+  - Exemplo 2: Deteccao de objetos com redes convolucionais
+ - O que é o LEARN
+  - Sao uma Liga de Estudos, que significa que estudam juntos e trocam informacoes sobre conteudos voltados para a area de Machine Learning
+  - Focam fortmente em liberdade pessoal e proatividade. 
+  - Dividem o grupo em duas partes
+   - Alunos experientes compartilham o que estao estudando 
+   - Alunos novos estudam o mesmo conteudo ao mesmo tempo, visando construir uma base solida do ambiente colaborativo do LEARN
+ - Projetos
+  - BRSet e Retinopatia Diabetica
+   - Surge pela FMUSP (Faculdade de Medicina)
+   - Necessidade de explorar causas de declinio cognitivo
+   - Como facilitar o diagnostico?
+    - Machine Learning
+  - BRSet
+   - Dataset brasileiro, explora anormaldiades em imagens de retina
+   - Queremos treinar um modelo para classificar imagens conforme suas anormalidades, doencas e saude
+   - Ideia: Usar uma Rede Convolucional 
+   
