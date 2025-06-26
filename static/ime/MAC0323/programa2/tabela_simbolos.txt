@@ -1,0 +1,5 @@
+a $\blacklozenge$
+b $\spadesuit$
+c $\bowtie$
+d $\wp$
+e $\pitchfork$

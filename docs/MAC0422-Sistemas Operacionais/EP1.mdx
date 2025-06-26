@@ -1,0 +1,72 @@
+---
+title: 'EP1 - Shell e Escalonador de Processos'
+description: 'Implementação de um shell e um escalonador de processos em C com múltiplos algoritmos e suporte a múltiplas CPUs.'
+date: '2024'
+tags: ['so', 'c', 'shell', 'escalonador']
+---
+
+# EP1: Shell (uspsh) e Escalonador de Processos (ep1)
+
+## Descrição do Problema
+
+Este projeto consiste na implementação de dois programas em C para a disciplina de Sistemas Operacionais (MAC0422):
+
+1.  **`uspsh`**: Um shell simples que permite a execução de comandos, com suporte a comandos internos que fazem uso de chamadas de sistema.
+2.  **`ep1`**: Um simulador que escalona "processos" (threads) com base em diferentes algoritmos, lendo-os de um arquivo de trace.
+
+## Estrutura do Projeto
+
+O projeto é dividido em duas partes principais, cada uma com seu executável.
+
+### `uspsh` - O Shell
+
+O `uspsh` é um shell interativo que exibe um prompt com o nome do host e o diretório atual. Ele utiliza a biblioteca `readline` para fornecer histórico de comandos.
+
+#### Comandos Internos
+
+Os seguintes comandos são implementados internamente e utilizam chamadas de sistema do Linux:
+
+-   `cd <diretorio>`: Muda o diretório atual (`chdir`).
+-   `whoami`: Exibe o nome do usuário atual (`getuid`, `getpwuid`).
+-   `chmod <perm> <arquivo>`: Altera as permissões de um arquivo (`chmod`).
+
+Qualquer outro comando é tratado como um comando externo e executado em um processo filho criado com `fork` e `execvp`.
+
+### `ep1` - O Escalonador de Processos
+
+O `ep1` é um simulador de escalonador de processos que opera sobre múltiplas CPUs. Ele lê uma lista de processos de um arquivo de trace e os executa de acordo com o algoritmo de escalonamento selecionado.
+
+#### Algoritmos de Escalonamento
+
+-   **FCFS (First-Come, First-Served)**: Os processos são executados na ordem em que chegam.
+-   **SRTN (Shortest Remaining Time Next)**: O processo com o menor tempo restante de execução é escolhido. Este é um algoritmo preemptivo.
+-   **Prioridade com Deadline**: Os processos são priorizados com base em seu deadline (prazo final), com o mais próximo sendo executado primeiro (LST - Least Slack Time). Também é preemptivo.
+
+#### Execução
+
+O simulador é executado via linha de comando, onde é possível especificar o algoritmo, os arquivos de entrada e saída, e o número de CPUs a serem utilizadas.
+
+```bash
+./ep1 <algoritmo> <arquivo-entrada> <arquivo-saida> [--cpu numero-cpu] [--debug]
+```
+
+## Análise de Desempenho
+
+O simulador foi utilizado para gerar dados sobre o comportamento dos escalonadores. Abaixo estão gráficos que ilustram a conformidade com os deadlines e o número de preempções para cada algoritmo.
+
+### Conformidade com Deadlines
+<img src="/ime/MAC0422/programa1/deadline_compliance_statistics.png" alt="Estatísticas de conformidade com deadline" />
+
+### Preempções
+<img src="/ime/MAC0422/programa1/preemption_statistics.png" alt="Estatísticas de preempção" />
+
+## Conclusão
+
+Este projeto permitiu explorar conceitos fundamentais de sistemas operacionais, como a criação e gerenciamento de processos, chamadas de sistema, e algoritmos de escalonamento. A implementação do shell `uspsh` proporcionou uma compreensão prática da interação entre o espaço do usuário e o kernel, enquanto o simulador `ep1` permitiu uma análise comparativa do desempenho de diferentes estratégias de escalonamento em um ambiente multi-core.
+
+export default ({ children }) => (
+  <article className="prose prose-lg max-w-none">
+    {children}
+  </article>
+);
+

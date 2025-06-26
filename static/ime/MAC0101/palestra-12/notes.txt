@@ -1,0 +1,48 @@
+CodificADAs
+ - Grupo de extensão para promover a participação feminina nos cursos de computação de ensino superior
+ - Primeira turma de BCC foi composta de 16 mulheres e 6 homens
+ - Para ingressar no BCC precisava ingressar em Matemática/Licenciatura e depois transferir
+ - "O Instituto de Matemática era basicamente uma escola de meninas, os meninos preferiam engenharia"
+ - Em 2016, de 40 alunos na turma apenas 6 eram mulheres
+ - Aproximadamente 16% de alunas no instituto
+ - O advento dos computadores pessoais (PCs) contribuiu para a construção de um estereótipo que associou a computação ao universo masculino
+ - A CodificADAs vem para atuar no ensino fundamental e ensino médio para a criação de ações educativas e de popularização da computação
+ - O objetivo é fomentar o interesse por carreiras na área de computação e colaborar para a redução das disparidades de gênero no ingresso ao ensino superior nesse campo
+ - Nome do grupo é uma homenagem a Ada Lovelace
+ - Escreveu o primeiro algoritmo a ser processado por uma maquina
+ - A maior parte do grupo é composta de pessoas da computação
+ - Cursos:
+  - Introducao a programacao em python
+   - A realizacao mais recente foi em janeiro de 2025, presencialmente nos labs do IME
+   - Alunas tambem tiveram a chance de conhecer o campus da cidade universitaria e suas dependencias, incentivando-as a obter um ensino superior voltado para a ciencia da computacao
+   - O principal foco do curso é mostrar o campus, para mostrar a USP e incentivar a entrada
+  - Programacao Web
+   - Para meninas do ensino medio
+  - Introducao ao Design de Experiencia do Usuario
+  - Introdução à Programação em Scratch
+   - Primeiro curso, oferecido durante a pandemia 
+  - Meninas e Mulheres na Computacao
+   - O evento contara com palestras motivadoras atividades de programacao e momentos de integracao
+   - Ira ocorrer em 23/08, nos periodos da manha e da tarde nos auditorios e laboratorios do iME, com o apoio de mais de 25 estudantes da graduacaoe da pos graduacao que atuarao na organizacao e execucao do evento
+  - Premio PIPA
+  
+USPGameDev
+ - é um grupo de extensao formado em 2009 voltado para o estudo e desenvolvimento de jogos
+ - organiza eventos relacionados, participa de game jams, tem contato com outros grupos de extensao voltados para game dev
+ - o grupo foca na horizontalidade, na autonomia e no software livre
+ - Treinamento
+  - Workshops introdutorios sobre desenvolvimento de jogos
+  - Workshops sobre git, godot, arte 2d, musica, etc.
+ - Eventos
+  - Gostam de fazer as Game Jams presenciais (maratona de game dev)
+  - Let's Test Play: traz jogos que o grupo fez para o IME para as pessoas testarem
+  - Corujao: Noite presencial de jogos onde vira-se a noite jogando, para integracao
+  - Noite de jogos online
+  - Serve como porta de entrada para industria
+ - Como funciona?
+  - Organizacao com base em projetos
+  - Usa majoritariamente o discord para comunicacao (avisos, propor jogos, etc.)
+  - Reunioes de integracao
+ - Pode participar qualquer pessoa da usp
+ - Algumas atividades rendem AACs (workshops, treinamentos, etc.)
+ - Usam majoritariamente a Godot por ser uma engine inteiramente open source

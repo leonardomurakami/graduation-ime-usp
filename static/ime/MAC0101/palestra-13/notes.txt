@@ -1,0 +1,45 @@
+TECS
+ - O TECS é um grupo focado no impacto social da computação e da tecnologia. 
+ - Ele é parte do TechShift, uma aliança global de organizações estudantis com esse mesmo propósito.
+ - Projetos
+  - GT Ciclo de Debates/Palestras
+  - GT Inclusao Digital
+  - GT Acessibilidade
+  - GT Portal Indigena
+  - GT Vestibulandas
+  - GT Web
+  - GT Each
+  - GT Editatona (maratonas de edicao de paginas da wikipedia)
+  - GT Kali
+  - GT MAC0213
+  - GT Fundacao Casa
+  - GT LGBTecs
+  - GT Eventos
+  - GT Colmeia Tech
+ - LGBTecs
+  - Unico GT ativo atualmente
+  - Curso de desenvolvimento web para pessoas trans
+ - A dinamica pautada em Grupos de Trabalho permite flexibilidade
+ - O TECS é interdisciplinar e conta com mebros das mais diversas areas
+ - Nenhum conhecimento previo de nenhum assunto é necessario
+
+SYMCOMP - Simposio da Computacao
+ - Grupo de extensao que nasceu com a msisao de tornar a computacao acessivel e envolvente para todos
+ - Aproximar os alunos com a comunidade externa
+ - Exemplo: empresas vem divulgar palestras, workshops, programas de estagios
+ - Eventos:
+  - ByteCafe
+   - Aproximar os alunos do ensino medio dos alunos do curso de computacao e da USP, proporcionando uma experiencia imersiva de um dia
+   - Ajudam os alunos do ensino medio a tirar quaisquer duvidas sobre o curso e incentivam a participacao
+   - Dao espaco a outros grupos de extensao se apresentarem ou organizam atividades proprias dinamicas (google collab, etc.)
+   - Palestra com coordenadores do curso
+  - Semana da computacao
+   - Evento Anual
+   - Organizado pelos proprios alunos da graduacao
+   - Grande participacao de alunos e docentes
+   - Palestrantes e Empresas da area de tecnologia
+   - Grupos de extensao do IME USP
+   - 20/10/2025 - 24/10/2025 (12:00 - 18:15)
+  - Premio PIPA
+  - Gambi conf
+  - IBM mainframe

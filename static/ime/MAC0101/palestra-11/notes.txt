@@ -1,0 +1,91 @@
+USPCodeLab
+ - Grupo de extensao para inovacao tecnologica
+ - DevLearn
+  - Curso de desenvolvimento web
+  - Versao reformulada para esse ano:
+   - HTML/CSS
+   - Javascript
+   - SQL
+   - Python (django)
+   - HTMX
+   - Docker
+  - Desenvolvimento de um aplicativo web
+  - Porta de entrada do CodeLab
+ - HackFools
+  - Hackaton voltado para quem nunca competiu em hackatons
+  - Mais descontraido, mas com codigo
+  - Esse sabado (10/06/2025)
+ - Aurora
+  - Projeto para facilitar a montagem de grades horarios para os alunos
+  - Ja foi disponibilizado a parte de pre-requisitos
+ - CodeClass
+  - A plataforma de cursos do CodeLab
+ - Maquina de Soco
+  - Maquina arcade de soco
+  - CodeLab vai fazer o software e o hardware vai vir externamente
+ - Por que participar?
+  - Construir coisas 
+  - Integração
+  
+IME Jr.
+ - Empresa dentro do IME-USP (empresa junior)
+ - Recebe pessoas de varios institutos, mas deve ser da USP
+ - Visa, principalmente, a transformacao pessoal, academica e profissional
+ - Preciso de conhecimento para entrar?
+  - Nao, a empresa oferece cursos e preparacao ao seus membros
+  - Trilhas dos membros
+  - Quando possivel, abrem as palestras para o IME/USP inteiro
+  - Apos seguir a trilha e o seu lider sentir que voce esta pronto, voce comeca a participar dos projetos
+ - Tem carga horaria fixa?
+  - Nao cobramos um tempo definido de execucao de tarefas
+  - Pedimos apenas comprometimento e responsabilidade
+  - Quanto mais participar e mais for proativo, melhorees resultados e mais projetos
+ - Online ou presencial?
+  - Praticamente tudo é online, como reunioes, tarefas e trilhas
+  - Temos eventos de integracao, reunioes gerais e cursos presenciais
+ - Setores/Nucleos
+  - Negocios
+   - Responsavel por receber o cliente, entender a demanda, fechar contrato, fazer orcamento, fazer evento
+   - Como aprender? Existe uma uniao de todas as juniores brasileiras que fornece cursos para ensinar a parte burocratica
+   - Por via de regra, cobra de 8 a 9x a menor que o mercado
+   - Projetos mais caros sairam entre 40 e 60 mil
+  - Juridico/Financeiro
+   - Possuem advogados e contadores
+   - Ainda precisam mandar os contratos e verificar antes de mandar
+  - RH
+   - Garantir a boa interacao entre as areas
+   - Garantir a performance e entrega das pessoas
+  - Marketing
+   - Trona a empresa visivel e atraente para clientes e publico em geral
+   - Montamos a aparencia, estetica, deixam o Ime JR com a "nossa cara"
+  - Educacao
+   - Cursos
+  - Dados
+  - Computacao
+   - Uma comunidade de aprendizado, experimentacao e criacao tecnologica dentro da IME Jr.
+   - Objetivo: conectar a teorica e pratica por meio de porjetos desafiadores em computacao, preparando nossos membros para atuar com impacto no mercado e na pesquisa
+   - O que aprendemos por aqui?
+    - Desenvolvimento web
+    - Git
+    - Machine Learning e IA
+    - LLMS e IA generativa
+    - Automacao de processos e scraping de dados
+    - Integracao com APIs
+   - Projetos para aprender
+    - Landing pages e reestruturacao de sites reais
+    - Automacao de fluxos manuais
+    - etc.
+   - Exemplos recentes
+    - Automacao de presenca com QR Code para o Cursinho EACH
+    - Scraper's inteligentes com processamento de texto
+    - Geracao de relatorios automatizados com ChatGPT
+    - Assistentes conversacionais para tarefas internas
+  - Porque entrar no nucleo?
+   - Para se desenvolver em Tecnica, Pratica e na parte Humana
+    - Tecnica: habilidades com valor de mercado
+    - Pratica: experiencia em projetos com entregas reais
+    - Humana: visao critica, autonomia, trabalho em equipe
+   - Acesso a redes e oportunidades
+   - Participacao em decisoes tecnicas e estrategicas
+   - Crescimento guiado por proposito 
+   
