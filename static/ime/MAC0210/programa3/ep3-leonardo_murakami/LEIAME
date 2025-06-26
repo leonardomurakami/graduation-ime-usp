@@ -1,0 +1,25 @@
+Para compilar e rodar o programa, execute o seguinte comando:
+
+```bash
+make
+```
+
+Este comando irá compilar o código `ep3.c`, gerando um executável chamado `ep3`, e em seguida irá executá-lo.
+
+Se você preferir, você pode executar os passos separadamente:
+
+**Compilar:**
+```bash
+make ep3
+```
+
+**Executar:**
+```bash
+./ep3
+```
+
+**Limpar:**
+Para remover os arquivos gerados durante a compilação, use:
+```bash
+make clean
+```
