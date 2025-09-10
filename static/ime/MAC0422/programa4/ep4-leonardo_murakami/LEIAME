@@ -1,0 +1,32 @@
+## Como executar o ep4.sh
+
+### Sintaxe:
+```
+./ep4.sh <num_clients> <file_size_1_MB> [file_size_2_MB] ...
+```
+
+### Parâmetros:
+- `<num_clients>`: Número de clientes concorrentes que se conectarão aos servidores
+- `<file_size_1_MB>`: Tamanho do primeiro arquivo em MB que será transferido
+- `[file_size_2_MB] ...`: Tamanhos adicionais de arquivos em MB (opcional)
+
+### Exemplos de uso:
+```bash
+# Testa com 10 clientes concorrentes e arquivo de 1MB
+./ep4.sh 10 1
+
+# Testa com 5 clientes e arquivos de 1MB, 5MB e 10MB
+./ep4.sh 5 1 5 10
+
+# Testa com 20 clientes e arquivos de 2MB, 4MB, 8MB
+./ep4.sh 20 2 4 8
+```
+
+### Saída:
+O script gera um arquivo PDF com nome `ep4-resultados-<num_clients>.pdf` contendo um gráfico comparativo dos tempos de resposta.
+
+## Video
+
+Link: https://www.youtube.com/watch?v=LkPJX56XSUA
+Link2: https://youtu.be/LkPJX56XSUA?si=MB2-GUxwOyHdEFFZ (mesmo video, por garantia)
+O video acima esta como nao listado, entao apenas com o link deve ser possivel acessa-lo

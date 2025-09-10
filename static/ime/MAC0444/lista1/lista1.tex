@@ -1,0 +1,204 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[portuguese]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+
+\title{Lista 1 - Sistemas Baseados em Conhecimento (MAC0444)}
+\author{Leonardo Heidi Almeida Murakami \\ NUSP: 11260186}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section*{1. Exercicio 1}
+Para cada caso, definimos uma interpretação $I = (D, \pi)$, onde $D$ é o domínio e $\pi$ é a função de interpretação que mapeia o predicado $P$ e as constantes $a, b$.
+
+\subsection*{(i) (a) falso, (b) e (c) verdadeiros}
+Neste caso, precisamos de uma relação que falhe na transitividade mas seja anti-simétrica e satisfaça a terceira condição.
+
+\begin{itemize}
+    \item \textbf{Domínio $D$}: $\{c_1, c_2, c_3, c_4\}$
+    \item \textbf{Interpretação $\pi$}:
+    \begin{itemize}
+        \item $\pi(a) = c_1$
+        \item $\pi(b) = c_2$
+        \item $\pi(P) = \{(c_2, c_3), (c_3, c_4)\}$
+    \end{itemize}
+\end{itemize}
+
+\textbf{Verificação}:
+\begin{itemize}
+    \item \textbf{(a) $\forall x\forall y\forall z((P(x,y)\wedge P(y,z))\rightarrow P(x,z))$ é FALSA.} \\
+    Para $x=c_2, y=c_3, z=c_4$, temos que $P(c_2,c_3)$ é verdadeiro e $P(c_3,c_4)$ é verdadeiro, mas $P(c_2,c_4)$ é falso. Portanto, a implicação é falsa e a sentença é falsa.
+    
+    \item \textbf{(b) $\forall x\forall y((P(x,y)\wedge P(y,x))\rightarrow x=y)$ é VERDADEIRA.} \\
+    A relação é anti-simétrica. Não existe nenhum par $(x,y)$ em $\pi(P)$ tal que $(y,x)$ também esteja em $\pi(P)$ para $x \neq y$. O antecedente da implicação é sempre falso, tornando-a verdadeira.
+    
+    \item \textbf{(c) $\forall x\forall y(P(a,y)\rightarrow P(x,b))$ é VERDADEIRA.} \\
+    Substituindo as constantes, a sentença se torna $\forall x\forall y(P(c_1,y)\rightarrow P(x,c_2))$. O antecedente $P(c_1,y)$ é sempre falso para qualquer $y \in D$, pois não há pares em $\pi(P)$ que comecem com $c_1$. Portanto, a implicação é vacuamente verdadeira para todos $x, y$.
+\end{itemize}
+
+\subsection*{(ii) (b) falso, (a) e (c) verdadeiros}
+Queremos que $P$ não seja anti-simétrica, mas seja transitiva e satisfaça a condição (c).
+
+\begin{itemize}
+    \item \textbf{Domínio $D$}: $\{c_1, c_2, c_3, c_4\}$
+    \item \textbf{Interpretação $\pi$}:
+    \begin{itemize}
+        \item $\pi(a) = c_1$
+        \item $\pi(b) = c_2$
+        \item $\pi(P) = \{(c_3, c_4), (c_4, c_3), (c_2, c_2), (c_3, c_3), (c_4, c_4), (c_1, c_2), (c_3, c_2), (c_4, c_2)\}$
+    \end{itemize}
+\end{itemize}
+
+\textbf{Verificação}:
+\begin{itemize}
+    \item \textbf{(b) $\forall x\forall y((P(x,y)\wedge P(y,x))\rightarrow x=y)$ é FALSA.} \\
+    Para $x=c_3, y=c_4$, temos que $P(c_3,c_4)$ é verdadeiro e $P(c_4,c_3)$ é verdadeiro, mas $c_3 \neq c_4$. Portanto, a implicação é falsa e a sentença é falsa.
+
+    \item \textbf{(a) $\forall x\forall y\forall z((P(x,y)\wedge P(y,z))\rightarrow P(x,z))$ é VERDADEIRA.} \\
+    A relação é transitiva. Por exemplo, $P(c_3,c_4)$ e $P(c_4,c_3)$ implicam $P(c_3,c_3)$, que é verdadeiro. $P(c_4,c_3)$ e $P(c_3,c_4)$ implicam $P(c_4,c_4)$, que é verdadeiro. $P(c_4,c_3)$ e $P(c_3,c_2)$ implicam $P(c_4,c_2)$, que é verdadeiro. A transitividade se mantém para todas as combinações.
+
+    \item \textbf{(c) $\forall x\forall y(P(a,y)\rightarrow P(x,b))$ é VERDADEIRA.} \\
+    Substituindo, $\forall x\forall y(P(c_1,y)\rightarrow P(x,c_2))$. O único valor de $y$ que torna $P(c_1,y)$ verdadeiro é $y=c_2$. Assim, a sentença exige que, se $P(c_1,c_2)$ for verdadeiro (o que é), então $P(x,c_2)$ deve ser verdadeiro para todo $x \in D$. De fato, os pares $(c_1, c_2), (c_2, c_2), (c_3, c_2), (c_4, c_2)$ estão na relação. Com a definição de $\pi(P)$ incluindo $(c_1, c_2), (c_2, c_2), (c_3, c_2), (c_4, c_2)$, a condição é satisfeita.
+\end{itemize}
+
+\subsection*{(iii) (c) falso, (a) e (b) verdadeiros}
+Queremos que $P$ seja transitiva e anti-simétrica, mas que a condição (c) seja falsa. A relação ``($\le$)'' sobre números parece um bom candidato.
+
+\begin{itemize}
+    \item \textbf{Domínio $D$}: $\{1, 2, 3, 4\}$
+    \item \textbf{Interpretação $\pi$}:
+    \begin{itemize}
+        \item $\pi(a) = 1$
+        \item $\pi(b) = 3$
+        \item $\pi(P) = \{(x,y) \in D \times D \mid x \le y\}$
+    \end{itemize}
+\end{itemize}
+
+\textbf{Verificação}:
+\begin{itemize}
+    \item \textbf{(c) $\forall x\forall y(P(a,y)\rightarrow P(x,b))$ é FALSA.} \\
+    Substituindo, $\forall x\forall y(1 \le y \rightarrow x \le 3)$. Para mostrar que esta sentença universal é falsa, precisamos encontrar um contra-exemplo, ou seja, valores para $x$ e $y$ que tornem a implicação falsa.
+    Seja $y=2$ e $x=4$. O antecedente $1 \le 2$ é verdadeiro, mas o consequente $4 \le 3$ é falso. Como a implicação é falsa para esta instância, a sentença universal é falsa.
+    
+    \item \textbf{(a) $\forall x\forall y\forall z((P(x,y)\wedge P(y,z))\rightarrow P(x,z))$ é VERDADEIRA.} \\
+    A relação $\le$ é transitiva. Se $x \le y$ e $y \le z$, então $x \le z$.
+    
+    \item \textbf{(b) $\forall x\forall y((P(x,y)\wedge P(y,x))\rightarrow x=y)$ é VERDADEIRA.} \\
+    A relação $\le$ é anti-simétrica. Se $x \le y$ e $y \le x$, então necessariamente $x = y$.
+\end{itemize}
+
+\newpage
+\section*{2. Exercicio 2}
+
+\subsection*{(a) Representação do Conhecimento}
+Definimos os seguintes predicados e constantes:
+\begin{itemize}
+    \item \textbf{Constantes}: $A$ (Antônio), $M$ (Maria), $J$ (João), $Chuva$, $Neve$.
+    \item \textbf{Predicados}:
+    \begin{itemize}
+        \item $Membro(x)$: $x$ é membro do Clube Alpino.
+        \item $Esquiador(x)$: $x$ é esquiador.
+        \item $Alpinista(x)$: $x$ é alpinista.
+        \item $Gosta(x,y)$: $x$ gosta de $y$.
+    \end{itemize}
+\end{itemize}
+
+As sentenças são representadas em lógica de primeira ordem da seguinte forma:
+\begin{enumerate}
+    \item $Membro(A) \wedge Membro(M) \wedge Membro(J)$
+    \item $\forall x ((Membro(x) \wedge \neg Esquiador(x)) \rightarrow Alpinista(x))$
+    \item $\forall x (Alpinista(x) \rightarrow \neg Gosta(x, Chuva))$
+    \item $\forall x (\neg Gosta(x, Neve) \rightarrow \neg Esquiador(x))$
+    \item $\forall y (Gosta(A, y) \rightarrow \neg Gosta(M, y))$
+    \item $\forall y (\neg Gosta(A, y) \rightarrow Gosta(M, y))$
+    \item $Gosta(A, Chuva) \wedge Gosta(A, Neve)$
+\end{enumerate}
+
+\subsection*{(b) Prova Semântica}
+Queremos provar que $\exists x (Membro(x) \wedge Alpinista(x))$ é uma consequência lógica do conhecimento (KB). Uma prova semântica demonstra que qualquer modelo que satisfaça o KB também deve satisfazer a conclusão.
+
+\begin{enumerate}
+    \item De (7), sabemos $Gosta(A, Neve)$.
+    \item De (5), instanciando $y=Neve$, temos $Gosta(A, Neve) \rightarrow \neg Gosta(M, Neve)$.
+    \item Aplicando Modus Ponens com (1) e (2), obtemos $\neg Gosta(M, Neve)$.
+    \item De (4), instanciando $x=M$, temos $\neg Gosta(M, Neve) \rightarrow \neg Esquiador(M)$.
+    \item Por Modus Ponens em (3) e (4), concluímos $\neg Esquiador(M)$.
+    \item De (1), sabemos $Membro(M)$.
+    \item Agora temos a conjunção $Membro(M) \wedge \neg Esquiador(M)$.
+    \item De (2), instanciando $x=M$, temos $(Membro(M) \wedge \neg Esquiador(M)) \rightarrow Alpinista(M)$.
+    \item Novamente utilizando Modus Ponens em (7) e (8), concluímos $Alpinista(M)$.
+    \item Como temos $Membro(M)$ (de 6) e $Alpinista(M)$ (de 9), temos $Membro(M) \wedge Alpinista(M)$.
+    \item Portanto, demonstramos que $Membro(M) \wedge Alpinista(M)$ é verdadeiro, o que nos permite concluir $\exists x (Membro(x) \wedge Alpinista(x))$, já que Maria é uma instância concreta de membro e também é alpinista.
+\end{enumerate}
+Assim, a existência de um membro alpinista é uma consequência lógica do KB.
+
+\subsection*{(c) Contra-exemplo}
+Se a sentença (5) for removida, a prova anterior não é mais válida. Para mostrar isso, construímos um modelo (um contra-exemplo) no qual o KB modificado é verdadeiro, mas a conclusão $\exists x (Membro(x) \wedge Alpinista(x))$ é falsa. A falsidade da conclusão é equivalente a $\forall x (Membro(x) \rightarrow \neg Alpinista(x))$.
+
+\textbf{Modelo de Contra-exemplo}:
+\begin{itemize}
+    \item \textbf{Domínio}: $\{A, M, J, Chuva, Neve\}$
+    \item \textbf{Extensão dos Predicados}:
+    \begin{itemize}
+        \item $Membro = \{A, M, J\}$
+        \item $Alpinista = \emptyset$ (para tornar a conclusão falsa)
+        \item $Esquiador = \{A, M, J\}$
+        \item $Gosta = \{(A, Chuva), (A, Neve), (M, Neve), (J, Neve)\}$
+    \end{itemize}
+\end{itemize}
+
+\textbf{Verificação do Modelo}:
+\begin{itemize}
+    \item (1) $Membro(A), Membro(M), Membro(J)$: Verdadeiro.
+    \item (2) $\forall x ((Membro(x) \wedge \neg Esquiador(x)) \rightarrow Alpinista(x))$: Verdadeiro, pois para todos os membros, $\neg Esquiador(x)$ é falso, tornando o antecedente falso.
+    \item (3) $\forall x (Alpinista(x) \rightarrow \neg Gosta(x, Chuva))$: Verdadeiro, pois $Alpinista$ é um conjunto vazio, tornando o antecedente sempre falso.
+    \item (4) $\forall x (\neg Gosta(x, Neve) \rightarrow \neg Esquiador(x))$: Verdadeiro, pois todos os membros gostam de neve, então o antecedente é sempre falso para eles.
+    \item (6) $\forall y (\neg Gosta(A, y) \rightarrow Gosta(M, y))$: Verdadeiro. Antônio gosta de Chuva e Neve. Para $y=Chuva$ e $y=Neve$, o antecedente $\neg Gosta(A,y)$ é falso.
+    \item (7) $Gosta(A, Chuva) \wedge Gosta(A, Neve)$: Verdadeiro.
+\end{itemize}
+O KB modificado é satisfeito neste modelo, mas a conclusão $\exists x (Membro(x) \wedge Alpinista(x))$ é falsa, pois não há alpinistas. Portanto, a prova não é mais possível.
+
+\subsection*{(d) Resolução com Extração de Resposta}
+O objetivo é responder à pergunta: "Quem é o membro do Clube Alpino que é alpinista mas não esquiador?". A consulta é $\exists k (Membro(k) \wedge Alpinista(k) \wedge \neg Esquiador(k))$.
+
+\textbf{Passo 1: Convertemos a KB para CNF}
+\begin{itemize}
+    \item[C1:] $Membro(A)$
+    \item[C2:] $Membro(M)$
+    \item[C3:] $Membro(J)$
+    \item[C4:] $\neg Membro(x) \vee Esquiador(x) \vee Alpinista(x)$
+    \item[C5:] $\neg Alpinista(y) \vee \neg Gosta(y, Chuva)$
+    \item[C6:] $Gosta(z, Neve) \vee \neg Esquiador(z)$
+    \item[C7:] $\neg Gosta(A, w) \vee \neg Gosta(M, w)$
+    \item[C8:] $Gosta(A, w') \vee Gosta(M, w')$
+    \item[C9:] $Gosta(A, Chuva)$
+    \item[C10:] $Gosta(A, Neve)$
+\end{itemize}
+
+\newpage
+\textbf{Passo 2: Negar a consulta e adicionar o literal de resposta}
+A negação da consulta é $\forall k \neg(Membro(k) \wedge Alpinista(k) \wedge \neg Esquiador(k))$, que em forma clausal com o literal de resposta $Ans(k)$ é:
+\begin{itemize}
+    \item[CQ:] $\neg Membro(k) \vee \neg Alpinista(k) \vee Esquiador(k) \vee Ans(k)$
+\end{itemize}
+
+\textbf{Passo 3: Provar por Resolução}
+\begin{enumerate}
+    \item $[C7, C10 \text{ com } \{w/Neve\}] \rightarrow R1: \neg Gosta(M, Neve)$
+    \item $[R1, C6 \text{ com } \{z/M\}] \rightarrow R2: \neg Esquiador(M)$
+    \item $[R2, CQ \text{ com } \{k/M\}] \rightarrow R3: \neg Membro(M) \vee \neg Alpinista(M) \vee Ans(M)$
+    \item $[R3, C2] \rightarrow R4: \neg Alpinista(M) \vee Ans(M)$
+    \item $[R2, C4 \text{ com } \{x/M\}] \rightarrow R5: \neg Membro(M) \vee Alpinista(M)$
+    \item $[R5, C2] \rightarrow R6: Alpinista(M)$
+    \item $[R6, R4] \rightarrow R7: Ans(M)$
+\end{enumerate}
+
+A resolução deriva a cláusula $Ans(M)$, o que significa que \textbf{Maria} é o membro do Clube Alpino que é alpinista mas não esquiadora.
+
+\end{document}

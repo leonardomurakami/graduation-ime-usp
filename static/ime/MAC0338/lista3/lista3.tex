@@ -1,0 +1,174 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[portuguese]{babel}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage[portuguese,algoruled,lined,linesnumbered]{algorithm2e}
+\usepackage{geometry}
+\usepackage{hyperref}
+\geometry{a4paper, margin=1in}
+
+
+% ---- PREENCHA ----
+\newcommand{\Lista}{3}
+\newcommand{\Nome}{Leonardo Heidi Almeida Murakami}
+\newcommand{\NUSP}{11260186}
+% -----------------------------
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\Nome}
+\fancyhead[R]{NUSP \NUSP}
+\fancyfoot[L]{Lista \Lista}
+\fancyfoot[C]{MAC0338}
+\fancyfoot[R]{Página \thepage\ de \pageref{LastPage}}
+
+\begin{document}
+
+\section*{Exercício 1}
+
+\subsection*{Qual é o número esperado de comparações executadas na linha 6 do algoritmo?}
+
+Considerando que, na iteração $i$ (para $i \in \{2, \dots, n\}$), a variável \texttt{maior} guarda
+
+\begin{equation}
+\max\{v[1], \dots, v[i-1]\}
+\end{equation}
+
+Logo, \texttt{v[i] > maior} é verdadeira apenas quando $v[i]$ é o máximo de $v[1..i]$, o que ocorre com probabilidade $\tfrac{1}{i}$, pois a entrada é uma permutação uniforme.
+Assim, a comparação \texttt{v[i] < menor} (linha 6) é executada na iteração $i$ se, e somente se, $v[i]$ \emph{não} é o máximo de $v[1..i]$:
+
+\begin{equation}
+P(\text{executar linha 6 na iteração } i) = 1 - \frac{1}{i}.
+\end{equation}
+
+Seja $X_6$ o número total de comparações na linha 6 e defina a série harmônica $H_n := \sum_{k=1}^{n} \tfrac{1}{k}$. Pela linearidade da esperança,
+\begin{align}
+E[X_6]
+&= \sum_{i=2}^{n} P(\text{executar linha 6 na iteração } i) \\
+&= \sum_{i=2}^{n} \left(1 - \frac{1}{i}\right) \\
+&= (n-1) - (H_n - 1) \\
+&= n - (H_n)
+\end{align}
+
+Portanto,
+\begin{equation}
+\boxed{E[X_6] = n - H_n}.
+\end{equation}
+
+\subsection*{Qual é o número esperado de atribuições efetuadas na linha 7 do algoritmo?}
+
+A atribuição da linha 7, \texttt{menor <- v[i]}, ocorre se, e somente se, \texttt{v[i] > maior} é falsa e \texttt{v[i] < menor} é verdadeira. Como \texttt{menor} guarda $\min\{v[1], \dots, v[i-1]\}$, a atribuição acontece exatamente quando $v[i]$ é o novo mínimo de $v[1..i]$.
+
+Com entrada aleatória (permutação uniforme), a probabilidade de $v[i]$ ser o mínimo de $v[1..i]$ é $\tfrac{1}{i}$. Logo, se $X_7$ é o número total de atribuições/execuções na linha 7,
+\begin{align}
+E[X_7]
+&= \sum_{i=2}^{n} P(\text{executar linha 7 na iteração } i) \\
+&= \sum_{i=2}^{n} \frac{1}{i} \\
+&= H_n - 1.
+\end{align}
+
+Portanto,
+\begin{equation}
+\boxed{E[X_7] = H_n - 1}.
+\end{equation}
+
+\section*{Exercício 3}
+
+\subsection*{Estratégia do Algoritmo}
+A estratégia ideal é usar a mediana como pivô em um algoritmo de \textit{divide and conquer}, similar ao Quickselect, garantindo que o maior subproblema tenha tamanho no máximo metade do atual.
+
+\subsection*{Algoritmo}
+
+Assumimos a existência de duas funções auxiliares:
+\begin{itemize}
+    \item \texttt{Mediana(A, p, r)}: A função "caixa-preta" dada, que retorna a mediana do subvetor $A[p..r]$ em tempo linear.
+    \item \texttt{Particiona(A, p, r, m)}: Uma função padrão de particionamento (como a do Quicksort) que rearranja o subvetor $A[p..r]$ em torno de um pivô $m$, colocando elementos menores que $m$ à sua esquerda e maiores à sua direita. Ela retorna o índice final $q$ onde o pivô $m$ foi colocado. Esta operação também é linear.
+\end{itemize}
+
+\begin{algorithm}[H]
+\SetAlgoLined
+\caption{\texttt{k-esimoMenor}$(A, p, r, k)$}
+\KwData{Vetor $A$, índices $p, r$ (início e fim), inteiro $k$}
+\KwResult{$k$-ésimo menor elemento de $A[p..r]$}
+\BlankLine
+\If{$p = r$}{
+    \Return{$A[p]$}\;
+}
+$m \leftarrow \text{Mediana}(A, p, r)$\;
+$q \leftarrow \text{Particiona}(A, p, r, m)$\;
+$i \leftarrow q - p + 1$ \tcp*{$i$ é a ordem do pivô em $A[p..r]$}
+\If{$k = i$}{
+    \Return{$A[q]$}\;
+}
+\ElseIf{$k < i$}{
+    \Return{\texttt{k-esimoMenor}$(A, p, q-1, k)$}\;
+}
+\Else{
+    \Return{\texttt{k-esimoMenor}$(A, q+1, r, k-i)$}\;
+}
+\end{algorithm}
+\newpage
+\subsection*{Funcionamento do Algoritmo}
+O algoritmo \texttt{k-esimoMenor} opera de forma recursiva, aplicando a estratégia de divide and conquer:
+\begin{enumerate}
+    \item \textbf{Divisão:} A mediana $m$ do subvetor $A[p..r]$ é encontrada usando a função caixa-preta.
+    \item \textbf{Conquista:} O subvetor é particionado em torno da mediana $m$. Após o particionamento, $m$ está em sua posição correta $q$ como se o vetor estivesse ordenado. Todos os elementos em $A[p..q-1]$ são menores que $m$, e todos em $A[q+1..r]$ são maiores.
+    \item \textbf{Combinação:} O algoritmo então decide em qual subproblema continuar a busca:
+    \begin{itemize}
+        \item A posição (ordem) do pivô no subvetor atual é $i = q - p + 1$.
+        \item Se $k=i$, então o pivô é o elemento que procuramos, e ele é retornado.
+        \item Se $k < i$, o $k$-ésimo menor elemento deve estar no subvetor à esquerda, $A[p..q-1]$. O algoritmo é chamado recursivamente para esta parte, procurando ainda pelo $k$-ésimo elemento.
+        \item Se $k > i$, o elemento está no subvetor à direita, $A[q+1..r]$. Como já descartamos $i$ elementos (o pivô e os que estão à sua esquerda), agora procuramos pelo $(k-i)$-ésimo menor elemento neste novo subvetor.
+    \end{itemize}
+    \item \textbf{Caso Base:} A recursão para quando o subvetor contém apenas um elemento ($p=r$), que é trivialmente o elemento procurado.
+\end{enumerate}
+
+\subsection*{Prova de Corretude}
+Provamos a corretude por indução no tamanho do subvetor, $n = r - p + 1$.
+
+\textbf{Base:} Se $n=1$, então $p=r$ e $k$ deve ser 1. O algoritmo entra na primeira condição e retorna $A[p]$, que é o primeiro (e único) menor elemento. A base é válida.
+
+\textbf{Hipótese de Indução (HI):} Assuma que \texttt{k-esimoMenor} retorna o resultado correto para todos os subvetores de tamanho menor que $n$.
+
+\textbf{Passo Indutivo:} Considere um subvetor de tamanho $n > 1$.
+O algoritmo encontra a mediana $m$ e a posiciona no índice $q$ através do particionamento. Por definição do particionamento, $A[q]$ é o $(q-p+1)$-ésimo menor elemento de $A[p..r]$. Seja $i = q-p+1$.
+
+\begin{itemize}
+    \item \textbf{Caso 1: $k = i$}. O algoritmo retorna $A[q]$, que é o $i$-ésimo menor elemento. Como $k=i$, o resultado está correto.
+    \item \textbf{Caso 2: $k < i$}. O $k$-ésimo menor elemento de $A[p..r]$ deve ser menor que o $i$-ésimo, $A[q]$. Portanto, ele deve estar no subvetor $A[p..q-1]$. O tamanho deste subvetor é $q-p = i-1 < n$. Pela HI, a chamada recursiva \texttt{k-esimoMenor(A, p, q-1, k)} retornará o elemento correto.
+    \item \textbf{Caso 3: $k > i$}. O $k$-ésimo menor elemento é maior que $A[q]$. Ele deve estar no subvetor $A[q+1..r]$. Já existem $i$ elementos menores ou iguais a $A[q]$. Portanto, estamos procurando o $(k-i)$-ésimo menor elemento no subvetor da direita. O tamanho deste subvetor é $r-q < n$. Pela HI, a chamada \texttt{k-esimoMenor(A, q+1, r, k-i)} retornará o elemento correto.
+\end{itemize}
+Como todos os casos levam a um resultado correto, o algoritmo está correto por indução.
+\newpage
+\subsection*{Análise de Complexidade}
+Seja $T(n)$ o tempo de execução do algoritmo para um vetor de tamanho $n$. O custo em cada chamada recursiva é a soma dos custos de suas operações:
+\begin{enumerate}
+    \item \texttt{Mediana}: $O(n)$ (dado pelo enunciado).
+    \item \texttt{Particiona}: $O(n)$ (particionamento padrão é linear).
+    \item Chamada recursiva: Ocorre em um subproblema.
+\end{enumerate}
+O pivô escolhido é a mediana. Assumindo que o tamanho $n$ do vetor é uma potência de 2, a mediana divide o vetor em duas metades quase perfeitas. O maior subproblema no qual a recursão pode ser chamada terá tamanho no máximo $n/2$.
+Com isso, obtemos a seguinte recorrência para o tempo de execução:
+\begin{align*}
+T(n) &= T\!\left(\frac{n}{2}\right) + cn.
+\end{align*}
+Pelo Teorema Mestre (não lembro se foi ensinado em aula mas vi aqui quando pesquisava sobre o quickselect, \href{https://secon.utulsa.edu/cs2123/slides/dc2p.pdf}{Moore, CS 2123: Divide-Conquer-Glue Algorithms} \cite{moore_dc2p}), com $a=1$, $b=2$, $k=1$ e $a < b^k$, segue que
+\begin{equation}
+    \Theta(n^k) = \Theta(n^1)
+\end{equation}
+Portanto, 
+\begin{equation}
+    \boxed{T(n) = \Theta(n)}.
+\end{equation}
+Logo, o algoritmo é linear.
+
+\begin{thebibliography}{1}
+\bibitem{moore_dc2p} Tyler Moore. Quickselect algorithm — Divide-Conquer-Glue Algorithms (CS 2123). University of Tulsa. Disponível em: \href{https://secon.utulsa.edu/cs2123/slides/dc2p.pdf}{https://secon.utulsa.edu/cs2123/slides/dc2p.pdf}.
+\end{thebibliography}
+
+\end{document}

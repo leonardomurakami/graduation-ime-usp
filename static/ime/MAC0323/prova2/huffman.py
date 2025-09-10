@@ -31,15 +31,7 @@ def write_code(string, code):
     return out
 
 def main():
-    string = """vc
-merece
-3
-mendigos
-pelados
-na
-rua
-atras de vc
-toda manha de terca feira"""
+    string = "aba bece baca"
     freq = {}
     nodes = []
     for char in string:

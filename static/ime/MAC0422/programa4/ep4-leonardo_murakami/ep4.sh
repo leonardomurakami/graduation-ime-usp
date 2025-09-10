@@ -6,7 +6,6 @@ if [ $# -lt 2 ]; then
     exit 1
 fi
 
-# processa argumentos da linha de comando
 NUM_CLIENTS=$1
 shift
 FILE_SIZES=("$@")
@@ -55,19 +54,14 @@ for size in "${FILE_SIZES[@]}"; do
     for server in "${SERVERS[@]}"; do
         echo "Subindo o servidor $server"
         
-        # mata instancias existentes
+        # mata instancias existentes para garantir a limpeza dos logs
         pkill -f "$server" 2>/dev/null
         sleep 1
         
-        # inicia servidor em background
-        if [[ "$server" == *"unix"* ]]; then
-            # servidor de socket unix
-            /tmp/$server &>/dev/null &
-        else
-            # servidor de socket internet
-            /tmp/$server &>/dev/null &
-        fi
+        # inicia servidor sem poluir o terminal
+        /tmp/$server &>/dev/null &
         
+        # pega o pid do servidor
         SERVER_PID=$!
         sleep 2
         
@@ -98,20 +92,23 @@ for size in "${FILE_SIZES[@]}"; do
         
         sleep 2
         
-        # encontra informacoes de tempo do journald
-        END_TIME=$(/bin/date "+%Y-%m-%d %H:%M:%S")
+        # encontra informacoes de tempo do journald usando journalctl
+        # busca o primeiro "Passou pelo accept" (primeiro cliente conectou)
+        FIRST_ACCEPT_RAW=$(journalctl -q --since "$START_TIME" --no-pager | grep "Passou pelo accept" | head -1 | awk '{print $1" "$2" "$3}')
         
-        # calcula tempo decorrido
-        START_EPOCH=$(date -d "$START_TIME" +%s)
-        END_EPOCH=$(date -d "$END_TIME" +%s)
-        ELAPSED=$((END_EPOCH - START_EPOCH))
+        # busca o ultimo "provavelmente enviou um exit" (ultimo cliente terminou)  
+        LAST_EXIT_RAW=$(journalctl -q --since "$START_TIME" --no-pager | grep "provavelmente enviou um exit" | tail -1 | awk '{print $1" "$2" "$3}')
+        EXIT_COUNT=$(journalctl -q --since "$START_TIME" --no-pager | grep "provavelmente enviou um exit" | wc -l)
+        # calcula tempo
+        if [ -n "$FIRST_ACCEPT_RAW" ] && [ -n "$LAST_EXIT_RAW" ]; then
+            # converte formato journalctl para um formato que o dateutils entende (YYYY-MM-DD HH:MM:SS)
+            CURRENT_YEAR=$(date +%Y)
+            FIRST_ACCEPT=$(date -d "${FIRST_ACCEPT_RAW} ${CURRENT_YEAR}" "+%Y-%m-%d %H:%M:%S")
+            LAST_EXIT=$(date -d "${LAST_EXIT_RAW} ${CURRENT_YEAR}" "+%Y-%m-%d %H:%M:%S")
+            TIME_STR=$(dateutils.ddiff "$FIRST_ACCEPT" "$LAST_EXIT" -f "%0M:%0S")
+        fi
         
-        # converte para formato mm:ss
-        MINUTES=$((ELAPSED / 60))
-        SECONDS=$((ELAPSED % 60))
-        TIME_STR=$(printf "%02d:%02d" $MINUTES $SECONDS)
-        
-        echo ">>>>>>> $NUM_CLIENTS clientes encerraram a conexão"
+        echo ">>>>>>> $EXIT_COUNT clientes encerraram a conexão"
         echo ">>>>>>> Tempo para servir os $NUM_CLIENTS clientes com o $server: $TIME_STR"
         
         # armazena resultado do tempo
@@ -120,8 +117,6 @@ for size in "${FILE_SIZES[@]}"; do
         # mata o servidor
         echo "Enviando um sinal 15 para o servidor $server..."
         kill -15 $SERVER_PID 2>/dev/null
-        sleep 1
-        pkill -f "$server" 2>/dev/null
     done
     
     # adiciona esta linha ao arquivo de dados

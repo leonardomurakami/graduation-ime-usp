@@ -1,0 +1,139 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[portuguese]{babel}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+
+% ---- PREENCHA ----
+\newcommand{\Lista}{1}
+\newcommand{\Nome}{Leonardo Heidi Almeida Murakami}
+\newcommand{\NUSP}{11260186}
+% -----------------------------
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\Nome}
+\fancyhead[R]{NUSP \NUSP}
+\fancyfoot[L]{Lista \Lista}
+\fancyfoot[C]{MAC0338}
+\fancyfoot[R]{Página \thepage\ de \pageref{LastPage}}
+
+\begin{document}
+
+\section*{Exercício 1 (c)}
+
+Para provar que $f(n) \in O(g(n))$, precisamos encontrar constantes $c > 0$ e $n_0 > 0$ tais que:
+\begin{equation}
+0 \leq f(n) \leq c \cdot g(n) \quad \text{para todo } n \geq n_0
+\end{equation}
+
+Neste caso, temos:
+\begin{align}
+f(n) &= \lg n = \log_2 n \\
+g(n) &= \log_{10} n
+\end{align}
+
+Portanto, precisamos encontrar $c > 0$ e $n_0 > 0$ tais que:
+\begin{equation}
+\log_2 n \leq c \cdot \log_{10} n \quad \text{para todo } n \geq n_0
+\end{equation}
+
+Para relacionar $\log_2 n$ e $\log_{10} n$, podemos usar a propriedade de mudança de base dos logaritmos:
+\begin{equation}
+\log_2 n = \frac{\log_{10} n}{\log_{10} 2}
+\end{equation}
+
+Substituindo na nossa expressão de desigualdade:
+\begin{equation}
+\frac{\log_{10} n}{\log_{10} 2} \leq c \cdot \log_{10} n
+\end{equation}
+
+Para $n > 1$, o valor de $\log_{10} n$ é positivo. Portanto, podemos dividir ambos os lados da inequação por $\log_{10} n$ sem alterar o sentido da desigualdade:
+\begin{equation}
+\frac{1}{\log_{10} 2} \leq c
+\end{equation}
+
+Escolhendo $c = \frac{1}{\log_{10} 2}$ e $n_0 = 2$ (ja que $n > 1$ foi condição para descobrir $c$), verificamos que $\log_2 n \leq c \cdot \log_{10} n$ para todo $n \geq n_0$. Portanto, $\lg n \in O(\log_{10} n)$.
+\newpage
+\section*{Exercício 3 (e)}
+
+Para mostrar que a afirmação ``Se $f(n) = O(g(n))$, então $2^{f(n)} = O(2^{g(n)})$'' é falsa, vamos construir um contraexemplo.
+
+Considere as funções:
+\begin{align}
+    f(n) &= 2n \\
+    g(n) &= n
+\end{align}
+
+Primeiro, vamos verificar que $f(n) = O(g(n))$, ou seja, que $2n = O(n)$.
+
+Por definição, precisamos encontrar constantes positivas $c$ e $n_0$ tais que:
+\begin{equation}
+    2n \leq c \cdot n \quad \text{para todo } n \geq n_0
+\end{equation}
+
+Escolhendo $c = 2$ e $n_0 = 1$, a desigualdade $2n \leq 2n$ é verdadeira para todo $n \geq 1$. Portanto, $f(n) = O(g(n))$ é satisfeita.
+
+Agora, vamos verificar se $2^{f(n)} = O(2^{g(n)})$, ou seja, se $2^{2n} = O(2^n)$.
+
+Para isso, precisaríamos encontrar constantes $c'$ e $n'_0$ tais que:
+\begin{equation}
+    2^{2n} \leq c' \cdot 2^n \quad \text{para todo } n \geq n'_0
+\end{equation}
+
+Podemos reescrever $2^{2n} = (2^2)^n = (2^n)^2$. Assim:
+\begin{equation}
+    (2^n)^2 \leq c' \cdot 2^n
+\end{equation}
+
+Dividindo ambos os lados por $2^n$ (que é sempre positivo):
+\begin{equation}
+    2^n \leq c'
+\end{equation}
+
+Como a função $2^n$ cresce exponencialmente e tende ao infinito quando $n \to \infty$, não existe nenhuma constante finita $c'$ que satisfaça esta desigualdade para todos os valores suficientemente grandes de $n$.
+
+Portanto, $2^{2n} \neq O(2^n)$, o que mostra que a afirmação original é falsa.
+\newpage
+\section*{Exercício 4 (a)}
+
+Para provar que $\sum_{k=1}^{n} k^{10} \in \Theta(n^{11})$, precisamos encontrar constantes positivas $c_1$, $c_2$ e $n_0$ tais que:
+\begin{equation}
+    c_1 \cdot n^{11} \leq \sum_{k=1}^{n} k^{10} \leq c_2 \cdot n^{11} \quad \text{para todo } n \geq n_0
+\end{equation}
+
+Primeiro, vamos encontrar o limite superior. Como $k \leq n$ para todo $k \in [1, n]$, temos $k^{10} \leq n^{10}$. Assim:
+\begin{align}
+    \sum_{k=1}^{n} k^{10} &\leq \sum_{k=1}^{n} n^{10} \\
+    &= n \cdot n^{10} \\
+    &= n^{11}
+\end{align}
+
+Portanto, podemos escolher $c_2 = 1$.
+
+Agora, vamos encontrar o limite inferior. Consideremos apenas os termos da segunda metade da soma:
+\begin{equation}
+    \sum_{k=1}^{n} k^{10} \geq \sum_{k=\lceil n/2 \rceil}^{n} k^{10}
+\end{equation}
+
+Para $k \geq \lceil n/2 \rceil \geq n/2$, temos $k^{10} \geq (n/2)^{10}$. O número de termos nesta soma é pelo menos $n/2$ (para $n \geq 2$). Logo:
+\begin{align}
+    \sum_{k=\lceil n/2 \rceil}^{n} k^{10} &\geq \frac{n}{2} \cdot \left(\frac{n}{2}\right)^{10} \\
+    &= \frac{n}{2} \cdot \frac{n^{10}}{2^{10}} \\
+    &= \frac{n^{11}}{2^{11}}
+\end{align}
+
+Portanto, podemos escolher $c_1 = \frac{1}{2^{11}} = \frac{1}{2048}$ e $n_0 = 2$.
+
+Com essas constantes, verificamos que:
+\begin{equation}
+    \frac{1}{2048} n^{11} \leq \sum_{k=1}^{n} k^{10} \leq n^{11} \quad \text{para todo } n \geq 2
+\end{equation}
+
+Portanto, $\sum_{k=1}^{n} k^{10} \in \Theta(n^{11})$.
+
+\end{document}

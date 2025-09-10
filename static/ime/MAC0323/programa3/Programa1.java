@@ -3,7 +3,7 @@ import java.util.*;
 
 public class Programa1 {
     
-    // Tabela de símbolos (inicializada vazia)
+    // tabela de simbolos inicializada vazia
     private static Map<Character, String> symbolTable = new HashMap<>();
     
     public static void main(String[] args) {
@@ -15,7 +15,7 @@ public class Programa1 {
         String symbolTableFile = args[0];
         String inputFile = args[1];
         
-        // Carrega tabela de símbolos (obrigatório)
+        // carrega tabela de simbolos
         loadSymbolTable(symbolTableFile);
         
         try {
@@ -27,25 +27,21 @@ public class Programa1 {
         }
     }
     
-    /**
-     * Lê o conteúdo de um arquivo e retorna como string
-     */
+    // le o conteudo de um arquivo e retorna como string
     private static String readFile(String filename) throws IOException {
         StringBuilder content = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 content.append(line);
-                content.append(" "); // Adiciona espaço entre linhas
+                content.append(" "); // adiciona espaco entre linhas
             }
         }
         return content.toString().trim();
     }
     
-    /**
-     * Carrega tabela de símbolos de um arquivo
-     * Formato esperado: cada linha deve ter "letra espaço codigo_latex"
-     */
+    // carrega tabela de simbolos de um arquivo
+    // formato esperado: cada linha deve ter "letra codigo_latex"
     private static void loadSymbolTable(String filename) {
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
             String line;
@@ -66,10 +62,8 @@ public class Programa1 {
         }
     }
     
-    /**
-     * Codifica o texto usando a tabela de símbolos
-     * Espaços são convertidos para pontos
-     */
+    // codifica o texto usando a tabela de simbolos
+    // espacos sao convertidos para pontos
     private static String encodeText(String text) {
         StringBuilder encoded = new StringBuilder();
         
@@ -82,26 +76,13 @@ public class Programa1 {
                 if (symbol != null) {
                     encoded.append(symbol);
                 } else {
-                    // Se não encontrar símbolo, mantém o caractere original
+                    // se nao encontrar simbolo, mantem o caractere original
                     encoded.append(c);
                 }
             }
-            // Ignora outros caracteres que não sejam letras ou espaços
+            // ignora outros caracteres que nao sejam letras ou espacos
         }
         
         return encoded.toString();
-    }
-    
-    /**
-     * Método auxiliar para imprimir a tabela de símbolos atual
-     */
-    public static void printSymbolTable() {
-        System.out.println("Tabela de Símbolos:");
-        for (char c = 'a'; c <= 'z'; c++) {
-            String symbol = symbolTable.get(c);
-            if (symbol != null) {
-                System.out.println(c + " -> " + symbol);
-            }
-        }
     }
 }
