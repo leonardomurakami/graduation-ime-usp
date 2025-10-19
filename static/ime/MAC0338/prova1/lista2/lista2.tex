@@ -1,0 +1,136 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[portuguese]{babel}
+\usepackage{fancyhdr}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage[portuguese,algoruled,lined,linesnumbered]{algorithm2e}
+
+% ---- PREENCHA ----
+\newcommand{\Lista}{2}
+\newcommand{\Nome}{Leonardo Heidi Almeida Murakami}
+\newcommand{\NUSP}{11260186}
+% -----------------------------
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\Nome}
+\fancyhead[R]{NUSP \NUSP}
+\fancyfoot[L]{Lista \Lista}
+\fancyfoot[C]{MAC0338}
+
+\begin{document}
+
+\section*{Exercício 3}
+\subsection*{Algoritmo}
+\begin{algorithm}[H]
+\SetAlgoLined
+\caption{INTER}
+
+\KwData{$k$ listas ordenadas $A_k[1..2^k], A_{k-1}[1..2^{k-1}]$ com total de $n = 2^{k+1}-1$ elementos}
+\KwResult{Lista ordenada $B[1..n]$ contendo todos os $n$ elementos}
+
+$B \leftarrow$ vetor vazio\;
+\For{$i \leftarrow 0$ \KwTo k}{
+    \For{$j \leftarrow 1$ \KwTo {$2^i$}}{
+        $B \leftarrow A_{i}[j]$
+    }
+}
+
+$q \leftarrow 1$\;
+\For{$i \leftarrow 0$ \KwTo k-1}{
+    $p \leftarrow 1$\;
+    $r = q + 2^{i+1}$\;
+    $INTERCALA(B,p,q,r)$\;
+    $q = r$\;
+}
+
+
+\Return{$resultado$}\;
+\end{algorithm}
+\subsection*{Estratégia do Algoritmo}
+Primeiro preenchemos o vetor B com todas as listas A, fazemos isso iterando por todas elas de 0 a k e atribuindo valor a valor para B. 
+Podemos entao chamar a funcao intercala dentro do proprio vetor B, para isso, iteramos k vezes a chamada da funcao com os parametros $q$ que salvara o tamanho do bloco ja ordenado pela ultima iteracao, $p$ que sempre sera 1 para intercalarmos todo o bloco ja ordenado com o bloco novo e $r$ que é calculado através da soma de q com o tamanho da lista seguinte, ou seja, $q + 2^{i+1}$
+\subsection*{Argumentar Corretude}
+Sabemos que todas as listas estao, entre si, ordenadas, e que o proprio algoritmo $INTERCALA$ deixa a lista, dado que ordenada de $p$ a $q$ e de $q+1$ a $r$ ordenada. Portanto podemos ter certeza que, caso os valores de $p, q$ e $r$ forem calculados de forma correta $INTERCALA$ sempre resultara em uma lista ordenada e no final teremos a lista inteira ordenada.
+\subsection*{Análise de Complexidade}
+\begin{enumerate}    
+    \item \textbf{Laço inicializacao:} Executamos $k$ iterações, uma para cada elemento. Em cada iteração:
+    
+    \begin{itemize}
+        \item O laco interno roda $2^i$ vezes uma operacao $O(1)$
+    \end{itemize}
+    
+    O custo total do laço é:
+    
+    \begin{equation}
+    T_{\text{loop}} = \sum_{1}^{k} 2^k = 2^{k+1} - 1
+    \end{equation}
+    
+    \item \textbf{Laço intercala:} Executamos $k$ vezes $INTERCALA$
+    \begin{itemize}
+        \item Na iteracao $i=1$: Unimos um bloco de tamanho 1 ($A_0$) com um de tamanho 2 ($A_1$), o custo é $O(1 + 2) = O(3)$
+        \item Na iteracao $i=2$: Unimos um bloco de tamanho 3 ($A_0 + A_1$) com um de tamanho 4 ($A_2$), o custo é $O(3 + 4) = O(7)$
+        \item Na iteracao $i$: Unimos um bloco de tamanho $2^i - 1$ com um de tamanho $2^i$, o custo é $O(2^{i+1} - 1)$ que, quando i=k (ou seja, na ultima iteracao), é exatamente $O(n)$
+    \end{itemize}
+
+    \item \textbf{Complexidade Total:} a complexidade total portanto é de $O(n) + O(n)$ que é $O(n)$
+\end{enumerate}
+
+\section*{Exercício 4}
+\subsection*{Algoritmo}
+\begin{algorithm}[H]
+\SetKwProg{Def}{def}{:}{}
+\SetKwRepeat{While}{while}{do}
+\SetAlgoLined
+\caption{INTER}
+
+\KwData{uma lista nao ordenada $X[1..n]$}
+\KwResult{uma lista ordenada $X[1..n]$}
+\Def{merge-threeway(X, start, pivo1, pivo2, end)}{
+    n1 = pivo1 - start + 1
+    n2 = pivo2 - pivo1
+    n3 = end - pivo2
+
+    E[1..n1] $\leftarrow$ vetor vazio
+    M[1..n2] $\leftarrow$ vetor vazio
+    D[1..n3] $\leftarrow$ vetor vazio
+
+    \For{i = 1 \KwTo n1}{
+        E[i] = X[start + i - 1]
+    }
+
+    \For{i = 1 \KwTo n2}{
+        M[i] = X[pivo1 + i]
+    }
+
+    \For{i = 1 \KwTo n3}{
+        D[i] = X[pivo2 + i]
+    }
+
+    \While{}{
+        
+    }
+}
+\Def{mergesort-threeway(X, start, end)}{
+    \If{$end - start$ > 2}{
+        pivo1 = floor(($end+start$)/3)\;
+        pivo2 = floor(2*($end+start$)/3)\;
+        mergesort-threeway(X, start, pivo1)\;
+        mergesort-threeway(X, pivo1+1, pivo2)\;
+        mergesort-threeway(X, pivo2+1, end)\;
+        merge-threeway(X, start, pivo1, pivo2, end)\;
+    }
+    \If{$start-end$ == 2}{
+        \If{X[start] > X[end]}{
+            aux = X[start]
+            X[start] = X[end]
+            X[end] = aux
+        }
+    }
+}
+\end{algorithm}
+
+\end{document}

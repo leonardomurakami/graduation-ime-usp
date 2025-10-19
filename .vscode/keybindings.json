@@ -1,0 +1,19 @@
+[
+    {
+        "key": "ctrl+shift+b",
+        "command": "workbench.action.tasks.build",
+        "when": "editorTextFocus && resourceExtname == '.tex'"
+    },
+    {
+        "key": "f5",
+        "command": "workbench.action.tasks.runTask",
+        "args": "Build LaTeX with pdflatex",
+        "when": "editorTextFocus && resourceExtname == '.tex'"
+    },
+    {
+        "key": "ctrl+f5",
+        "command": "workbench.action.tasks.runTask",
+        "args": "Build LaTeX with full cleanup",
+        "when": "editorTextFocus && resourceExtname == '.tex'"
+    }
+]

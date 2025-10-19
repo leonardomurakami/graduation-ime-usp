@@ -1,0 +1,171 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[portuguese]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+
+\title{Lista 2 - Sistemas Baseados em Conhecimento (MAC0444/MAC5778)}
+\author{Leonardo Heidi Almeida Murakami \\ NUSP: 11260186}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section*{1. Exercicio 1}
+
+Primeiro, formalizamos as sentenças dadas usando os predicados fornecidos:
+\begin{itemize}
+\item "Quem fez os exercícios vai bem na prova."  \\
+    $\forall x (\text{fezEx}(x) \rightarrow \text{vaiBem}(x))$
+\item "Quem vai bem na prova fica com média alta."  \\
+    $\forall x (\text{vaiBem}(x) \rightarrow \text{mediaAlta}(x))$
+\item "Quem fica com média alta é aprovado em mac444."  \\
+    $\forall x (\text{mediaAlta}(x) \rightarrow \text{aprovado}(x))$
+\item "João fez os exercícios."  \\
+    $\text{fezEx}(\text{joao})$
+\item "Maria foi bem na prova."  \\
+    $\text{vaiBem}(\text{maria})$
+\end{itemize}
+
+Para usar a resolução SLD, convertemos as implicações para a forma clausal (cláusulas de Horn):
+\begin{enumerate}
+    \item $\text{vaiBem}(x) \leftarrow \text{fezEx}(x)$
+    \item $\text{mediaAlta}(x) \leftarrow \text{vaiBem}(x)$
+    \item $\text{aprovado}(x) \leftarrow \text{mediaAlta}(x)$
+    \item $\text{fezEx}(\text{joao}).$
+    \item $\text{vaiBem}(\text{maria}).$
+\end{enumerate}
+
+\subsection*{Prova para João}
+Queremos provar $\text{aprovado}(\text{joao})$. Partindo da negação:
+\begin{itemize}
+    \item[G0:] $\leftarrow \text{aprovado}(\text{joao})$
+    \item[G1:] Resolvendo com (3) e $\{x/\text{joao}\}$: \\
+    $\leftarrow \text{mediaAlta}(\text{joao})$
+    \item[G2:] Resolvendo com (2) e $\{x/\text{joao}\}$: \\
+    $\leftarrow \text{vaiBem}(\text{joao})$
+    \item[G3:] Resolvendo com (1) e $\{x/\text{joao}\}$: \\
+    $\leftarrow \text{fezEx}(\text{joao})$
+    \item[G4:] Resolvendo com o fato (4), obtemos $\square$.
+\end{itemize}
+Como derivamos a cláusula vazia, temos que $\text{aprovado}(\text{joao})$ é consequência lógica da base.
+
+\subsection*{Prova para Maria}
+Queremos provar $\text{aprovado}(\text{maria})$. Partindo da negação:
+\begin{itemize}
+    \item[G0:] $\leftarrow \text{aprovado}(\text{maria})$
+    \item[G1:] Resolvendo com (3) e $\{x/\text{maria}\}$: \\
+    $\leftarrow \text{mediaAlta}(\text{maria})$
+    \item[G2:] Resolvendo com (2) e $\{x/\text{maria}\}$: \\
+    $\leftarrow \text{vaiBem}(\text{maria})$
+    \item[G3:] Resolvendo com o fato (5), obtemos $\square$.
+\end{itemize}
+Como derivamos a cláusula vazia, temos que $\text{aprovado}(\text{maria})$ é consequência lógica da base.
+
+\section*{2. Exercicio 2}
+
+Vamos mostrar que o encadeamento para trás produz SIM para o objetivo $P(a)$ usando a base de conhecimento dada.
+
+Base de conhecimento:
+\begin{enumerate}
+    \item $P(x) \leftarrow A1(x), A2(x)$
+    \item $A1(x) \leftarrow B1(x), B2(x)$
+    \item $A2(x) \leftarrow B3(x), B4(x)$
+    \item $B1(a).$
+    \item $B2(a).$
+    \item $B3(a).$
+    \item $B4(a).$
+\end{enumerate}
+
+Queremos provar $P(a)$:
+\begin{itemize}
+    \item[G0:] $\leftarrow P(a)$
+    \item[G1:] Resolvendo com (1) e $\{x/a\}$: \\
+    $\leftarrow A1(a), A2(a)$
+    \item[G2:] Resolvendo $A1(a)$ com (2) e $\{x/a\}$: \\
+    $\leftarrow B1(a), B2(a), A2(a)$
+    \item[G3:] Resolvendo $B1(a)$ com o fato (4): \\
+    $\leftarrow B2(a), A2(a)$
+    \item[G4:] Resolvendo $B2(a)$ com o fato (5): \\
+    $\leftarrow A2(a)$
+    \item[G5:] Resolvendo $A2(a)$ com (3) e $\{x/a\}$: \\
+    $\leftarrow B3(a), B4(a)$
+    \item[G6:] Resolvendo $B3(a)$ com o fato (6): \\
+    $\leftarrow B4(a)$
+    \item[G7:] Resolvendo $B4(a)$ com o fato (7): \\
+    $\leftarrow$ (lista vazia)
+\end{itemize}
+Como todos os sub-objetivos foram satisfeitos, $P(a)$ foi provado. Logo, a resposta é \textbf{SIM}.
+
+\newpage
+\section*{3. Exercicio 3}
+
+\subsection*{(a) Resposta da consulta}
+Programa Prolog:
+\begin{verbatim}
+result([_, E | L], [E | M]):- !, result(L, M).
+result(_, []).
+\end{verbatim}
+
+Execução de \texttt{?- result([a, b, c, d, e, f, g], X).}:
+\begin{enumerate}
+    \item \texttt{result([a, b, c, d, e, f, g], X)} casa com a primeira regra:
+    \begin{itemize}
+        \item \texttt{\_} = \texttt{a}, \texttt{E} = \texttt{b}, \texttt{L} = \texttt{[c, d, e, f, g]}
+        \item \texttt{X} = \texttt{[b | M]}
+        \item Chamada recursiva: \texttt{result([c, d, e, f, g], M)}
+    \end{itemize}
+    \item \texttt{result([c, d, e, f, g], M)} casa com a primeira regra:
+    \begin{itemize}
+        \item \texttt{\_} = \texttt{c}, \texttt{E} = \texttt{d}, \texttt{L} = \texttt{[e, f, g]}
+        \item \texttt{M} = \texttt{[d | M1]} (logo \texttt{X} = \texttt{[b, d | M1]})
+        \item Chamada recursiva: \texttt{result([e, f, g], M1)}
+    \end{itemize}
+    \item \texttt{result([e, f, g], M1)} casa com a primeira regra:
+    \begin{itemize}
+        \item \texttt{\_} = \texttt{e}, \texttt{E} = \texttt{f}, \texttt{L} = \texttt{[g]}
+        \item \texttt{M1} = \texttt{[f | M2]} (logo \texttt{X} = \texttt{[b, d, f | M2]})
+        \item Chamada recursiva: \texttt{result([g], M2)}
+    \end{itemize}
+    \item \texttt{result([g], M2)} não casa com a primeira regra (lista com só um elemento).
+    \item Casa com a segunda regra \texttt{result(\_, [])}:
+    \begin{itemize}
+        \item \texttt{M2} = \texttt{[]}
+    \end{itemize}
+    \item Voltando nas chamadas: \texttt{M2} = \texttt{[]}, então \texttt{M1} = \texttt{[f]}, \texttt{M} = \texttt{[d, f]} e \texttt{X} = \texttt{[b, d, f]}.
+\end{enumerate}
+Resposta:
+\begin{verbatim}
+X = [b, d, f].
+\end{verbatim}
+
+\subsection*{(b) Descrição do programa}
+
+\textbf{O que o programa faz:}
+
+O programa \texttt{result/2} retorna os elementos nas posições pares (2, 4, 6, ...) da lista de entrada. A cada chamada recursiva, ele pula o primeiro elemento e pega o segundo, continuando com o resto da lista.
+
+\textbf{Casos cobertos pelo fato:}
+
+O fato \texttt{result(\_, [])} é o caso base que cobre:
+\begin{itemize}
+    \item Lista vazia: \texttt{[]}.
+    \item Lista com um único elemento: ex. \texttt{[g]}.
+\end{itemize}
+Em ambos os casos, a primeira regra não se aplica (não há pelo menos dois elementos), então o resultado é a lista vazia.
+
+\textbf{Efeito do corte (\texttt{!}):}
+
+O corte impede backtracking após a primeira regra ser aplicada. Sem ele, o Prolog tentaria usar a segunda regra (\texttt{result(\_, [])}) na mesma chamada, gerando uma solução alternativa incorreta (\texttt{X = []}). O corte garante que, se a lista tem pelo menos dois elementos, só a primeira regra será usada.
+
+\textbf{Uso da variável anônima (\texttt{\_}):}
+
+\begin{itemize}
+    \item Em \texttt{[\_, E | L]}: indica o primeiro elemento, que queremos ignorar. Precisamos dele na estrutura do pattern matching para acessar \texttt{E} (segundo elemento), mas seu valor não importa.
+    \item Em \texttt{result(\_, [])}: representa qualquer lista de entrada. Como sempre retornamos \texttt{[]}, não importa o conteúdo da entrada.
+\end{itemize}
+
+\end{document}

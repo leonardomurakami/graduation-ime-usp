@@ -1,0 +1,96 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build LaTeX with pdflatex",
+            "type": "shell",
+            "command": "pdflatex",
+            "args": [
+                "-synctex=1",
+                "-interaction=nonstopmode",
+                "-file-line-error",
+                "${file}"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "problemMatcher": {
+                "owner": "latex",
+                "fileLocation": [
+                    "relative",
+                    "${workspaceFolder}"
+                ],
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):\\s+(.*?)\\s*$",
+                    "file": 1,
+                    "line": 2,
+                    "message": 3
+                }
+            }
+        },
+        {
+            "label": "Build LaTeX with full cleanup",
+            "type": "shell",
+            "command": "pdflatex",
+            "args": [
+                "-synctex=1",
+                "-interaction=nonstopmode",
+                "-file-line-error",
+                "${file}",
+                "&&",
+                "pdflatex",
+                "${file}"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "dependsOrder": "sequence"
+        },
+        {
+            "label": "Clean LaTeX auxiliary files",
+            "type": "shell",
+            "command": "rm",
+            "args": [
+                "-f",
+                "${fileBasenameNoExtension}.aux",
+                "${fileBasenameNoExtension}.log",
+                "${fileBasenameNoExtension}.out",
+                "${fileBasenameNoExtension}.synctex.gz",
+                "${fileBasenameNoExtension}.toc",
+                "${fileBasenameNoExtension}.lof",
+                "${fileBasenameNoExtension}.lot",
+                "${fileBasenameNoExtension}.fls",
+                "${fileBasenameNoExtension}.fdb_latexmk"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "${fileDirname}"
+            }
+        }
+    ]
+}

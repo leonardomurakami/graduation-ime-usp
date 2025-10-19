@@ -1,0 +1,201 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[portuguese]{babel}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage[portuguese,algoruled,lined,linesnumbered]{algorithm2e}
+\usepackage{geometry}
+\usepackage{hyperref}
+\geometry{a4paper, margin=1in}
+
+
+% ---- PREENCHA ----
+\newcommand{\Lista}{5}
+\newcommand{\Nome}{Leonardo Heidi Almeida Murakami}
+\newcommand{\NUSP}{11260186}
+% -----------------------------
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\Nome}
+\fancyhead[R]{NUSP \NUSP}
+\fancyfoot[L]{Lista \Lista}
+\fancyfoot[C]{MAC0338}
+\fancyfoot[R]{Página \thepage\ de \pageref{LastPage}}
+
+\begin{document}
+
+\section*{Exercício 7}
+
+\subsection*{Estratégia do Algoritmo}
+Usaremos PD. A ideia é, para cada posição $i$ do vetor, calcular o comprimento da maior subsequência crescente que termina especificamente em $v[i]$. Depois, basta pegar o máximo entre todos esses valores.
+
+Definimos $L[i]$ como o comprimento da LIS (\textit{Longest Increasing Subsequence}) que \textbf{termina} no elemento $v[i]$. Note que isso não é a LIS do subvetor $v[1..i]$ inteiro — é especificamente a maior subsequência crescente que inclui $v[i]$ como último elemento.
+
+A estratégia funciona porque qualquer LIS do vetor inteiro necessariamente termina em alguma posição $i$. Logo, se calcularmos corretamente $L[i]$ para todo $i$, o máximo de $L$ será a resposta.
+
+Para calcular $L[i]$, aproveitamos os valores $L[j]$ já calculados para $j < i$. Se $v[j] < v[i]$, podemos "grudar" $v[i]$ no final da LIS que termina em $v[j]$, criando uma subsequência de tamanho $1 + L[j]$. Escolhemos o $j$ que maximiza esse valor.
+
+\subsection*{Recorrência}
+Formalizando a ideia acima:
+\begin{equation}
+L[i] = 1 + \max(\{L[j] \mid 1 \le j < i \text{ e } v[j] < v[i]\} \cup \{0\}),
+\end{equation}
+onde o $\max$ do conjunto vazio é 0.
+
+A resposta final é o maior valor em $L$, já que a LIS pode terminar em qualquer posição:
+\begin{equation}
+\text{Resultado} = \max_{1 \le i \le n} L[i].
+\end{equation}
+\subsection*{Prova de Corretude}
+Vamos provar por indução em $i$ que $L[i]$ é calculado corretamente.
+
+\textbf{Base:} Para $i=1$, temos $L[1] = 1$. De fato, a única subsequência que termina em $v[1]$ é o próprio $v[1]$, que tem comprimento 1.
+
+\textbf{Hipótese de Indução (HI):} Assuma que para todo $k < i$, o valor $L[k]$ está correto.
+
+\textbf{Passo Indutivo:} Considere $i > 1$. A LIS terminando em $v[i]$ pode ser:
+\begin{itemize}
+    \item Uma LIS terminando em algum $v[j]$ (com $j < i$ e $v[j] < v[i]$), estendida por $v[i]$. Pela HI, $L[j]$ está correto, então o tamanho é $1 + L[j]$. Como queremos o máximo, escolhemos o maior $L[j]$ possível.
+    \item Apenas $v[i]$ sozinho, se não existir $v[j] < v[i]$ antes dele. Neste caso o tamanho é 1, que a recorrência retorna como $1+0=1$.
+\end{itemize}
+
+A recorrência captura ambos os casos, logo $L[i]$ é correto. Como todo $L[i]$ está correto, o máximo de $L$ é a resposta certa.
+\subsection*{Algoritmo}
+\begin{algorithm}[H]
+\SetAlgoLined
+\caption{\texttt{SubsequenciaCrescenteMaisLonga}$(v, n)$}
+\KwData{Vetor $v[1..n]$ de inteiros}
+\KwResult{Comprimento da subsequência crescente mais longa de $v$}
+\BlankLine
+Seja $L[1..n]$ um novo vetor\;
+\For{$i \leftarrow 1$ \KwTo $n$}{
+    $L[i] \leftarrow 1$\;
+}
+\For{$i \leftarrow 2$ \KwTo $n$}{
+    \For{$j \leftarrow 1$ \KwTo $i-1$}{
+        \If{$v[j] < v[i]$}{
+            $L[i] \leftarrow \max(L[i], 1 + L[j])$\;
+        }
+    }
+}
+comprimentoMax $\leftarrow 0$\;
+\For{$i \leftarrow 1$ \KwTo $n$}{
+    comprimentoMax $\leftarrow \max(comprimentoMax, L[i])$\;
+}
+\Return{comprimentoMax}\;
+\end{algorithm}
+
+\subsection*{Análise de Complexidade}
+Seja $T(n)$ o tempo de execução do algoritmo. Analisamos cada parte:
+
+\begin{enumerate}
+    \item \textbf{Inicialização} (linhas 2-4): Inicializa $n$ posições do vetor $L$, levando tempo $O(n)$.
+    
+    \item \textbf{Cálculo de $L$} (linhas 5-11): Dois laços aninhados. O laço externo vai de $i=2$ até $n$. Para cada $i$, o laço interno vai de $j=1$ até $i-1$. O total de iterações é:
+    \begin{align*}
+    \sum_{i=2}^{n} (i-1) &= \sum_{k=1}^{n-1} k \\
+    &= \frac{(n-1)n}{2} \\
+    &= \frac{n^2 - n}{2}.
+    \end{align*}
+    Cada iteração faz operações $O(1)$, logo esta parte custa $O(n^2)$.
+    
+    \item \textbf{Busca do máximo} (linhas 12-15): Percorre $n$ elementos em $O(n)$.
+\end{enumerate}
+
+O custo total é dominado pelo cálculo de $L$:
+\begin{equation}
+\boxed{T(n) = O(n^2)}.
+\end{equation}
+
+O espaço usado é $O(n)$ para o vetor $L$.
+
+\section*{Exercício 14}
+
+\subsection*{Estratégia do Algoritmo}
+Usaremos PD. A ideia é calcular o número de maneiras de formar cada valor $j$ (de 0 até $V$) usando as moedas disponíveis, adicionando uma de cada vez.
+
+Seja $C[i][j]$ o número de composicoes para formar o valor $j$ usando apenas as $i$ primeiras denominações ($v[1], \dots, v[i]$), respeitando suas quantidades ($q[1], \dots, q[i]$).
+
+\subsection*{Recorrência}
+Para calcular $C[i][j]$, consideramos usar $k$ unidades da moeda $v[i]$, onde $k$ varia de $0$ até $q[i]$. Se usarmos $k$ unidades de $v[i]$, elas somam $k \cdot v[i]$. O resto, $j - k \cdot v[i]$, precisa ser formado com as primeiras $i-1$ denominações, o que pode ser feito de $C[i-1][j - k \cdot v[i]]$ maneiras.
+
+Como não podemos usar simultaneamente quantidades diferentes de $v[i]$, somamos as possibilidades:
+\begin{equation}
+C[i][j] = \sum_{k=0}^{q[i]} C[i-1][j - k \cdot v[i]],
+\end{equation}
+onde apenas consideramos termos com $j - k \cdot v[i] \ge 0$.
+
+\textbf{Casos Base:}
+\begin{itemize}
+    \item $C[0][0] = 1$: Uma maneira de formar 0 sem moedas (composição vazia).
+    \item $C[0][j] = 0$ para $j > 0$: Impossível formar valor positivo sem moedas.
+\end{itemize}
+
+A resposta e $C[n][V]$.
+\subsection*{Prova de Corretude}
+Vamos provar por indução em $i$ que $C[i][j]$ está correto para todo $j$.
+
+\textbf{Base:} Para $i=0$, temos $C[0][0]=1$ e $C[0][j]=0$ para $j>0$, que está correto.
+
+\textbf{Hipótese de Indução (HI):} Assuma que $C[i-1][j]$ está correto para todo $j$.
+
+\textbf{Passo Indutivo:} Para calcular $C[i][j]$, somamos as contagens para cada possível quantidade $k$ da moeda $v[i]$:
+\begin{itemize}
+    \item Usar 0 de $v[i]$: $C[i-1][j]$ maneiras
+    \item Usar 1 de $v[i]$: $C[i-1][j-v[i]]$ maneiras
+    \item ...
+    \item Usar $k$ de $v[i]$: $C[i-1][j-k \cdot v[i]]$ maneiras
+\end{itemize}
+
+Pela HI, cada termo está correto. Como somamos todas as possibilidades (de $k=0$ até $k=q[i]$) e elas são disjuntas, temos $C[i][j]$ correto. Logo $C[n][V]$ é a resposta certa.
+
+\subsection*{Algoritmo}
+\begin{algorithm}[H]
+\SetAlgoLined
+\caption{\texttt{NumeroComposicoes}$(v, q, n, V)$}
+\KwData{Vetores $v[1..n]$, $q[1..n]$, inteiros $n > 0$, $V > 0$}
+\KwResult{O número de composições de $V$}
+\BlankLine
+Seja $C[0..n][0..V]$ uma nova matriz 2D, inicializada com zeros\;
+$C[0][0] \leftarrow 1$\;
+\For{$i \leftarrow 1$ \KwTo $n$}{
+    \For{$j \leftarrow 0$ \KwTo $V$}{
+        \For{$k \leftarrow 0$ \KwTo $q[i]$}{
+            \If{$j - k \cdot v[i] \ge 0$}{
+                $C[i][j] \leftarrow C[i][j] + C[i-1][j - k \cdot v[i]]$\;
+            }
+        }
+    }
+}
+\Return{$C[n][V]$}\;
+\end{algorithm}
+
+\subsection*{Análise de Complexidade}
+Temos três laços aninhados:
+\begin{enumerate}
+    \item Laço sobre as $n$ denominações (linha 3).
+    \item Laço sobre os valores de $0$ até $V$ (linha 4): $V+1$ iterações.
+    \item Laço sobre a quantidade $k$ de $0$ a $q[i]$ (linha 5): no pior caso $\max(q)+1$ vezes.
+\end{enumerate}
+
+O total de operações é:
+\begin{align*}
+T(n, V) &= \sum_{i=1}^{n} \sum_{j=0}^{V} \sum_{k=0}^{q[i]} O(1) \\
+&= n \cdot V \cdot \max(q).
+\end{align*}
+
+Logo:
+\begin{equation}
+\boxed{O(n \cdot V \cdot \max(q))}.
+\end{equation}
+
+O espaço usado é $O(n \cdot V)$ para a matriz $C$.
+
+
+
+\end{document}

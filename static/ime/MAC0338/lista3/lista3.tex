@@ -39,7 +39,7 @@ Considerando que, na iteração $i$ (para $i \in \{2, \dots, n\}$), a variável 
 \max\{v[1], \dots, v[i-1]\}
 \end{equation}
 
-Logo, \texttt{v[i] > maior} é verdadeira apenas quando $v[i]$ é o máximo de $v[1..i]$, o que ocorre com probabilidade $\tfrac{1}{i}$, pois a entrada é uma permutação uniforme.
+Logo, \texttt{v[i] > maior} é verdadeira apenas quando $v[i]$ é o máximo de $v[1..i]$, o que ocorre com probabilidade $\tfrac{1}{i}$, pois a entrada e uma permutação uniforme.
 Assim, a comparação \texttt{v[i] < menor} (linha 6) é executada na iteração $i$ se, e somente se, $v[i]$ \emph{não} é o máximo de $v[1..i]$:
 
 \begin{equation}
@@ -62,7 +62,7 @@ Portanto,
 
 \subsection*{Qual é o número esperado de atribuições efetuadas na linha 7 do algoritmo?}
 
-A atribuição da linha 7, \texttt{menor <- v[i]}, ocorre se, e somente se, \texttt{v[i] > maior} é falsa e \texttt{v[i] < menor} é verdadeira. Como \texttt{menor} guarda $\min\{v[1], \dots, v[i-1]\}$, a atribuição acontece exatamente quando $v[i]$ é o novo mínimo de $v[1..i]$.
+A atribuição da linha 7, \texttt{menor <- v[i]}, ocorre se, e somente se, \texttt{v[i] > maior} é falsa, enquanto \texttt{v[i] < menor} é verdadeira. Como \texttt{menor} guarda $\min\{v[1], \dots, v[i-1]\}$, a atribuição acontece exatamente quando $v[i]$ é o novo mínimo de $v[1..i]$.
 
 Com entrada aleatória (permutação uniforme), a probabilidade de $v[i]$ ser o mínimo de $v[1..i]$ é $\tfrac{1}{i}$. Logo, se $X_7$ é o número total de atribuições/execuções na linha 7,
 \begin{align}

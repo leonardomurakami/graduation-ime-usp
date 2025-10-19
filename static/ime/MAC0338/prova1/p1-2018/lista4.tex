@@ -1,0 +1,101 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[portuguese]{babel}
+\usepackage{fancyhdr}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage[portuguese,algoruled,lined,linesnumbered]{algorithm2e}
+\usepackage{mathtools}
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+
+% ---- PREENCHA ----
+\newcommand{\Lista}{2}
+\newcommand{\Nome}{Leonardo Heidi Almeida Murakami}
+\newcommand{\NUSP}{11260186}
+% -----------------------------
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\Nome}
+\fancyhead[R]{NUSP \NUSP}
+\fancyfoot[L]{Lista \Lista}
+\fancyfoot[C]{MAC0338}
+
+\begin{document}
+\section*{Exercício 1}
+Para $\sum_{i=1}^{n} i^2 = \Theta(n^3)$ temos que provar que 
+\begin{equation}
+    c_1 \cdot n^3 \le \sum_{i=1}^{n} i^2 \le c_2 \cdot n^3
+\end{equation}
+Sabendo que $i \le n$ temos um bom limite superior, portanto
+\begin{equation}
+    \sum_{i=1}^{n} i^2 \le \sum_{i=1}^n n^2
+\end{equation}
+\begin{equation}
+    \sum_{i=1}^{n} i^2 \le n \cdot n^2
+\end{equation}
+Podemos usar entao $c_2 = 1$
+Agora para encontrar o limite inferior, vamos considerar apenas a metade final dos valores $\sum_{\ceil{n/2}}^{n}$, disso sabemos que, para $n \ge 2$ temos pelo menos $n/2$ numeros na somatoria
+\begin{equation}
+    \sum_{i=1}^{n} i^2 \ge \sum_{i=\ceil{n/2}}^{n} i^2 \ge \frac{n}{2}\left(\frac{n}{2}\right)^2
+\end{equation}
+Portanto, podemos escolher o limite inferior de modo que
+\begin{equation}
+    \frac{1}{8}n^3 \le \sum_{i=1}^{n} i^2 \le n^3
+\end{equation}
+Logo, com $c_1 = \frac{1}{8}, c_2 = 1, n_0 = 2$ a definicao de $f(n) = \Theta(n^3)$ esta satisfeita
+
+
+\newpage
+\section*{Exercício 2}
+$T(n/3)$ se desmembra até $\frac{n}{3^k} = 1$ tendo profundidade $log_3^n$.
+$T(2n/3)$ se desmembra até $\frac{2n}{3^k} = 1$ tendo profundidade $log_{3/2}^2$.
+
+A profundidade da arvore é determinada pelo caminho mais longo, que é $\Theta(\log{n})$
+
+\subsection*{Prova por Inducao}
+Prova:
+
+No nivel 0: tamanho total n
+
+No nivel 1: subproblemas $T(n/3)$ e $T(2n/3)$, somando os tamanhos tambem temos n
+
+No nivel 2: $T(n/3)$ gera $T(n/9)$ e $T(2n/9)$ e $T(2n/3)$ gera $T(2n/9)$ e $T(4n/9)$, somando $n/9 + 2n/9 + 2n/9 + 4n/9 = n$
+
+No nivel i: Cada nó de tamanho $m$ no nivel i-1 gera dois filhos de tamanho $m/3$ e $2m/3$ no nivel $i$, somando os filhos temos $m$
+
+Como a soma dos tamanhos se conserva, ou seja, no nivel i-1 tinhamos S e no nivel continuamos tendo S, sabemos que em todo nivel a soma é exatamente $n$
+
+Portanto o custo total é de $\Theta(n) \cdot \Theta(\log{n})$
+
+\section*{Exercício 3}
+Um algoritmo que resolve o problema descrito pode ser feito da seguinte forma. Podemos ordenar o vetor A utilizando um algoritmo como o \textit{Mergesort} (que tem complexidade de $O(n\log{n})$) e, com A ordenado inicializamos dois ponteiros um em cada ponta do array.
+
+A cada iteracao checamos a soma de $A[p_{esq}] + A[p_{dir}]$ se a soma for menor que $x$, acrescemos $1$ no $p_{esq}$, se a soma for maior que $x$ decrescemos $1$ no $p_{dir}$ indo dessa forma ate que $A[p_{esq}] + A[p_{dir}]$ seja exatamente $x$ ou que $p_{esq}$ e $p_{dir}$ se cruzem, de tal modo que nao teriamos $x$ contemplado pela soma de dois valores presentes em A
+
+Podemos argumentar corretude de modo que $A[p_{esq}] < A[p_{esq} + 1]$ num array ordenado, ou seja, se a soma estiver menor e nao mexermos no pivo direito, estamos fazendo a soma ir em direcao ao valor de $x$, o mesmo pode ser dito do outro lado, ja que $A[p_{dir} - 1] < A[p_{dir}]$. O algoritmo sempre tenta se aproximar de $x$, ate que os valores se esgotem ou que a soma seja encontrada
+
+Temos que o pior caso do algoritmo ocorre quando a soma de x é dada por $A[1] + A[2]$, ou $A[n] + A[n-1]$ em que um ponteiro teria que ter percorrido $n-1$ valores para chegar no resultado, sendo essa parte do algoritmo $O(n)$, portanto.
+\begin{equation}
+    T(n) = O(n) + O(n\log{n})
+\end{equation}
+O algoritmo portanto é $O(n\log{n})$
+
+\section*{Exercício 4}
+Como A é uma permutação entre todas as possíveis de $1..n$ escolhidas de uma distribuição uniforme, sabemos que a chance de $A[i] < chave$ é de $1/2$
+
+A linha 5 tem uma probabilidade $P(\text{executar 5}) = 1/2$
+
+\begin{align}
+    E[X_5]
+    &= \sum_{j=2}^n \sum_{i=1}^{j-1} 1/2 \\
+    &= \frac{1}{2}\sum_{j=2}^n (j-1) \\
+    &= \frac{1}{2}(1 + 2 + \dots + (n-1)) \\
+    &= \frac{1}{2}(\frac{(n-1)n}{2}) \\
+    &= \frac{n \cdot (n-1)}{4} 
+\end{align}
+
+\end{document}

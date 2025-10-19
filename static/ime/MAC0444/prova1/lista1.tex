@@ -1,0 +1,58 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+
+\title{MAC0344 Arquitetura de Computadores \\ Lista de Exercícios No. 3}
+\author{Leonardo Heidi Almeida Murakami \\ NUSP: 11260186}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section*{Exercício 1}
+\subsection*{a}
+Qualquer apartamento no centro tem aluguel mais baixo do que alguns apartamentos em Pinheiros
+\begin{equation}
+    \forall x((\text{Apto}(x)\wedge\text{Em}(x,\text{centro}))) \rightarrow \exists y ((\text{Apto}(y)\wedge\text{Em}(y, \text{pinheiros}))) \rightarrow (\text{Aluguel}(x) < \text{Aluguel}(y))
+\end{equation}
+Não é uma boa tradução, uma tradução correta seria
+\begin{equation}
+    \forall x((\text{Apto}(x)\wedge\text{Em}(x,\text{centro}))) \rightarrow \exists y((\text{Apto}(y) \wedge \text{Em}(y, \text{pinheiros})) \wedge \text{Aluguel}(x) < \text{Aluguel}(y))
+\end{equation}
+
+
+\subsection*{b}
+"Há exatamente um apartamento em Pinheiros com aluguel abaixo de R\$1000."
+\begin{equation}
+    \exists x(\text{Apto}(x) \wedge \text{Em}(x, \text{pinheiros}) \wedge
+    \forall y((\text{Apto}(y) \wedge \text{Em}(y, \text{pinheiros}) \wedge (\text{Aluguel}(y) < 1000)) \rightarrow (y = x)))
+\end{equation}
+
+\section{Exercicio 2}
+\begin{itemize}
+    \item \textbf{esp} -- Constante, naipe de espadas.
+    \item \textbf{m1} -- Constante, uma mão particular.
+    \item $n(x, y)$ -- O naipe da carta $x$ é $y$.
+    \item $i(x, y)$ -- A carta $x$ está na mão $y$.
+    \item $f(x)$ -- A mão $x$ é um flush.
+\end{itemize}
+
+\begin{enumerate}
+    \item[(a)] \textbf{Traduza para a lógica de primeira ordem:}
+    \begin{enumerate}
+        \item[(i)] Se todas as cartas de uma mão são do mesmo naipe, a mão é um flush.
+        \item[(ii)] Toda carta de $m_1$ é de espadas.
+    \end{enumerate}
+    \item[(b)] \textbf{Use resolução para provar que $m_1$ é um flush a partir de (i) e (ii).}
+\end{enumerate}
+
+\subsection*{a}
+\begin{itemize}
+    \item Se todas as cartas de uma mão são do mesmo naipe, a mão é um flush.
+    \item $\forall x \left( \left( \exists y \; \forall z \; (i(z, x) \rightarrow n(z, y)) \right) \rightarrow f(x) \right)$
+\end{itemize}
+\end{document}

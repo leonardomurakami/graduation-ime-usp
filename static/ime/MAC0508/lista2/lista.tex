@@ -1,0 +1,57 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+
+\title{MAC0344 Arquitetura de Computadores \\ Lista de Exercícios No. 3}
+\author{Leonardo Heidi Almeida Murakami \\ NUSP: 11260186}
+\date{\today}
+
+\begin{document}
+\maketitle
+Lista de unigramas:
+\begin{itemize}
+    \item $\text{\textless ini\textgreater} = 5$
+    \item $\text{eu} = 5$
+    \item $\text{sou} = 2$
+    \item $\text{Mane} = 5$
+    \item $\text{sei} = 3$
+    \item $\text{bem} = 2$
+    \item $\text{\textless fim\textgreater} = 5$
+\end{itemize}
+Lista de bigramas:
+\begin{itemize}
+    \item $\text{\textless ini\textgreater}\mid \text{eu} = 1$
+    \item $\text{\textless ini\textgreater}\mid \text{Mané} = 3$
+    \item $\text{\textless ini\textgreater}\mid \text{bem} = 1$
+    \item $\text{eu}\mid \text{sou} = 2$
+    \item $\text{sou} \mid \text{Mane} = 1$
+    \item $\text{Mane} \mid \text{eu} = 3$
+    \item $\text{eu} \mid \text{sei} = 2$
+    \item $\text{eu} \mid \text{bem} = 1$
+    \item $\text{bem} \mid \text{sei} = 1$
+    \item $\text{bem} \mid \text{eu} = 1$
+    \item $\text{sei} \mid \text{Mane} = 1$
+    \item $\text{Mane} \mid \text{\textless fim\textgreater} = 2$
+    \item $\text{sou}\mid \text{\textless fim\textgreater} = 1$
+    \item $\text{sei}\mid \text{\textless fim\textgreater} = 2$
+\end{itemize}
+
+\subsection*{1. Qual a proxima palavra mais provavel prevista pelo modelo}
+\begin{itemize}
+    \item a. Mané (eu $P(eu|Mane) = 0.6$)
+    \item b. Mané eu (sou|sei $P(sou|eu) = 0.4, P(sei|eu) = 0.4$)
+    \item c. Mane eu sou (Mane|<fim> $P(Mane|sou) = 0.5, P(<fim>|sou) = 0.5$)
+    \item d. bem eu sei (<fim> $P(<fim>|sei) = 0.66$) 
+\end{itemize}
+\subsection*{2. Qual das seguintes frases é melhor, ou seja, tem maior probabilidade com este modelo?}
+\begin{itemize}
+    \item a. $P(\text{Mane} \mid \text{\textless ini \textgreater})*P(\text{eu} \mid \text{Mane})*P(\text{bem} \mid \text{eu})*P(\text{eu} \mid \text{bem})*P(\text{sei} \mid \text{eu})*P(\text{\textless fim \textgreater} \mid \text{sei}) = 0.6*0.6*0.2*0.5*0.4*0.4 = 0.00576$
+    \item b. $P(\text{Mane} \mid \text{\textless ini \textgreater})*P(\text{eu} \mid \text{Mane})*P(\text{sou} \mid \text{eu})*P(\text{\textless fim \textgreater} \mid \text{sou}) = 0.6*0.6*0*\dots = 0$
+    \item c. $P(\text{eu} \mid \text{\textless ini \textgreater})*P(\text{bem} \mid \text{eu})*P(\text{sei} \mid \text{bem})*P(\text{Mane} \mid \text{sei})*P(\text{eu} \mid \text{Mane})*P(\text{sou} \mid \text{eu})*P(\text{\textless fim \textgreater} \mid \text{sou}) = 0.2*0.2*0.5*0.33*0.6*0.4*0.2 = 0.0003168$
+\end{itemize}
+Logo a frase \textbf{a} tem a melhor probabilidade
+\end{document}

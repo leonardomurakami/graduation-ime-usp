@@ -1,0 +1,106 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[portuguese]{babel}
+\usepackage{fancyhdr}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage[portuguese,algoruled,lined,linesnumbered]{algorithm2e}
+
+% ---- PREENCHA ----
+\newcommand{\Lista}{2}
+\newcommand{\Nome}{Leonardo Heidi Almeida Murakami}
+\newcommand{\NUSP}{11260186}
+% -----------------------------
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\Nome}
+\fancyhead[R]{NUSP \NUSP}
+\fancyfoot[L]{Lista \Lista}
+\fancyfoot[C]{MAC0338}
+
+\begin{document}
+
+\section*{Exercício 1}
+\begin{algorithm}[H]
+    \SetKwProg{Def}{def}{:}{}
+    \SetAlgoLined
+    \caption{CountRange}
+    
+    \KwData{lista $X[1..n]$ inteiros no intervalo 1 a k}
+    \KwResult{numero $n$ de inteiros em um intervalo $[a..b]$}
+    
+    \Def{preprocess(X, n, k)}{
+        $C \leftarrow \text{array [1..k]}$\;
+        $P \leftarrow \text{array [1..k]}$\;
+        \For{$i \leftarrow 1$ \KwTo k}{
+            $C[i] \leftarrow 0$\;
+        }
+        \For{$i \leftarrow 1$ \KwTo n}{
+            $val \leftarrow X[i]$\;
+            $C[val] \leftarrow C[val] + 1$\;
+        }
+        $prefix \leftarrow 0$\;
+        \For{$i \leftarrow 1$ \KwTo k}{
+            $P[i] \leftarrow prefix$\;
+            $prefix \leftarrow prefix + C[i]$\;
+        }
+        \Return{P}\;
+    }
+    \Def{countRange(P, a, b)}{
+        \If{$a \ge b$}{
+            \Return{0}\;
+        }
+        \If{$a == 1$}{
+            \Return{$P[b]$}\;
+        }
+        \Return{$P[b]-P[a-1]$}\;
+    }
+\end{algorithm}
+\section*{Exercício 2}
+\begin{algorithm}[H]
+\SetKwProg{Def}{def}{:}{}
+\SetAlgoLined
+\caption{sort}
+
+\KwData{lista $X[1..(n^2-1)]$ nao ordenada}
+\KwResult{lista $X[1..(n^2-1)]$ ordenada}
+\Def{sort(X, n)}{
+    \For{$i \leftarrow 1$ \KwTo $n$}{
+
+    }
+}
+\end{algorithm}
+\section*{Exercício 2}
+\begin{algorithm}[H]
+\SetKwProg{Def}{def}{:}{}
+\SetAlgoLined
+\caption{sort}
+
+\KwData{lista $X[1..(n^2-1)]$ nao ordenada}
+\KwResult{lista $X[1..(n^2-1)]$ ordenada}
+\Def{sort(X, n)}{
+    \For{$i \leftarrow 1$ \KwTo $n$}{
+
+    }
+}
+\end{algorithm}
+\section*{Exercício 6}
+\begin{enumerate}
+    \item Achamos o max do array, que é 6
+    \item Inicializamos o array de contagem C[0..6]
+    \item Fazemos o array de contagem passando uma vez por cada elemento de A e somando o valor de sua propria posição no array de contagem
+    \item C[0..6] = [2, 2, 2, 2, 1, 0, 2]
+    \item Transformamos o array de contagem em um array prefixados, acumulando a soma
+    \item P[0..6] = [2, 4, 6, 8, 9, 9, 11]
+    \item De tras para frente vemos quantos numeros menores que cada posicao existem
+    \item O[1..11] = [_, _, _, _, _, 2, _, _, _, _, _]
+    \item O[1..11] = [_, _, _, _, _, 2, _, 3, _, _, _]
+    \item etc..
+\end{enumerate}
+
+\section*{Exercício 7}
+
+\end{document}

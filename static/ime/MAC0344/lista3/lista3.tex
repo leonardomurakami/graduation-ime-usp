@@ -1,0 +1,71 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+
+\title{MAC0344 Arquitetura de Computadores \\ Lista de Exercícios No. 3}
+\author{Leonardo Heidi Almeida Murakami \\ NUSP: 11260186}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section*{1. Identifique todas as dependências nas seguintes instruções}
+
+Considere o seguinte código:
+\begin{verbatim}
+1: B = Y + 5
+2: A = B + C
+3: C = X * X
+4: D = 0
+5: E = D + 1
+6: D = Y + 1
+\end{verbatim}
+
+As dependências identificadas são:
+
+\begin{itemize}
+    \item \textbf{Dependências Verdadeiras (RAW - Read After Write):}
+    \begin{itemize}
+        \item $1 \rightarrow^{v} 2$: A instrução 2 lê a variável $B$ após a instrução 1 escrever nela.
+        \item $4 \rightarrow^{v} 5$: A instrução 5 lê a variável $D$ após a instrução 4 escrever nela.
+    \end{itemize}
+    \bigskip
+    \item \textbf{Anti-dependências (WAR - Write After Read):}
+    \begin{itemize}
+        \item $2 \rightarrow^{\text{anti}} 3$: A instrução 3 escreve na variável $C$ após a instrução 2 ler o valor original de $C$.
+        \item $5 \rightarrow^{\text{anti}} 6$: A instrução 6 escreve na variável $D$ após a instrução 5 ler o valor de $D$ definido pela instrução 4.
+    \end{itemize}
+    \bigskip
+    \item \textbf{Dependências de Saída (WAW - Write After Write):}
+    \begin{itemize}
+        \item $4 \rightarrow^{\text{saída}} 6$: A instrução 6 escreve na variável $D$ após a instrução 4 também ter escrito em $D$.
+    \end{itemize}
+\end{itemize}
+
+\newpage
+\section*{2. Removendo as anti-dependências e dependências de saída}
+
+As dependências falsas (anti-dependências e dependências de saída) podem ser removidas através de \textbf{renomeação de variáveis}, alocando novos registradores para os destinos conflitantes:
+
+\begin{itemize}
+    \item A anti-dependência $2 \rightarrow^{\text{anti}} 3$ ocorre porque $C$ é lida em 2 e escrita em 3. Renomeamos o destino da instrução 3 para $C1$.
+    \item A dependência de saída $4 \rightarrow^{\text{saída}} 6$ e a anti-dependência $5 \rightarrow^{\text{anti}} 6$ ocorrem porque $D$ é escrita em 4 e 6, sendo lida em 5. Renomeamos o destino da instrução 6 para $D1$.
+\end{itemize}
+
+O código reescrito fica:
+\begin{verbatim}
+1: B = Y + 5
+2: A = B + C
+3: C1 = X * X
+4: D = 0
+5: E = D + 1
+6: D1 = Y + 1
+\end{verbatim}
+
+Com essas renomeações, eliminamos todas as dependências falsas, mantendo apenas as dependências verdadeiras $1 \rightarrow^{v} 2$ e $4 \rightarrow^{v} 5$.
+
+\end{document}
