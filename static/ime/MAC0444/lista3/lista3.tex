@@ -1,0 +1,139 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[portuguese]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{enumitem}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+
+\title{Lista 3 - Sistemas Baseados em Conhecimento (MAC0444/MAC5778)}
+\author{Leonardo Heidi Almeida Murakami \\ NUSP: 11260186}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section*{1. Exercício 1}
+
+Utilizando os conceitos atômicos \textit{Animal}, \textit{Peixe}, \textit{Peixívoro} e \textit{Gato}, os papéis \textit{temCauda}, \textit{temPata} e \textit{come} e a constante \textit{mimi}:
+
+\subsection*{(a) Expressão dos conceitos em Lógica de Descrição}
+
+Vamos traduzir cada conceito para a linguagem formal:
+
+\begin{itemize}[leftmargin=*, itemsep=1em]
+    \item \textbf{C1: Um animal que tem cauda.}
+    \[
+        \text{Animal} \sqcap \exists \text{temCauda}.\top
+    \]
+    
+    \item \textbf{C2: Um animal que tem exatamente uma cauda e quatro patas.}
+    \[
+        \text{Animal} \sqcap ({=}\,1\text{ temCauda}.\top) \sqcap ({=}\,4\text{ temPata}.\top)
+    \]
+    
+    \item \textbf{C3: Um animal que só come peixe.}
+    \[
+        \text{Animal} \sqcap \forall \text{come}.\text{Peixe}
+    \]
+    
+    \item \textbf{C4: Um animal que só come coisas que só comem peixe.}
+    \[
+        \text{Animal} \sqcap \forall \text{come}.(\forall \text{come}.\text{Peixe})
+    \]
+\end{itemize}
+
+\subsection*{(b) Expressão dos axiomas}
+
+Agora vamos expressar cada axioma em Lógica de Descrição:
+
+\begin{itemize}[leftmargin=*, itemsep=1em]
+    \item \textbf{S1: Mimi é um gato que só come peixe.}
+    \[
+        \text{mimi} : \text{Gato} \sqcap \forall \text{come}.\text{Peixe}
+    \]
+    
+    \item \textbf{S2: Gatos são animais que têm quatro patas.}
+    \[
+        \text{Gato} \sqsubseteq \text{Animal} \sqcap ({=}\,4\text{ temPata}.\top)
+    \]
+    
+    \item \textbf{S3: Peixívoros são animais que só comem peixe.}
+    \[
+        \text{Peixívoro} \sqsubseteq \text{Animal} \sqcap \forall \text{come}.\text{Peixe}
+    \]
+\end{itemize}
+
+\newpage
+
+\subsection*{(c) S4 é consequência lógica de S1-S3?}
+
+Queremos verificar se o axioma S4 pode ser deduzido dos axiomas anteriores:
+
+\vspace{1em}
+
+\noindent\textbf{S4: Mimi é um peixívoro de quatro patas.}
+\[
+    \text{mimi} : \text{Peixívoro} \sqcap ({=}\,4\text{ temPata}.\top)
+\]
+
+\vspace{1em}
+
+\noindent\textbf{Prova:}
+
+\vspace{0.5em}
+
+Vamos construir um raciocínio passo a passo para mostrar que S4 realmente decorre de S1-S3.
+
+\begin{enumerate}[leftmargin=*, itemsep=1em, label=\textbf{Passo \arabic*:}]
+    \item O axioma S1 nos diz que:
+    \[
+        \text{mimi} : \text{Gato} \sqcap \forall \text{come}.\text{Peixe}
+    \]
+    
+    Ou seja, podemos extrair duas informações sobre o mimi:
+    \begin{itemize}[itemsep=0.3em]
+        \item \(\text{mimi} : \text{Gato}\)
+        \item \(\text{mimi} : \forall \text{come}.\text{Peixe}\)
+    \end{itemize}
+    
+    \item Agora, sabendo que mimi é um gato e que o axioma S2 diz que todo gato é um animal com quatro patas, podemos concluir:
+    \[
+        \text{mimi} : \text{Animal} \sqcap ({=}\,4\text{ temPata}.\top)
+    \]
+    
+    Em outras palavras:
+    \begin{itemize}[itemsep=0.3em]
+        \item \(\text{mimi} : \text{Animal}\)
+        \item \(\text{mimi} : ({=}\,4\text{ temPata}.\top)\)
+    \end{itemize}
+    
+    \item Juntando as informações dos passos 1 e 2, sabemos que mimi é um animal que só come peixe:
+    \[
+        \text{mimi} : \text{Animal} \sqcap \forall \text{come}.\text{Peixe}
+    \]
+    
+    \item O axioma S3 define que:
+    \[
+        \text{Peixívoro} \sqsubseteq \text{Animal} \sqcap \forall \text{come}.\text{Peixe}
+    \]
+    
+    Isso significa que ser peixívoro é exatamente ser um animal que só come peixe. Como mimi satisfaz essas condições (do Passo 3), podemos classificá-lo como peixívoro:
+    \[
+        \text{mimi} : \text{Peixívoro}
+    \]
+    
+    \item Finalmente, combinando o fato de que mimi é um peixívoro (Passo 4) com o fato de que tem quatro patas (Passo 2):
+    \[
+        \text{mimi} : \text{Peixívoro} \sqcap ({=}\,4\text{ temPata}.\top)
+    \]
+\end{enumerate}
+
+\vspace{1em}
+
+\noindent\textbf{Conclusão:} S4 é consequência lógica de S1-S3.
+
+\end{document}

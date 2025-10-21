@@ -1,0 +1,97 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[portuguese]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+
+\title{MAC0344 Arquitetura de Computadores \\ Lista de Exercícios No. 4}
+\author{Leonardo Heidi Almeida Murakami \\ NUSP: 11260186}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section*{1. Para um dado de 7 bits, escreva o código de Hamming}
+
+\textbf{Enunciado:} Para um dado de 7 bits $m_{1}m_{2}m_{3}m_{4}m_{5}m_{6}m_{7}$, seu código de Hamming tem 11 bits (7 bits originais mais 4 bits adicionais). Escreva o código de Hamming $x_{1}x_{2}x_{3}x_{4}x_{5}x_{6}x_{7}x_{8}x_{9}x_{10}x_{11}$ para o dado $m_{1}m_{2}m_{3}m_{4}m_{5}m_{6}m_{7}=1100101,$ pelo método discutido em classe.
+
+\subsection*{Resolução}
+
+Para começar, precisamos distribuir os 7 bits de dados nas posições que não são potências de 2. Isso acontece porque as posições $x_1, x_2, x_4, x_8$ ficam reservadas para guardar os bits de paridade.
+
+\begin{itemize}
+    \item $x_3 \leftarrow m_1 = 1$
+    \item $x_5 \leftarrow m_2 = 1$
+    \item $x_6 \leftarrow m_3 = 0$
+    \item $x_7 \leftarrow m_4 = 0$
+    \item $x_9 \leftarrow m_5 = 1$
+    \item $x_{10} \leftarrow m_6 = 0$
+    \item $x_{11} \leftarrow m_7 = 1$
+\end{itemize}
+
+Agora calculamos os bits de paridade ($x_1, x_2, x_4, x_8$). Para isso, aplicamos a operação XOR ($\oplus$) nas posições certas de acordo com o método visto em aula:
+
+\begin{itemize}
+    \item \textbf{Cálculo de $x_1$:}
+    $x_1 = x_3 \oplus x_5 \oplus x_7 \oplus x_9 \oplus x_{11} = 1 \oplus 1 \oplus 0 \oplus 1 \oplus 1 = 0$
+    
+    \bigskip
+    \item \textbf{Cálculo de $x_2$:}
+    $x_2 = x_3 \oplus x_6 \oplus x_7 \oplus x_{10} \oplus x_{11} = 1 \oplus 0 \oplus 0 \oplus 0 \oplus 1 = 0$
+    
+    \bigskip
+    \item \textbf{Cálculo de $x_4$:}
+    $x_4 = x_5 \oplus x_6 \oplus x_7 = 1 \oplus 0 \oplus 0 = 1$
+    
+    \bigskip
+    \item \textbf{Cálculo de $x_8$:}
+    $x_8 = x_9 \oplus x_{10} \oplus x_{11} = 1 \oplus 0 \oplus 1 = 0$
+\end{itemize}
+
+Juntando tudo, o código de Hamming fica:
+\begin{center}
+\textbf{00111000101}
+\end{center}
+
+\newpage
+\section*{2. Detecte e corrija o erro no código de Hamming lido}
+
+\textbf{Enunciado:} Suponha que o código de Hamming (total 11 bits) lido da memória foi 
+\[y_{1}y_{2}y_{3}y_{4}y_{5}y_{6}y_{7}y_{8}y_{9}y_{10}y_{11}=00110000101.\]
+Você detecta algum erro? Se positivo, corrija o erro. Mostre o seu trabalho para chegar a resposta.
+
+\subsection*{Resolução}
+Para saber se tem erro e onde ele está, vamos calcular os 4 bits de verificação ($k_1, k_2, k_3, k_4$) com base no código que chegou ($y_i$):
+
+\begin{itemize}
+    \item \textbf{Cálculo de $k_1$:}
+    $k_1 = y_1 \oplus y_3 \oplus y_5 \oplus y_7 \oplus y_9 \oplus y_{11} = 0 \oplus 1 \oplus 0 \oplus 0 \oplus 1 \oplus 1 = 1$
+    
+    \bigskip
+    \item \textbf{Cálculo de $k_2$:}
+    $k_2 = y_2 \oplus y_3 \oplus y_6 \oplus y_7 \oplus y_{10} \oplus y_{11} = 0 \oplus 1 \oplus 0 \oplus 0 \oplus 0 \oplus 1 = 0$
+    
+    \bigskip
+    \item \textbf{Cálculo de $k_3$:}
+    $k_3 = y_4 \oplus y_5 \oplus y_6 \oplus y_7 = 1 \oplus 0 \oplus 0 \oplus 0 = 1$
+    
+    \bigskip
+    \item \textbf{Cálculo de $k_4$:}
+    $k_4 = y_8 \oplus y_9 \oplus y_{10} \oplus y_{11} = 0 \oplus 1 \oplus 0 \oplus 1 = 0$
+\end{itemize}
+
+Juntando os bits de verificação, temos $k_4k_3k_2k_1 = 0101$. Como deu diferente de $0000$, encontramos um erro! E a sacada aqui é que o valor em decimal dessa palavra binária mostra exatamente onde está o erro:
+\[
+(0101)_2 = 0 \cdot 2^3 + 1 \cdot 2^2 + 0 \cdot 2^1 + 1 \cdot 2^0 = 4 + 1 = 5
+\]
+ou seja, o problema está na \textbf{posição 5} ($y_5$).
+
+Portanto, flipando o bit da posição 5, o código corrigido fica:
+\begin{center}
+\textbf{00111000101}
+\end{center}
+
+\end{document}
