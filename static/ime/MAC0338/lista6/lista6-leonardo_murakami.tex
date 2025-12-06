@@ -1,0 +1,221 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[portuguese]{babel}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage[portuguese,algoruled,lined,linesnumbered]{algorithm2e}
+\usepackage{geometry}
+\usepackage{hyperref}
+\geometry{a4paper, margin=1in}
+
+
+% ---- PREENCHA ----
+\newcommand{\Lista}{6}
+\newcommand{\Nome}{Leonardo Heidi Almeida Murakami}
+\newcommand{\NUSP}{11260186}
+% -----------------------------
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\Nome}
+\fancyhead[R]{NUSP \NUSP}
+\fancyfoot[L]{Lista \Lista}
+\fancyfoot[C]{MAC0338}
+\fancyfoot[R]{Página \thepage\ de \pageref{LastPage}}
+
+\begin{document}
+
+\section*{Exercício 2}
+
+\subsection*{Estratégia do Algoritmo}
+Temos uma sequência de $n$ números $X = \{x_1, \dots, x_n\}$, onde $n$ é par. O objetivo é dividir esses números em $n/2$ pares de modo que a maior soma entre os pares seja a menor possível.
+
+A ideia gulosa é simples:
+\begin{enumerate}
+    \item Ordenar os números em ordem crescente: $X' = [x'_1, x'_2, \dots, x'_n]$, com $x'_1 \le x'_2 \le \dots \le x'_n$.
+    \item Parear o menor com o maior, depois o segundo menor com o segundo maior, e assim por diante.
+\end{enumerate}
+Isso gera os pares:
+$$ P_G = \{(x'_1, x'_n), (x'_2, x'_{n-1}), \dots, (x'_{n/2}, x'_{n/2 + 1}) \} $$
+
+\subsection*{Algoritmo}
+\begin{algorithm}[H]
+\SetAlgoLined
+\caption{\texttt{MinimizaSomaMaximaDosPares}$(X, n)$}
+\KwData{Vetor $X[1..n]$ de números, $n$ é par}
+\KwResult{Um conjunto $P$ de $n/2$ pares que minimiza a soma máxima}
+\BlankLine
+$X' \leftarrow \texttt{Sort}(X)$ \tcp{Ordena o vetor, e.g., com MergeSort}
+$P \leftarrow \emptyset$ \tcp{Inicializa o conjunto de pares}
+\For{$i \leftarrow 1$ \KwTo $n/2$}{
+    Adicione o par $(X'[i], X'[n - i + 1])$ ao conjunto $P$\;
+}
+\Return{$P$}\;
+\end{algorithm}
+
+\subsection*{Prova de Corretude}
+Vamos chamar $X' = [x'_1 \le x'_2 \le \dots \le x'_n]$ a sequência já ordenada.
+Seja $P_G$ a partição que o algoritmo guloso gera, com soma máxima $M_G = \max_{(a,b) \in P_G} (a+b)$.
+Seja $P_{OPT}$ uma solução ótima qualquer, com soma máxima $M_{OPT} = \max_{(a,b) \in P_{OPT}} (a+b)$ (que é o mínimo possível).
+Queremos mostrar que $M_G = M_{OPT}$. Como $P_G$ é válida, sabemos que $M_G \ge M_{OPT}$. Então basta provar que $M_G \le M_{OPT}$.
+
+Usando um argumento de troca. Suponha que $P_{OPT}$ é diferente de $P_G$.
+Se $P_{OPT} \ne P_G$, então existe pelo menos um "cruzamento". Isso significa que existem quatro elementos $x'_a < x'_b \le x'_c < x'_d$ onde $P_{OPT}$ tem os pares $(x'_a, x'_c)$ e $(x'_b, x'_d)$, mas $P_G$ teria os pares $(x'_a, x'_d)$ e $(x'_b, x'_c)$.
+
+Comparando as somas nesses dois casos:
+\begin{itemize}
+    \item \textbf{Na $P_{OPT}$:} Temos os pares $(x'_a, x'_c)$ e $(x'_b, x'_d)$.
+    As somas são $S_1 = x'_a + x'_c$ e $S_2 = x'_b + x'_d$.
+    Como $x'_a \le x'_b$ e $x'_c < x'_d$, temos $x'_a + x'_c < x'_b + x'_d$.
+    Então a maior soma aqui é $M'_{OPT} = S_2 = x'_b + x'_d$.
+    
+    \item \textbf{Na $P_G$:} Temos os pares $(x'_a, x'_d)$ e $(x'_b, x'_c)$.
+    As somas são $S'_1 = x'_a + x'_d$ e $S'_2 = x'_b + x'_c$.
+    A maior soma aqui é $M'_G = \max(x'_a + x'_d, x'_b + x'_c)$.
+\end{itemize}
+
+Agora note que:
+\begin{itemize}
+    \item $x'_b + x'_d > x'_a + x'_d$ (porque $x'_b > x'_a$)
+    \item $x'_b + x'_d > x'_b + x'_c$ (porque $x'_d > x'_c$)
+\end{itemize}
+Ou seja, $M'_{OPT} = x'_b + x'_d$ é maior ou igual às duas somas da partição gulosa.
+Logo, $M'_{OPT} \ge M'_G$.
+
+Isso quer dizer que se "desfizarmos o cruzamento" em $P_{OPT}$ (trocar $(x'_a, x'_c)$ e $(x'_b, x'_d)$ por $(x'_a, x'_d)$ e $(x'_b, x'_c)$), obtemos uma nova partição $P'_{OPT}$ cuja soma máxima é no máximo $M_{OPT}$. 
+
+Podemos repetir esse processo pra todo cruzamento que ainda existir. A cada troca, a soma máxima não piora e vamos chegando mais perto da partição gulosa $P_G$ (que não tem nenhum cruzamento).
+No final, transformamos $P_{OPT}$ em $P_G$ sem nunca aumentar a soma máxima.
+Isso mostra que $M_G \le M_{OPT}$.
+
+Como $M_G \ge M_{OPT}$ (já que $M_{OPT}$ é o mínimo) e $M_G \le M_{OPT}$ (pelo argumento acima), temos que $M_G = M_{OPT}$.
+Portanto, o algoritmo guloso é ótimo.
+
+\subsection*{Análise de Complexidade}
+O tempo de execução $T(n)$ vem basicamente de duas partes:
+\begin{enumerate}
+    \item \textbf{Ordenação}: Ordenar o vetor $X$ com $n$ elementos usando MergeSort ou HeapSort leva $O(n \log n)$.
+    \item \textbf{Formação dos Pares}: O laço executa $n/2$ vezes, e cada iteração só faz operações simples ($O(1)$). Total: $O(n/2) = O(n)$.
+\end{enumerate}
+Somando tudo:
+$$ T(n) = O(n \log n) + O(n) $$
+O termo dominante é a ordenação, então:
+\begin{equation}
+\boxed{T(n) = O(n \log n)}.
+\end{equation}
+O algoritmo atende o requisito de complexidade. O espaço auxiliar é $O(n)$ pra guardar $X'$ ordenado e a lista de pares $P$.
+
+\newpage
+\section*{Exercício 6}
+
+\subsection*{Descrição do Algoritmo}
+O problema pede pra provar que a estratégia gulosa que a companhia já usa é ótima, ou seja, que ela realmente minimiza o número de caminhões. A ideia é respeitar a ordem FIFO (primeiro a chegar, primeiro a sair).
+
+A estratégia gulosa (vou chamar de \texttt{CarregaFIFO}) funciona assim:
+\begin{enumerate}
+    \item Começa com um caminhão vazio (caminhão $k=1$).
+    \item Vai processando as caixas $w_i$ na ordem que elas chegam ($i=1, 2, 3, \dots$).
+    \item Pra cada caixa $w_i$, verifica se ela cabe no caminhão atual (se $\text{peso\_atual} + w_i \le W$).
+    \item \textbf{Se couber:} Joga a caixa no caminhão e atualiza o peso ($\text{peso\_atual} \leftarrow \text{peso\_atual} + w_i$).
+    \item \textbf{Se não couber:} Fecha o caminhão $k$ e manda embora. Pega um caminhão novo ($k+1$), coloca a caixa $w_i$ nele e atualiza $\text{peso\_atual} \leftarrow w_i$.
+    \item Repete até todas as $n$ caixas serem carregadas.
+\end{enumerate}
+Assumimos que cada caixa $w_i$ tem peso $\le W$ (senão seria impossível carregar).
+
+\subsection*{Pseudocódigo}
+\begin{algorithm}[H]
+\SetAlgoLined
+\caption{\texttt{CarregaFIFO}$(W, w[1..n])$}
+\KwData{Capacidade $W$, vetor de pesos das caixas $w[1..n]$}
+\KwResult{O número mínimo $k$ de caminhões necessários}
+\BlankLine
+\If{$n = 0$}{\Return{0}}
+$k \leftarrow 1$ \tcp{Número de caminhões}
+somaAtual $\leftarrow 0$ \tcp{Peso no caminhão atual}
+\For{$i \leftarrow 1$ \KwTo $n$}{
+    \If{somaAtual + $w[i] \le W$}{
+        somaAtual $\leftarrow$ somaAtual + $w[i]$\;
+    } \Else {
+        \tcp{Fecha o caminhão atual e inicia um novo}
+        $k \leftarrow k + 1$\;
+        somaAtual $\leftarrow w[i]$\;
+    }
+}
+\Return{$k$}\;
+\end{algorithm}
+
+\subsection*{Prova de Corretude (Estratégia "Sempre à Frente")}
+Pra provar que o algoritmo guloso $G$ é ótimo, vou comparar ele com uma solução ótima qualquer $O$.
+
+Seja $G = (T_1, T_2, \dots, T_k)$ a sequência de $k$ caminhões que o guloso gera.
+Seja $O = (T'_1, T'_2, \dots, T'_m)$ a sequência de $m$ caminhões de uma solução ótima.
+Como $O$ é ótima, sabemos que $m \le k$. Vamos provar que $m \ge k$, o que vai mostrar que $k=m$.
+
+Vou usar a estratégia "sempre à frente". A ideia é acompanhar o \textbf{índice da última caixa} que cada caminhão leva.
+\begin{itemize}
+    \item $c_i$ = índice da última caixa no caminhão $T_i$ do guloso.
+    \item $c'_i$ = índice da última caixa no caminhão $T'_i$ do ótimo.
+\end{itemize}
+Por causa da política FIFO, os dois algoritmos processam as caixas na ordem $w_1, \dots, w_n$.
+O caminhão $T_1$ leva caixas $\{1, \dots, c_1\}$, o $T_2$ leva $\{c_1+1, \dots, c_2\}$, e por aí vai.
+Da mesma forma, $T'_1$ leva $\{1, \dots, c'_1\}$, $T'_2$ leva $\{c'_1+1, \dots, c'_2\}$, etc.
+
+\textbf{Afirmação:} O guloso está "sempre à frente", ou seja, $c_i \ge c'_i$ pra todo $i = 1, \dots, m$.
+Vou provar isso por indução sobre $i$.
+
+\textbf{Caso Base ($i=1$):}
+\begin{itemize}
+    \item $T'_1$ (ótimo) carrega as caixas $\{w_1, \dots, w_{c'_1}\}$ com $\sum_{j=1}^{c'_1} w_j \le W$.
+    \item $T_1$ (guloso) carrega as caixas $\{w_1, \dots, w_{c_1}\}$ tal que $\sum_{j=1}^{c_1} w_j \le W$, e se $c_1 < n$, então $\sum_{j=1}^{c_1+1} w_j > W$.
+    \item O guloso, por definição, coloca o \emph{máximo} de caixas possível no primeiro caminhão. Já o ótimo escolhe \emph{algum} número de caixas que cabem.
+    \item Como o conjunto $\{w_1, \dots, w_{c'_1}\}$ é válido (cabe em $W$), o conjunto que o guloso escolheu tem que ser pelo menos tão grande quanto esse.
+    \item Logo, $c_1 \ge c'_1$.
+\end{itemize}
+
+\textbf{Hipótese de Indução (HI):}
+Vamos supor que vale pro caminhão $i-1$, ou seja, $c_{i-1} \ge c'_{i-1}$.
+
+\textbf{Passo Indutivo (provar pra $i$):}
+Vamos mostrar que $c_i \ge c'_i$.
+\begin{itemize}
+    \item O caminhão $T_i$ (guloso) começa na caixa $p = c_{i-1} + 1$ e vai colocando até não caber mais. Isso maximiza $c_i$ tal que $\sum_{j=p}^{c_i} w_j \le W$.
+    \item O caminhão $T'_i$ (ótimo) começa na caixa $p' = c'_{i-1} + 1$ e escolhe algum $c'_i$ com $\sum_{j=p'}^{c'_i} w_j \le W$.
+    \item Pela HI, temos $c_{i-1} \ge c'_{i-1}$, então $p \ge p'$. Ou seja, o guloso começa na mesma posição ou mais pra frente que o ótimo.
+    \item Considere o conjunto $S' = \{w_{p'}, \dots, w_{c'_i}\}$ que o ótimo carrega no $T'_i$. Sabemos que $\sum(S') \le W$.
+    \item Agora olhe pro subconjunto $S = \{w_p, \dots, w_{c'_i}\}$. Como $p \ge p'$, temos que $S$ é um subconjunto de $S'$.
+    \item Logo, $\sum(S) \le \sum(S') \le W$.
+    \item Isso quer dizer que $S$ é um conjunto válido que o guloso \emph{poderia} carregar (começa em $p$ e a soma cabe).
+    \item Como o guloso \emph{maximiza} quantas caixas ele consegue carregar, ele vai escolher um índice final $c_i$ no mínimo tão grande quanto $c'_i$.
+    \item Portanto, $c_i \ge c'_i$.
+\end{itemize}
+Pronto, completamos a indução.
+
+\textbf{Conclusão:}
+Acabamos de provar que $c_i \ge c'_i$ pra todo $i = 1, \dots, m$.
+Agora vamos supor por contradição que o guloso usa mais caminhões, ou seja, $k > m$.
+\begin{itemize}
+    \item Se $k > m$, vamos olhar pro $m$-ésimo caminhão de cada um.
+    \item $T'_m$ é o último caminhão ótimo, então ele tem que carregar a última caixa $w_n$. Logo, $c'_m = n$.
+    \item Pela nossa prova, $c_m \ge c'_m$.
+    \item Substituindo, $c_m \ge n$. Como $c_m$ não pode passar de $n$, temos $c_m = n$.
+    \item Se $c_m = n$, o $m$-ésimo caminhão guloso também carrega a última caixa. Então o guloso termina depois de $m$ caminhões.
+    \item Ou seja, $k=m$.
+    \item Isso contradiz a suposição de que $k > m$.
+\end{itemize}
+Logo, $k > m$ é impossível. Como já sabíamos que $m \le k$ (por $m$ ser ótimo), só resta $k=m$. Portanto, o guloso é ótimo e minimiza o número de caminhões.
+
+\subsection*{Análise de Complexidade}
+O algoritmo \texttt{CarregaFIFO} tem um único laço que vai de $i=1$ até $n$.
+Dentro do laço, só fazemos operações simples ($O(1)$): um \textbf{if/else}, uma soma e uma atribuição.
+O algoritmo passa por cada uma das $n$ caixas exatamente uma vez.
+Portanto:
+\begin{equation}
+\boxed{T(n) = O(n)}.
+\end{equation}
+A complexidade de espaço é $O(1)$, já que só usamos algumas variáveis pra guardar o número de caminhões e o peso atual.
+
+\end{document}

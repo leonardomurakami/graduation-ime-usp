@@ -1,0 +1,989 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazilian]{babel}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{float}
+\usepackage{caption}
+
+\geometry{margin=2.5cm}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{sparqlstyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    frame=single,
+    morekeywords={SELECT, WHERE, PREFIX, ORDER, BY, FILTER, VALUES, DISTINCT, GROUP, LIMIT, DESC, ASC, UNION, MIN, MAX, AS}
+}
+
+\lstset{style=sparqlstyle}
+
+\title{\textbf{MAC0444 - Projeto}\\
+\large Relatório}
+\author{Leonardo Heidi Almeida Murakami\\NUSP:11260186}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\newpage
+
+% ============================================================================
+\section{Introdução}
+% ============================================================================
+
+Este relatório descreve o desenvolvimento de uma ontologia para representação do domínio cinematográfico, incluindo conceitos como filmes, atores, atrizes, diretores e personagens. O projeto foi desenvolvido utilizando o Protégé como ferramenta principal, com referência à ontologia FOAF (\textit{Friend of a Friend}) como base para a modelagem de pessoas e suas relações.
+
+A ontologia foi projetada para responder a dez questões de competência específicas, demonstrando sua capacidade de representar adequadamente o domínio do cinema e permitir consultas complexas sobre os dados.
+
+% ============================================================================
+\section{Descrição da Ontologia}
+% ============================================================================
+
+\subsection{URI Base}
+
+A ontologia desenvolvida possui o seguinte URI base:
+
+\begin{verbatim}
+http://www.semanticweb.org/leonardomurakami/ontologies/2025/10/ontology-movies#
+\end{verbatim}
+
+\subsection{Importações}
+
+A ontologia importa a ontologia FOAF (\textit{Friend of a Friend}), disponível em:
+
+\begin{verbatim}
+http://xmlns.com/foaf/0.1/
+\end{verbatim}
+
+ou em
+
+\begin{verbatim}
+https://web.archive.org/web/20211024051123/http://xmlns.com/foaf/spec/index.rdf    
+\end{verbatim}
+
+Esta importação é declarada como \texttt{owl:imports} no cabeçalho da ontologia, permitindo reutilizar conceitos e propriedades já estabelecidos para representação de pessoas e suas relações.
+
+% ============================================================================
+\section{Classes (Conceitos)}
+% ============================================================================
+
+A ontologia define cinco classes principais para representar as entidades do domínio cinematográfico:
+
+\subsection{Movie}
+
+\begin{itemize}
+    \item \textbf{URI:} \texttt{:Movie}
+    \item \textbf{Superclasse:} \texttt{owl:Thing}
+    \item \textbf{Descrição:} Representa um filme. Cada instância possui título, ano de criação e duração, além de relações com diretores, atores, atrizes e personagens.
+\end{itemize}
+
+\subsection{Actor}
+
+\begin{itemize}
+    \item \textbf{URI:} \texttt{:Actor}
+    \item \textbf{Superclasse:} \texttt{contact:Person} (via FOAF)
+    \item \textbf{Descrição:} Representa um ator (pessoa do sexo masculino que atua em filmes). Possui primeiro nome, sobrenome e relações com os filmes em que atuou e os personagens que interpretou.
+\end{itemize}
+
+\subsection{Actress}
+
+\begin{itemize}
+    \item \textbf{URI:} \texttt{:Actress}
+    \item \textbf{Superclasse:} \texttt{contact:Person} (via FOAF)
+    \item \textbf{Descrição:} Representa uma atriz (pessoa do sexo feminino que atua em filmes). Possui as mesmas propriedades que Actor, mas permite distinguir gênero nas consultas.
+\end{itemize}
+
+\subsection{Director}
+
+\begin{itemize}
+    \item \textbf{URI:} \texttt{:Director}
+    \item \textbf{Superclasse:} \texttt{contact:Person} (via FOAF)
+    \item \textbf{Descrição:} Representa um diretor de filmes. Possui primeiro nome, sobrenome e relações com os filmes que dirigiu.
+\end{itemize}
+
+\subsection{Character}
+
+\begin{itemize}
+    \item \textbf{URI:} \texttt{:Character}
+    \item \textbf{Superclasse:} \texttt{contact:Person} (via FOAF)
+    \item \textbf{Descrição:} Representa um personagem de um filme. Cada personagem está associado a um ator ou atriz específico em um filme específico. Usamos a coluna id da planilha para evitar duplicação de personagens (ex: um doutor figurante, doutores de Doctor Who, etc.) 
+\end{itemize}
+
+\newpage
+% ============================================================================
+\section{Propriedades de Objeto (Object Properties)}
+% ============================================================================
+
+\subsection{Propriedades Derivadas de foaf:made}
+
+Estas propriedades representam relações onde uma pessoa ``faz'' algo (atua, dirige):
+
+\subsubsection{actsIn}
+\begin{itemize}
+    \item \textbf{URI:} \texttt{:actsIn}
+    \item \textbf{Superpropriedade:} \texttt{foaf:made}
+    \item \textbf{Domínio:} Actor $\cup$ Actress
+    \item \textbf{Contradomínio:} Movie
+    \item \textbf{Descrição:} Relaciona um ator/atriz ao filme em que ele/ela atua.
+\end{itemize}
+
+\subsubsection{actsAs}
+\begin{itemize}
+    \item \textbf{URI:} \texttt{:actsAs}
+    \item \textbf{Superpropriedade:} \texttt{foaf:made}
+    \item \textbf{Domínio:} Actor $\cup$ Actress
+    \item \textbf{Contradomínio:} Character
+    \item \textbf{Descrição:} Relaciona um ator/atriz ao personagem que ele/ela interpreta.
+\end{itemize}
+
+\subsubsection{directs}
+\begin{itemize}
+    \item \textbf{URI:} \texttt{:directs}
+    \item \textbf{Superpropriedade:} \texttt{foaf:made}
+    \item \textbf{Domínio:} Director
+    \item \textbf{Contradomínio:} Movie
+    \item \textbf{Descrição:} Relaciona um diretor ao filme que ele dirigiu.
+\end{itemize}
+
+\subsection{Propriedades Derivadas de foaf:maker}
+
+Estas propriedades representam relações inversas, onde algo ``tem'' um criador:
+
+\subsubsection{hasActor}
+\begin{itemize}
+    \item \textbf{URI:} \texttt{:hasActor}
+    \item \textbf{Superpropriedade:} \texttt{foaf:maker}
+    \item \textbf{Domínio:} Movie
+    \item \textbf{Contradomínio:} Actor
+    \item \textbf{Descrição:} Relaciona um filme a um ator que atua nele.
+\end{itemize}
+
+\subsubsection{hasActress}
+\begin{itemize}
+    \item \textbf{URI:} \texttt{:hasActress}
+    \item \textbf{Superpropriedade:} \texttt{foaf:maker}
+    \item \textbf{Domínio:} Movie
+    \item \textbf{Contradomínio:} Actress
+    \item \textbf{Descrição:} Relaciona um filme a uma atriz que atua nele.
+\end{itemize}
+
+\subsubsection{hasDirector}
+\begin{itemize}
+    \item \textbf{URI:} \texttt{:hasDirector}
+    \item \textbf{Superpropriedade:} \texttt{foaf:maker}
+    \item \textbf{Domínio:} Movie
+    \item \textbf{Contradomínio:} Director
+    \item \textbf{Descrição:} Relaciona um filme ao seu diretor.
+\end{itemize}
+
+\subsubsection{hasCharacter}
+\begin{itemize}
+    \item \textbf{URI:} \texttt{:hasCharacter}
+    \item \textbf{Superpropriedade:} \texttt{foaf:maker}
+    \item \textbf{Domínio:} Movie
+    \item \textbf{Contradomínio:} Character
+    \item \textbf{Descrição:} Relaciona um filme a um personagem que aparece nele.
+\end{itemize}
+
+\subsubsection{isPlayedBy}
+\begin{itemize}
+    \item \textbf{URI:} \texttt{:isPlayedBy}
+    \item \textbf{Superpropriedade:} \texttt{foaf:maker}
+    \item \textbf{Domínio:} Character
+    \item \textbf{Contradomínio:} Actor $\cup$ Actress
+    \item \textbf{Descrição:} Relaciona um personagem ao ator/atriz que o interpreta.
+\end{itemize}
+
+% ============================================================================
+\section{Propriedades de Dados (Data Properties)}
+% ============================================================================
+
+\subsection{Propriedades da Ontologia FOAF Utilizadas}
+
+\subsubsection{foaf:firstName}
+\begin{itemize}
+    \item \textbf{URI:} \texttt{foaf:firstName}
+    \item \textbf{Tipo:} \texttt{xsd:string}
+    \item \textbf{Descrição:} Primeiro nome de uma pessoa (ator, atriz ou diretor).
+\end{itemize}
+
+\subsubsection{foaf:familyName}
+\begin{itemize}
+    \item \textbf{URI:} \texttt{foaf:familyName}
+    \item \textbf{Tipo:} \texttt{xsd:string}
+    \item \textbf{Descrição:} Sobrenome (nome de família) de uma pessoa.
+\end{itemize}
+
+\subsubsection{foaf:title}
+\begin{itemize}
+    \item \textbf{URI:} \texttt{foaf:title}
+    \item \textbf{Tipo:} \texttt{xsd:string}
+    \item \textbf{Descrição:} Título do filme.
+\end{itemize}
+
+\subsection{Propriedades Definidas na Ontologia}
+
+\subsubsection{creationYear}
+\begin{itemize}
+    \item \textbf{URI:} \texttt{:creationYear}
+    \item \textbf{Tipo:} \texttt{xsd:integer}
+    \item \textbf{Descrição:} Ano de lançamento do filme (pensei em criar como sub-propriedade de birthDay mas nao parecia fazer sentido).
+\end{itemize}
+
+\subsubsection{duration}
+\begin{itemize}
+    \item \textbf{URI:} \texttt{:duration}
+    \item \textbf{Tipo:} \texttt{xsd:integer}
+    \item \textbf{Descrição:} Duração do filme em minutos.
+\end{itemize}
+
+\subsubsection{birthDay}
+\begin{itemize}
+    \item \textbf{URI:} \texttt{:birthDay}
+    \item \textbf{Superpropriedade:} \texttt{foaf:birthday}
+    \item \textbf{Tipo:} \texttt{xsd:string}
+    \item \textbf{Descrição:} Data de nascimento de uma pessoa.
+\end{itemize}
+
+% ============================================================================
+\section{Relação com a Ontologia FOAF}
+% ============================================================================
+
+A ontologia desenvolvida segue rigorosamente os requisitos de integração com a FOAF, conforme especificado no enunciado do projeto:
+
+\begin{table}[H]
+\centering
+\caption{Mapeamento entre elementos da ontologia e FOAF}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Elemento FOAF} & \textbf{Uso na Ontologia} \\
+\hline
+\texttt{foaf:Person} & Superclasse de Actor, Actress, Director, Character  \\
+\hline
+\texttt{foaf:firstName} & Utilizado para primeiro nome \\
+\hline
+\texttt{foaf:familyName} & Utilizado para sobrenome  \\
+\hline
+\texttt{foaf:made} & Superpropriedade de actsIn, actsAs, directs \\
+\hline
+\texttt{foaf:maker} & Superpropriedade de hasActor, hasActress, etc. \\
+\hline
+\texttt{foaf:title} & Utilizado para título do filme \\
+\hline
+\end{tabular}
+\end{table}
+
+% ============================================================================
+\section{Estatísticas da Ontologia}
+% ============================================================================
+
+A ontologia populada contém os seguintes números de indivíduos:
+
+\begin{lstlisting}
+SELECT ?Classe (COUNT(?individuo) AS ?Quantidade)
+WHERE {
+    ?individuo rdf:type ?Classe .
+    FILTER(?Classe IN (:Movie, :Actor, :Actress, :Director, :Character))
+}
+GROUP BY ?Classe
+ORDER BY DESC(?Quantidade)
+\end{lstlisting}
+
+\begin{table}[H]
+\centering
+\caption{Quantidade de indivíduos por classe}
+\begin{tabular}{|l|r|}
+\hline
+\textbf{Classe} & \textbf{Quantidade} \\
+\hline
+Character & 2.789 \\
+\hline
+Actor & 1.693 \\
+\hline
+Actress & 828 \\
+\hline
+Director & 73 \\
+\hline
+Movie & 72 \\
+\hline
+\textbf{Total} & \textbf{5.455} \\
+\hline
+\end{tabular}
+\end{table}
+
+\newpage
+% ============================================================================
+\section{Consultas SPARQL e Resultados}
+% ============================================================================
+
+A seguir são apresentadas as dez consultas SPARQL desenvolvidas para responder às questões de competência, com seus respectivos parâmetros e resultados.
+
+\subsection{Prefixos Utilizados}
+
+\begin{lstlisting}
+PREFIX : <http://www.semanticweb.org/leonardomurakami/
+         ontologies/2025/10/ontology-movies#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+\end{lstlisting}
+
+
+% ----------------------------------------------------------------------------
+\subsection{Query 1: Filmes dirigidos por um diretor}
+% ----------------------------------------------------------------------------
+
+\textbf{Questão:} Quais os títulos dos filmes que foram dirigidos pelo diretor D, em ordem lexicográfica?
+
+\textbf{Parâmetro:} \texttt{D = :joel\_coen}
+
+\begin{lstlisting}
+SELECT ?TituloDoFilme
+WHERE {
+    VALUES ?D { :joel_coen }
+    
+    ?filme rdf:type :Movie .
+    ?filme :hasDirector ?D .
+    ?filme foaf:title ?TituloDoFilme .
+}
+ORDER BY ?TituloDoFilme
+\end{lstlisting}
+
+\textbf{Resultados:}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|}
+\hline
+\textbf{TituloDoFilme} \\
+\hline
+Barton Fink \\
+\hline
+Blood Simple \\
+\hline
+Fargo \\
+\hline
+Intolerable Cruelty \\
+\hline
+Miller's Crossing \\
+\hline
+No Country for Old Men \\
+\hline
+O Brother, Where Art Thou? \\
+\hline
+Paris, je t'aime \\
+\hline
+Raising Arizona \\
+\hline
+The Big Lebowski \\
+\hline
+The Hudsucker Proxy \\
+\hline
+The Ladykillers \\
+\hline
+The Man Who Wasn't There \\
+\hline
+\end{tabular}
+\end{table}
+
+\newpage
+% ----------------------------------------------------------------------------
+\subsection{Query 2: Atores e personagens de um filme}
+% ----------------------------------------------------------------------------
+
+\textbf{Questão:} Quais os primeiros nomes e últimos nomes dos atores que participaram do filme de título Ft, em ordem lexicográfica de nome e sobrenome, com seus respectivos personagens?
+
+\textbf{Parâmetro:} \texttt{Ft = "The Godfather"}
+
+\begin{lstlisting}
+SELECT ?PrimeiroNome ?UltimoNome ?Personagem
+WHERE {
+    VALUES ?Ft { "The Godfather" }
+    
+    ?filme rdf:type :Movie .
+    ?filme foaf:title ?Ft .
+    
+    { ?filme :hasActor ?pessoa . }
+    UNION
+    { ?filme :hasActress ?pessoa . }
+    
+    ?pessoa foaf:firstName ?PrimeiroNome .
+    ?pessoa foaf:familyName ?UltimoNome .
+    
+    ?pessoa :actsAs ?Personagem .
+    ?filme :hasCharacter ?Personagem .
+}
+ORDER BY ?PrimeiroNome ?UltimoNome
+\end{lstlisting}
+
+\textbf{Resultados:}
+
+\begin{longtable}{|l|l|p{6cm}|}
+\hline
+\textbf{PrimeiroNome} & \textbf{UltimoNome} & \textbf{Personagem} \\
+\hline
+\endfirsthead
+\hline
+\textbf{PrimeiroNome} & \textbf{UltimoNome} & \textbf{Personagem} \\
+\hline
+\endhead
+Abe & Vigoda & abe\_vigodathe\_godfather salvadore\_sally\_tessio \\
+\hline
+Al & Lettieri & al\_lettierithe\_godfather virgil\_sollozzo \\
+\hline
+Al & Martino & al\_martinothe\_godfather johnny\_fontane \\
+\hline
+Al & Pacino & al\_pacinothe\_godfather michael\_corleone \\
+\hline
+Alex & Rocco & alex\_roccothe\_godfather moe\_greene \\
+\hline
+Angelo & Infanti & angelo\_infantithe\_godfather fabrizio \\
+\hline
+Anthony & Gounaris & anthony\_gounaristhe\_godfather anthony\_vito\_corleone \\
+\hline
+Ardell & Sheridan & ardell\_sheridanthe\_godfather mrs\_clemenza \\
+\hline
+Burt & Richards & burt\_richardsthe\_godfather floral\_designer \\
+\hline
+Carmine & Coppola & carmine\_coppolathe\_godfather piano\_player\_in\_montage\_scene \\
+\hline
+Corrado & Gaipa & corrado\_gaipathe\_godfather don\_tommasino \\
+\hline
+Diane & Keaton & diane\_keatonthe\_godfather kay\_adams \\
+\hline
+Ed & Vantura & ed\_vanturathe\_godfather wedding\_guest \\
+\hline
+Father & Medeglia & father\_joseph\_medegliathe\_godfather priest\_at\_baptism \\
+\hline
+Filomena & Spagnuolo & filomena\_spagnuolothe\_godfather extra\_at\_wedding\_scene \\
+\hline
+Franco & Citti & franco\_cittithe\_godfather calo \\
+\hline
+Frank & Macetta & frank\_macettathe\_godfather \\
+\hline
+Frank & Sivero & frank\_siverothe\_godfather extra \\
+\hline
+Gabriele & Torrei & gabriele\_torreithe\_godfather enzo\_robutti\_the\_baker \\
+\hline
+Gian & Coppola & gian\_carlo\_coppolathe\_godfather baptism\_observer \\
+\hline
+Gianni & Russo & gianni\_russothe\_godfather carlo\_rizzi \\
+\hline
+James & Caan & james\_caanthe\_godfather santino\_sonny\_corleone \\
+\hline
+Jeannie & Linero & jeannie\_linerothe\_godfather lucy\_mancini \\
+\hline
+Joe & Grippo & joe\_lo\_grippothe\_godfather sonny\_s\_bodyguard \\
+\hline
+Joe & Spinell & joe\_spinellthe\_godfather willie\_cicci \\
+\hline
+John & Cazale & john\_cazalethe\_godfather fredo \\
+\hline
+John & Marley & john\_marleythe\_godfather jack\_woltz \\
+\hline
+John & Martino & john\_martinothe\_godfather paulie\_gatto \\
+\hline
+Julie & Gregg & julie\_greggthe\_godfather sandra\_corleone \\
+\hline
+Lenny & Montana & lenny\_montanathe\_godfather luca\_brasi \\
+\hline
+Lou & Jr. & lou\_martini\_jrthe\_godfather boy\_at\_wedding \\
+\hline
+Louis & Guss & louis\_gussthe\_godfather don\_zaluchi \\
+\hline
+Marlon & Brando & marlon\_brandothe\_godfather don\_vito\_corleone \\
+\hline
+Matthew & Vlahakis & matthew\_vlahakisthe\_godfather clemenza\_s\_son \\
+\hline
+Morgana & King & morgana\_kingthe\_godfather mama\_corleone \\
+\hline
+Nick & Vallelonga & nick\_vallelongathe\_godfather wedding\_party\_guest \\
+\hline
+Randy & Jurgensen & randy\_jurgensenthe\_godfather sonny\_s\_killer\_1 \\
+\hline
+Richard & Bright & richard\_brightthe\_godfather al\_neri \\
+\hline
+Richard & Castellano & richard\_s\_castellanothe\_godfather pete\_clemenza \\
+\hline
+Richard & Conte & richard\_contethe\_godfather emilio\_barzini \\
+\hline
+Rick & Petrucelli & rick\_petrucellithe\_godfather man\_in\_passenger\_seat \\
+\hline
+Robert & Duvall & robert\_duvallthe\_godfather tom\_hagen \\
+\hline
+Ron & Gilbert & ron\_gilbertthe\_godfather usher\_in\_bridal\_party \\
+\hline
+Rudy & Bond & rudy\_bondthe\_godfather ottilio\_cuneo \\
+\hline
+Sal & Richards & sal\_richardsthe\_godfather drunk \\
+\hline
+Salvatore & Corsitto & salvatore\_corsittothe\_godfather amerigo\_bonasera \\
+\hline
+Saro & Urz & saro\_urzthe\_godfather vitelli \\
+\hline
+Simonetta & Stefanelli & simonetta\_stefanellithe\_godfather apollonia\_vitelli\_corleone \\
+\hline
+Sofia & Coppola & sofia\_coppolathe\_godfather michael\_francis\_rizzi \\
+\hline
+Sonny & Grosso & sonny\_grossothe\_godfather cop\_with\_capt\_mccluskey \\
+\hline
+Sterling & Hayden & sterling\_haydenthe\_godfather capt\_mark\_mccluskey \\
+\hline
+Talia & Shire & talia\_shirethe\_godfather connie \\
+\hline
+Tere & Livrano & tere\_livranothe\_godfather theresa\_hagen \\
+\hline
+Tom & Rosqui & tom\_rosquithe\_godfather rocco\_lampone \\
+\hline
+Tony & Giorgio & tony\_giorgiothe\_godfather bruno\_tattaglia \\
+\hline
+Tony & Lip & tony\_lipthe\_godfather wedding\_guest \\
+\hline
+Victor & Rendina & victor\_rendinathe\_godfather philip\_tattaglia \\
+\hline
+Vito & Scotti & vito\_scottithe\_godfather nazorine \\
+\hline
+\end{longtable}
+\newpage
+% ----------------------------------------------------------------------------
+\subsection{Query 3: Filmes em que dois atores atuaram juntos}
+% ----------------------------------------------------------------------------
+
+\textbf{Questão:} Em quais filmes os atores X e Y atuaram juntos, com os respectivos diretores e anos de lançamento, do mais novo para o mais antigo?
+
+\textbf{Parâmetros:} \texttt{X = :al\_pacino}, \texttt{Y = :diane\_keaton}
+
+\begin{lstlisting}
+SELECT ?Filme ?Diretor ?Ano
+WHERE {
+    VALUES ?X { :al_pacino }
+    VALUES ?Y { :diane_keaton }
+    
+    ?filme rdf:type :Movie .
+    ?filme foaf:title ?Filme .
+    ?filme :creationYear ?Ano .
+    ?filme :hasDirector ?Diretor .
+    
+    { ?filme :hasActor ?X . } UNION { ?filme :hasActress ?X . }
+    { ?filme :hasActor ?Y . } UNION { ?filme :hasActress ?Y . }
+}
+ORDER BY DESC(?Ano)
+\end{lstlisting}
+
+\textbf{Resultados:}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|r|}
+\hline
+\textbf{Filme} & \textbf{Diretor} & \textbf{Ano} \\
+\hline
+The Godfather: Part III & :francis\_ford\_coppola & 1990 \\
+\hline
+The Godfather: Part II & :francis\_ford\_coppola & 1974 \\
+\hline
+The Godfather & :francis\_ford\_coppola & 1972 \\
+\hline
+\end{tabular}
+\end{table}
+\newpage
+% ----------------------------------------------------------------------------
+\subsection{Query 4: Filmes do diretor de F com atores X ou Y}
+% ----------------------------------------------------------------------------
+
+\textbf{Questão:} Quais filmes do diretor do filme F possuem X ou Y como atores, com as respectivas durações em ordem crescente?
+
+\textbf{Parâmetros:} \texttt{F = "The Godfather"}, \texttt{X = :al\_pacino}, \texttt{Y = :diane\_keaton}
+
+\begin{lstlisting}
+SELECT DISTINCT ?Filme ?Duracao
+WHERE {
+    VALUES ?F { "The Godfather" }
+    VALUES ?X { :al_pacino }
+    VALUES ?Y { :diane_keaton }
+    
+    ?filmeF rdf:type :Movie .
+    ?filmeF foaf:title ?F .
+    ?filmeF :hasDirector ?diretor .
+    
+    ?filme :hasDirector ?diretor .
+    ?filme foaf:title ?Filme .
+    ?filme :duration ?Duracao .
+    
+    {
+        { ?filme :hasActor ?X . } UNION { ?filme :hasActress ?X . }
+    }
+    UNION
+    {
+        { ?filme :hasActor ?Y . } UNION { ?filme :hasActress ?Y . }
+    }
+}
+ORDER BY ?Duracao
+\end{lstlisting}
+
+\textbf{Resultados:}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|r|}
+\hline
+\textbf{Filme} & \textbf{Duracao} \\
+\hline
+The Godfather: Part III & 162 \\
+\hline
+The Godfather & 175 \\
+\hline
+The Godfather: Part II & 202 \\
+\hline
+\end{tabular}
+\end{table}
+\newpage
+% ----------------------------------------------------------------------------
+\subsection{Query 5: Pessoas que atuaram e dirigiram}
+% ----------------------------------------------------------------------------
+
+\textbf{Questão:} Quais pessoas atuaram em um filme e dirigiram algum filme (não necessariamente o mesmo filme, mas obrigatoriamente a mesma pessoa)?
+
+\textbf{Parâmetros:} Nenhum (busca todas as pessoas).
+
+\begin{lstlisting}
+SELECT DISTINCT ?Pessoa ?FilmeAt ?FilmeDir
+WHERE {
+    { ?filmeAtuado :hasActor ?Pessoa . }
+    UNION
+    { ?filmeAtuado :hasActress ?Pessoa . }
+    
+    ?filmeDirigido :hasDirector ?Pessoa .
+    
+    ?filmeAtuado foaf:title ?FilmeAt .
+    ?filmeDirigido foaf:title ?FilmeDir .
+}
+ORDER BY ?Pessoa ?FilmeAt ?FilmeDir
+\end{lstlisting}
+
+\textbf{Resultados (amostra representativa):}
+
+\begin{longtable}{|l|p{4.5cm}|p{4.5cm}|}
+\hline
+\textbf{Pessoa} & \textbf{FilmeAt} & \textbf{FilmeDir} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Pessoa} & \textbf{FilmeAt} & \textbf{FilmeDir} \\
+\hline
+\endhead
+:denzel\_washington & The Great Debaters & The Great Debaters \\
+\hline
+:eleanor\_coppola & Hearts of Darkness: A Filmmaker's Apocalypse & Hearts of Darkness: A Filmmaker's Apocalypse \\
+\hline
+:eric\_schaeffer & Fall & Fall \\
+\hline
+:eric\_schaeffer & Fall & If Lucy Fell \\
+\hline
+:eric\_schaeffer & If Lucy Fell & Fall \\
+\hline
+:eric\_schaeffer & If Lucy Fell & If Lucy Fell \\
+\hline
+:ethan\_coen & Down from the Mountain & Barton Fink \\
+\hline
+:ethan\_coen & Down from the Mountain & Blood Simple \\
+\hline
+:ethan\_coen & Down from the Mountain & Fargo \\
+\hline
+:francis\_ford\_coppola & Hearts of Darkness: A Filmmaker's Apocalypse & The Godfather \\
+\hline
+:francis\_ford\_coppola & Hearts of Darkness: A Filmmaker's Apocalypse & The Godfather: Part II \\
+\hline
+:francis\_ford\_coppola & Hearts of Darkness: A Filmmaker's Apocalypse & The Godfather: Part III \\
+\hline
+:george\_lucas & Hearts of Darkness: A Filmmaker's Apocalypse & Star Wars: Episode I \\
+\hline
+:harold\_ramis & Ghostbusters & Groundhog Day \\
+\hline
+:harold\_ramis & Groundhog Day & Groundhog Day \\
+\hline
+:ivan\_reitman & Ghostbusters & Ghostbusters \\
+\hline
+:joel\_coen & Crimewave & Blood Simple \\
+\hline
+:joel\_coen & Crimewave & Fargo \\
+\hline
+:joel\_coen & Down from the Mountain & The Big Lebowski \\
+\hline
+:robert\_redford & The Horse Whisperer & The Horse Whisperer \\
+\hline
+:roman\_coppola & Hearts of Darkness: A Filmmaker's Apocalypse & CQ \\
+\hline
+:sam\_raimi & Miller's Crossing & Crimewave \\
+\hline
+:sam\_raimi & The Hudsucker Proxy & Crimewave \\
+\hline
+:sofia\_coppola & The Godfather & Lost in Translation \\
+\hline
+:sofia\_coppola & The Godfather & Marie Antoinette \\
+\hline
+:sofia\_coppola & The Godfather: Part III & The Virgin Suicides \\
+\hline
+:spike\_jonze & Torrance Rises & Her \\
+\hline
+:stephen\_hillenburg & The SpongeBob SquarePants Movie & The SpongeBob SquarePants Movie \\
+\hline
+:woody\_allen & Scoop & Match Point \\
+\hline
+:woody\_allen & Scoop & Scoop \\
+\hline
+\end{longtable}
+
+\textit{Nota: A tabela completa contém 138 linhas com todas as combinações de filmes atuados e dirigidos por cada pessoa.}
+\newpage
+% ----------------------------------------------------------------------------
+\subsection{Query 6: Diretores em intervalo de anos com atores X e Y}
+% ----------------------------------------------------------------------------
+
+\textbf{Questão:} Quais diretores dirigiram algum filme em um ano entre os anos N1 e N2, em que os atores X e Y aparecem, do mais antigo para o mais novo?
+
+\textbf{Parâmetros:} \texttt{N1 = 1940}, \texttt{N2 = 2000}, \texttt{X = :al\_pacino}, \texttt{Y = :al\_martino}
+
+\begin{lstlisting}
+SELECT ?Ano ?Diretor ?Filme
+WHERE {
+    VALUES ?N1 { 1940 }
+    VALUES ?N2 { 2000 }
+    VALUES ?X { :al_pacino }
+    VALUES ?Y { :al_martino }
+    
+    ?filme rdf:type :Movie .
+    ?filme foaf:title ?Filme .
+    ?filme :creationYear ?Ano .
+    ?filme :hasDirector ?Diretor .
+    
+    FILTER(?Ano >= ?N1 && ?Ano <= ?N2)
+    
+    { ?filme :hasActor ?X . } UNION { ?filme :hasActress ?X . }
+    { ?filme :hasActor ?Y . } UNION { ?filme :hasActress ?Y . }
+}
+ORDER BY ?Ano
+\end{lstlisting}
+
+\textbf{Resultados:}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|r|l|l|}
+\hline
+\textbf{Ano} & \textbf{Diretor} & \textbf{Filme} \\
+\hline
+1972 & :francis\_ford\_coppola & The Godfather \\
+\hline
+1990 & :francis\_ford\_coppola & The Godfather Part III \\
+\hline
+\end{tabular}
+\end{table}
+\newpage
+% ----------------------------------------------------------------------------
+\subsection{Query 7: Pares atriz-ator em filmes de duração específica}
+% ----------------------------------------------------------------------------
+
+\textbf{Questão:} Quais pares formados por uma atriz e um ator atuaram juntos em algum filme de duração entre M1 e M2?
+
+\textbf{Parâmetros:} \texttt{M1 = 140}, \texttt{M2 = 150}
+
+\begin{lstlisting}
+SELECT DISTINCT ?Atriz ?Ator ?Filme ?Duracao
+WHERE {
+    VALUES ?M1 { 140 }
+    VALUES ?M2 { 150 }
+    
+    ?Filme rdf:type :Movie .
+    ?Filme :duration ?Duracao .
+    ?Filme :hasActress ?Atriz .
+    ?Filme :hasActor ?Ator .
+    
+    FILTER(?Duracao >= ?M1 && ?Duracao <= ?M2)
+}
+ORDER BY ?Atriz ?Ator
+\end{lstlisting}
+
+\textbf{Resultados:}
+
+\begin{table}[H]
+\centering
+\footnotesize
+\begin{tabular}{|l|l|l|r|}
+\hline
+\textbf{Atriz} & \textbf{Ator} & \textbf{Filme} & \textbf{Duracao} \\
+\hline
+:audrey\_tautou & :alfred\_molina & :the\_da\_vinci\_code & 149 \\
+\hline
+:audrey\_tautou & :ian\_mckellen & :the\_da\_vinci\_code & 149 \\
+\hline
+:audrey\_tautou & :jean\_reno & :the\_da\_vinci\_code & 149 \\
+\hline
+:audrey\_tautou & :jean\_yves\_berteloot & :the\_da\_vinci\_code & 149 \\
+\hline
+:audrey\_tautou & :jurgen\_prochnow & :the\_da\_vinci\_code & 149 \\
+\hline
+:audrey\_tautou & :paul\_bettany & :the\_da\_vinci\_code & 149 \\
+\hline
+:audrey\_tautou & :tom\_hanks & :the\_da\_vinci\_code & 149 \\
+\hline
+\end{tabular}
+\end{table}
+\newpage
+% ----------------------------------------------------------------------------
+\subsection{Query 8: Diretor que mais dirigiu filmes com ator específico}
+% ----------------------------------------------------------------------------
+
+\textbf{Questão:} Qual o diretor que mais dirigiu filmes em que aparece o ator de primeiro nome Xp e último nome Xu?
+
+\textbf{Parâmetros:} \texttt{Xp = "Al"}, \texttt{Xu = "Pacino"}
+
+\begin{lstlisting}
+SELECT ?Diretor (COUNT(?filme) AS ?NumFilmes)
+WHERE {
+    VALUES ?Xp { "Al" }
+    VALUES ?Xu { "Pacino" }
+    
+    ?ator foaf:firstName ?Xp .
+    ?ator foaf:familyName ?Xu .
+    
+    { ?filme :hasActor ?ator . } 
+    UNION 
+    { ?filme :hasActress ?ator . }
+    
+    ?filme :hasDirector ?Diretor .
+}
+GROUP BY ?Diretor
+ORDER BY DESC(?NumFilmes)
+LIMIT 1
+\end{lstlisting}
+
+\textbf{Resultado:}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|r|}
+\hline
+\textbf{Diretor} & \textbf{numFilmes} \\
+\hline
+:francis\_ford\_coppola & 3 \\
+\hline
+\end{tabular}
+\end{table}
+\newpage
+% ----------------------------------------------------------------------------
+\subsection{Query 9: Filme mais antigo de um ator}
+% ----------------------------------------------------------------------------
+
+\textbf{Questão:} Qual o filme mais antigo em que o ator X atuou, em que ano foi lançado e qual era seu personagem? Havendo empate, devolver todos do mesmo ano.
+
+\textbf{Parâmetro:} \texttt{X = :joel\_coen}
+
+\begin{lstlisting}
+SELECT ?Filme ?Ano ?Personagem
+WHERE {
+    VALUES ?X { :joel_coen }
+    
+    ?Filme rdf:type :Movie .
+    ?Filme foaf:title ?tituloFilme .
+    ?Filme :creationYear ?Ano .
+    
+    { ?Filme :hasActor ?X . } UNION { ?Filme :hasActress ?X . }
+    
+    ?X :actsAs ?Personagem .
+    ?Filme :hasCharacter ?Personagem .
+    
+    FILTER NOT EXISTS {
+        ?outroFilme :creationYear ?outroAno .
+        { ?outroFilme :hasActor ?X . } UNION { ?outroFilme :hasActress ?X . }
+        FILTER(?outroAno < ?Ano)
+    }
+}
+\end{lstlisting}
+
+\textbf{Resultado:}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|r|l|}
+\hline
+\textbf{Filme} & \textbf{Ano} & \textbf{Personagem} \\
+\hline
+:spies\_like\_us & 1985 & :joel\_coenspies\_like\_us drive\_in\_security \\
+\hline
+:crimewave & 1985 & :joel\_coencrimewave reporter\_at\_execution \\
+\hline
+\end{tabular}
+\end{table}
+\newpage
+% ----------------------------------------------------------------------------
+\subsection{Query 10: Filme mais longo de um diretor}
+% ----------------------------------------------------------------------------
+
+\textbf{Questão:} Qual o filme mais longo dirigido por D, e qual a sua duração? Havendo empate, devolver todos da mesma duração.
+
+\textbf{Parâmetro:} \texttt{D = :francis\_ford\_coppola}
+
+\begin{lstlisting}
+SELECT ?Filme ?Duracao
+WHERE {
+    VALUES ?D { :francis_ford_coppola }
+    
+    ?Filme rdf:type :Movie .
+    ?Filme :hasDirector ?D .
+    ?Filme :duration ?Duracao .
+    
+    {
+        SELECT (MAX(?duracaoMax) AS ?duracaoMaxima)
+        WHERE {
+            ?filmeInner :hasDirector ?D .
+            ?filmeInner :duration ?duracaoMax .
+        }
+    }
+    
+    FILTER(?Duracao = ?duracaoMaxima)
+}
+\end{lstlisting}
+
+\textbf{Resultado:}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|r|}
+\hline
+\textbf{Filme} & \textbf{Duracao} \\
+\hline
+:the\_godfather\_part\_ii & 202 \\
+\hline
+\end{tabular}
+\end{table}
+\end{document}

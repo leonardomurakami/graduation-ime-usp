@@ -1,0 +1,97 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[portuguese]{babel}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage[portuguese,algoruled,lined,linesnumbered]{algorithm2e}
+\usepackage{geometry}
+\usepackage{hyperref}
+\geometry{a4paper, margin=1in}
+
+
+% ---- PREENCHA ----
+\newcommand{\Lista}{7}
+\newcommand{\Nome}{Leonardo Heidi Almeida Murakami}
+\newcommand{\NUSP}{11260186}
+% -----------------------------
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\Nome}
+\fancyhead[R]{NUSP \NUSP}
+\fancyfoot[L]{Lista \Lista}
+\fancyfoot[C]{MAC0338}
+\fancyfoot[R]{Página \thepage\ de \pageref{LastPage}}
+
+\begin{document}
+
+\section*{Exercício 3}
+
+\subsection*{Análise}
+A afirmação é falsa.
+
+Sabemos que a propriedade fundamental da MST relacionada a ciclos estabelece que a aresta de custo máximo em qualquer ciclo não pode pertencer à MST (supondo custos distintos). A pergunta, porém, trata da aresta de custo mínimo, para a qual não há tal garantia.
+
+Provaremos isso por contraexemplo, construindo um grafo onde a aresta de custo mínimo de um ciclo $C$ não pertence à MST.
+
+\subsection*{Contraexemplo}
+Considere o grafo $G=(V, E)$ com 4 vértices $V = \{A, B, C, D\}$ e 5 arestas:
+\begin{itemize}
+    \item $c(A, D) = 2$
+    \item $c(D, B) = 3$
+    \item $c(A, B) = 5$
+    \item $c(B, C) = 6$
+    \item $c(C, A) = 7$
+\end{itemize}
+Como o grafo é conexo e todos os custos são distintos, existe uma única MST.
+
+Considere o ciclo $C = A-B-C-A$. As arestas deste ciclo são $(A, B)$ com custo 5, $(B, C)$ com custo 6 e $(C, A)$ com custo 7. Logo, a aresta de custo mínimo em $C$ é $(A, B)$.
+
+Construindo a MST de $G$ pelo algoritmo de Kruskal:
+\begin{enumerate}
+    \item Adiciona $(A, D)$ (custo 2). Arestas da MST: $\{(A, D)\}$.
+    \item Adiciona $(D, B)$ (custo 3). Arestas da MST: $\{(A, D), (D, B)\}$.
+    \item Ao considerar $(A, B)$ (custo 5), observamos que ela forma o ciclo $A-D-B-A$. Como $(A, B)$ é a aresta de maior custo neste ciclo, ela é rejeitada.
+    \item Adiciona $(B, C)$ (custo 6). Arestas da MST: $\{(A, D), (D, B), (B, C)\}$.
+    \item Ao considerar $(C, A)$ (custo 7), observamos que ela forma o ciclo $A-D-B-C-A$. Como $(C, A)$ é a aresta de maior custo neste ciclo, ela é rejeitada.
+\end{enumerate}
+Portanto, a MST de $G$ é $T = \{(A, D), (D, B), (B, C)\}$, com custo total 11.
+
+\subsection*{Conclusão}
+A aresta $(A, B)$ é a aresta de custo mínimo no ciclo $C$, mas não pertence à MST de $G$. Isso ocorre porque, apesar de ser mínima em $C$, ela é máxima em outro ciclo ($A-D-B-A$), sendo portanto excluída pela propriedade de ciclo.
+
+Concluímos que a afirmação é falsa.
+
+\newpage
+
+\section*{Exercício 5}
+
+\subsection*{Prova}
+A afirmação é verdadeira. Provaremos usando a Propriedade do Corte das MSTs.
+
+Seja $G = (V, E)$ o grafo e $T$ uma MST que contém a aresta $e = (u, v)$.
+
+\begin{enumerate}
+    \item \textbf{Construção do Corte:}
+    Ao remover a aresta $e$ da árvore $T$, obtemos exatamente dois componentes conexos. Seja $S$ o conjunto de vértices do componente que contém $u$ e $V-S$ o conjunto de vértices do componente que contém $v$. Esta partição $(S, V-S)$ define um corte no grafo $G$, e a aresta $e$ cruza este corte por construção.
+    
+    \item \textbf{Prova por Contradição:}
+    Suponha, por absurdo, que $e$ não seja de peso mínimo entre as arestas que cruzam o corte $(S, V-S)$. Então existe uma aresta $e' = (x, y)$ em $G$ tal que $e'$ cruza o corte e $w(e') < w(e)$.
+
+    \item \textbf{Argumento de Troca:}
+    Se adicionarmos $e'$ a $T$, criamos um ciclo, pois $T$ já é uma árvore. Este ciclo necessariamente cruza o corte $(S, V-S)$ duas vezes: uma pela aresta $e'$ e outra pela aresta $e$, que é a única ponte entre $S$ e $V-S$ em $T$. Logo, o ciclo contém ambas $e$ e $e'$.
+    
+    \item \textbf{Construção de $T'$:}
+    Defina $T' = (T - \{e\}) \cup \{e'\}$. Como removemos uma aresta do ciclo, $T'$ continua sendo uma árvore geradora. Comparando os pesos:
+    $$ w(T') = w(T) - w(e) + w(e') < w(T) $$
+    pois $w(e') < w(e)$. Mas isto contradiz o fato de $T$ ser uma MST.
+
+    \item \textbf{Conclusão:}
+    Logo, nossa hipótese de que existe $e'$ com peso menor que $e$ cruzando o corte é falsa. Portanto, $e$ tem peso mínimo entre todas as arestas que cruzam $(S, V-S)$.
+\end{enumerate}
+
+\end{document}

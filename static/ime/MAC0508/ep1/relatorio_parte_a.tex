@@ -1,0 +1,267 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[brazilian]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{float}
+
+\geometry{margin=2.5cm}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    language=Python,
+    showstringspaces=false,
+    commentstyle=\color{gray},
+    keywordstyle=\color{blue},
+    stringstyle=\color{red}
+}
+
+\title{\textbf{MAC0508 -- Introdução ao Processamento de Língua Natural}\\
+\Large{EP1 - Parte A}}
+\author{Leonardo Heidi Almeida Murakami \\ NUSP: 11260186}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Descrição da Implementação}
+
+\subsection{Arquitetura do Modelo}
+
+Implementamos um modelo de bigramas em Python para prever a próxima palavra a partir da anterior. O código está organizado na classe \texttt{BigramModel}, que cuida do treinamento, previsão e avaliação.
+
+\subsection{Pré-processamento dos Dados}
+
+O pré-processamento seguiu alguns passos básicos:
+
+\begin{enumerate}
+    \item \textbf{Leitura em CoNLL-U}: O método \texttt{parse\_conllu()} extrai a coluna FORM (coluna 2) dos arquivos, mantendo as maiúsculas como estão.
+    \item \textbf{Multi-word tokens}: Ignoramos linhas com ID contendo `-' para evitar contagens duplicadas (tipo ``na'' \,$\to$\, ``em'' + ``a'').
+    \item \textbf{Tokens especiais}: Cada sentença começa com \texttt{<s>} e termina com \texttt{</s>}.
+    \item \textbf{Palavras desconhecidas}: Usamos \texttt{<DESC>} para palavras que não estão no vocabulário de treino. O conjunto de validação ajuda a identificá-las e estimar $P(w\mid\texttt{<DESC>})$. Reprocessamos uma parte do treino trocando algumas ocorrências por \texttt{<DESC>} para o modelo aprender esse contexto.
+\end{enumerate}
+
+\subsection{Algoritmo de Treinamento}
+
+O treino é bem direto. Basicamente contamos:
+
+\begin{itemize}
+    \item \textbf{Bigramas}: $C(w_1w_2)$ — quantas vezes vemos a sequência $w_1w_2$ no corpus
+    \item \textbf{Unigramas}: $C(w_1)$ — quantas vezes aparece a palavra $w_1$
+    \item \textbf{Vocabulário}: todas as palavras únicas vistas no treino
+\end{itemize}
+
+A probabilidade de $w_2$ seguir $w_1$ é estimada como:
+
+\[
+P(w_2|w_1) = \frac{C(w_1w_2)}{C(w_1)} \approx \frac{\text{contagem}(w_1w_2)}{\text{contagem}(w_1)}
+\]
+
+\subsection{Suavização}
+
+Para evitar probabilidades zero, aplicamos a \textbf{suavização de Lidstone} com $\alpha = 1$ (conhecida como suavização de Laplace):
+
+\[
+P(w_2|w_1) = \frac{C(w_1w_2) + \alpha}{C(w_1) + \alpha \cdot V}
+\]
+
+onde $V$ é o tamanho do vocabulário. Isso garante que até bigramas nunca vistos tenham uma probabilidade mínima.
+
+\subsection{Previsão}
+
+Na hora de prever, escolhemos a palavra $w_2$ que maximiza a probabilidade condicional:
+
+\[
+\hat{w}_2 = \arg\max_{w \in V} P(w|w_1)
+\]
+
+Para deixar isso mais rápido, mantemos um cache das melhores continuações observadas para cada $w_1$ durante o treino.
+
+\subsection{Hipóteses e Decisões de Implementação}
+
+Algumas decisões importantes na implementação:
+
+\begin{itemize}
+    \item Os tokens especiais \texttt{<s>}, \texttt{</s>} e \texttt{<DESC>} fazem parte do vocabulário.
+    \item Quando encontramos uma palavra desconhecida, sabemos que vamos errar ela, mas pelo menos tentamos acertar a próxima usando $P(w\mid\texttt{<DESC>})$.
+    \item Usamos \texttt{defaultdict} do Python para deixar as contagens mais eficientes.
+    \item Para acelerar, mantemos para cada palavra o conjunto de possíveis sucessoras já vistas no treino.
+\end{itemize}
+
+\section{Ativação do Programa}
+
+\subsection{Requisitos}
+
+\begin{itemize}
+    \item Python 3.7 ou superior
+    \item Bibliotecas padrão do Python (nenhuma biblioteca externa necessária)
+\end{itemize}
+
+\subsection{Arquivos Necessários}
+
+O programa requer os seguintes arquivos no mesmo diretório:
+\begin{itemize}
+    \item \texttt{bigram\_model.py} -- código fonte do modelo
+    \item \texttt{pt\_porttinari-ud-train.conllu} -- corpus de treinamento
+    \item \texttt{pt\_porttinari-ud-dev.conllu} -- corpus de validação
+    \item \texttt{pt\_porttinari-ud-test.conllu} -- corpus de teste
+\end{itemize}
+
+\subsection{Execução}
+
+Para rodar o programa, basta executar:
+
+\begin{lstlisting}[language=bash]
+python bigram_model.py
+\end{lstlisting}
+
+O programa vai:
+\begin{enumerate}
+    \item Carregar e processar o corpus de treinamento
+    \item Treinar o modelo de bigramas
+    \item Identificar palavras desconhecidas usando o corpus de validação
+    \item Avaliar no corpus de teste
+    \item Exibir os resultados formatados
+\end{enumerate}
+
+\section{Resultados}
+
+\subsection{Estatísticas do Treinamento}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lr}
+\toprule
+\textbf{Métrica} & \textbf{Valor} \\
+\midrule
+Sentenças de treino & 5.893 \\
+Tamanho do vocabulário & 17.024 \\
+Palavras desconhecidas (dev) & 1.302 \\
+Sentenças de teste & 1.683 \\
+\bottomrule
+\end{tabular}
+\caption{Estatísticas dos conjuntos de dados}
+\end{table}
+
+\subsection{Métricas Globais}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lr}
+\toprule
+\textbf{Métrica} & \textbf{Valor} \\
+\midrule
+Acurácia & 18,02\% \\
+Precisão Média & 1,33\% \\
+Cobertura Média & 1,34\% \\
+Medida-F Média & 1,21\% \\
+Palavras corretas & 6.357 / 35.277 \\
+\bottomrule
+\end{tabular}
+\caption{Métricas globais de avaliação}
+\end{table}
+
+Como as métricas foram calculadas:
+
+\begin{itemize}
+    \item \textbf{Acurácia}: proporção de palavras previstas corretamente sobre o total
+    \item \textbf{Precisão (por palavra)}: $\frac{\text{N. de vezes que } w \text{ aparece corretamente}}{\text{N. de vezes que } w \text{ aparece no córpus de previsão}}$
+    \item \textbf{Cobertura (por palavra)}: $\frac{\text{N. de vezes que } w \text{ aparece corretamente}}{\text{N. de vezes que } w \text{ aparece no padrão ouro}}$
+    \item \textbf{Medida-F (por palavra)}: $\frac{2 \cdot \text{Precisão}(w) \cdot \text{Cobertura}(w)}{\text{Precisão}(w) + \text{Cobertura}(w)}$
+\end{itemize}
+
+\subsection{Palavras Mais Fáceis de Prever}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{clrrr}
+\toprule
+\textbf{\#} & \textbf{Palavra} & \textbf{F1} & \textbf{Precisão} & \textbf{Cobertura} \\
+\midrule
+1 & Médio & 100,00\% & 100,00\% & 100,00\% \\
+2 & Angeles & 100,00\% & 100,00\% & 100,00\% \\
+3 & capita & 100,00\% & 100,00\% & 100,00\% \\
+4 & Times & 100,00\% & 100,00\% & 100,00\% \\
+5 & Fraca & 100,00\% & 100,00\% & 100,00\% \\
+6 & Ronaldo & 100,00\% & 100,00\% & 100,00\% \\
+7 & Wars & 100,00\% & 100,00\% & 100,00\% \\
+8 & Jedi & 100,00\% & 100,00\% & 100,00\% \\
+9 & Schulzinger & 100,00\% & 100,00\% & 100,00\% \\
+10 & elétricos & 100,00\% & 100,00\% & 100,00\% \\
+\bottomrule
+\end{tabular}
+\caption{Top 10 palavras mais fáceis de prever}
+\end{table}
+
+\subsection{Palavras Mais Difíceis de Prever}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{clrrr}
+\toprule
+\textbf{\#} & \textbf{Palavra} & \textbf{F1} & \textbf{Precisão} & \textbf{Cobertura} \\
+\midrule
+1 & foi & 1,42\% & 3,45\% & 0,89\% \\
+2 & uma & 1,83\% & 3,57\% & 1,23\% \\
+3 & também & 2,56\% & 12,50\% & 1,43\% \\
+4 & sido & 3,08\% & 1,69\% & 16,67\% \\
+5 & sobre & 3,17\% & 6,67\% & 2,08\% \\
+6 & nome & 3,33\% & 1,89\% & 14,29\% \\
+7 & são & 3,33\% & 12,50\% & 1,92\% \\
+8 & entre & 3,64\% & 25,00\% & 1,96\% \\
+9 & muito & 3,70\% & 4,76\% & 3,03\% \\
+10 & dia & 3,77\% & 5,26\% & 2,94\% \\
+\bottomrule
+\end{tabular}
+\caption{Top 10 palavras mais difíceis de prever}
+\end{table}
+
+\section{Comentários e Conclusões}
+
+\subsection{Análise dos Resultados}
+
+\subsubsection{Palavras Fáceis de Prever}
+
+As palavras com F1 de 100\% são, em sua maioria, nomes próprios e partes de expressões fixas: ``Los Angeles'', ``New York Times'', ``per capita'', ``Star Wars''. O modelo acerta porque esses bigramas aparecem sempre da mesma forma. Quando vê ``Los'', ele sabe que vem ``Angeles''. Isso mostra que bigramas são ótimos para capturar colocações, mas não demonstra um verdadeiro entendimento da língua.
+
+\subsubsection{Palavras Difíceis de Prever}
+
+Já as mais difíceis mostram exatamente onde o modelo falha. Palavras como ``foi'', ``uma'', ``também'', ``sido'' e ``são'' aparecem em contextos extremamente variados. O verbo ``foi'', por exemplo, pode vir depois de praticamente qualquer substantivo, nome próprio ou pronome. Com apenas a palavra anterior como pista, não dá para saber qual será a próxima. Para esses casos, seria necessário olhar mais palavras de contexto ou usar modelos que capturam relações sintáticas mais complexas.
+
+\subsubsection{Métricas Micro}
+
+As médias de precisão (1,33\%) e cobertura (1,34\%) bem baixas confirmam que a maioria das palavras é difícil de prever. A distribuição é bem desigual: tem um punhado de palavras que o modelo acerta sempre, e uma montanha de palavras que ele erra quase sempre. Isso é típico de modelos com contexto limitado.
+
+\subsection{Tratamento de Palavras Desconhecidas}
+
+O tratamento de palavras desconhecidas funcionou razoavelmente bem. Identificamos 1.302 palavras no conjunto de validação que não apareciam no treino. O token \texttt{<DESC>} ajudou o modelo a aprender padrões típicos dessas situações. Claro que erramos sempre a própria palavra desconhecida, mas pelo menos conseguimos prever a palavra seguinte usando $P(w\mid\texttt{<DESC>})$, o que mantém o modelo funcionando.
+
+\subsection{Limitações do Modelo}
+
+As principais limitações ficaram bem claras nos resultados:
+
+\begin{enumerate}
+    \item \textbf{Contexto muito curto}: olhar só a palavra anterior é insuficiente para a maioria dos casos.
+    \item \textbf{Hipótese de Markov muito forte}: assumir que $P(w_i\mid w_{1..i-1}) \approx P(w_i\mid w_{i-1})$ é uma simplificação pesada da realidade.
+    \item \textbf{Esparsidade}: mesmo com milhares de sentenças, muitos bigramas plausíveis simplesmente não aparecem no treino.
+    \item \textbf{Contextos diversos}: palavras funcionais e verbos comuns ocorrem em tantos contextos diferentes que um bigrama não consegue capturar essa variação.
+\end{enumerate}
+
+\subsection{Conclusão Final}
+
+O exercício foi útil para entender na prática onde bigramas funcionam e onde falham. O modelo consegue capturar bem colocações e padrões locais muito repetidos, mas falha em qualquer coisa que exija contexto mais amplo. Os 18\% de acurácia fazem sentido: é bem melhor que o acaso, mas está longe de ser suficiente para aplicações práticas.
+
+Para melhorar, os caminhos mais óbvios seriam usar trigramas ou n-gramas maiores (com o custo de aumentar a esparsidade), ou partir para modelos que conseguem olhar contextos mais longos de forma mais inteligente, como modelos neurais.
+
+\end{document}
+

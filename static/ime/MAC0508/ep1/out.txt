@@ -1,0 +1,108 @@
+
+======================================================================
+                  EP1 - PARTE B (HMM COM BAUM-WELCH)                  
+                     VERSÃO OTIMIZADA + CORRIGIDA                     
+======================================================================
+
+======================================================================
+                      TREINAMENTO DO MODELO HMM                       
+======================================================================
+
+  Sentenças de treino: 5,893
+  Número de etiquetas: 16
+  Tamanho do vocabulário: 17,022
+  Número de pares de estados: 256
+  Modelo inicializado com contagens + Lidstone (α=1.0)
+
+  Verificação de normalização:
+    Soma de π: 1.000000
+    Somas das linhas de A: min=1.000000, max=1.000000
+    Somas das linhas de B: min=1.000000, max=1.000000
+
+  Palavras desconhecidas (dev): 1,302
+  Token <DESC> adicionado com 1,362 ocorrências de palavras desconhecidas no dev
+
+======================================================================
+                      TREINAMENTO COM BAUM-WELCH                      
+======================================================================
+
+  Iteração | Log-Likelihood | Distância | Razão
+  ------------------------------------------------------------
+     1     |   -135691.34   | 3.34e+01  | 1.00e+00 
+     2     |   -135691.34   | 8.98e-03  | 2.69e-04 
+
+  Convergência atingida após 2 iterações
+  Distância final / Distância inicial = 2.69e-04 < 0.01
+
+======================================================================
+
+  Verificação de normalização pós Baum-Welch:
+    Soma de π: 1.000000
+    Somas das linhas de A: min=1.000000, max=1.000000
+    Somas das linhas de B: min=1.000000, max=1.000000
+
+======================================================================
+
+======================================================================
+                    AVALIAÇÃO NO CONJUNTO DE TESTE                    
+======================================================================
+
+  Sentenças de teste: 1,683
+
+
+======================================================================
+                              RESULTADOS                              
+======================================================================
+
+  Métricas Globais:
+    Acurácia:         56.72%
+    Precisão Média:   72.61%
+    Cobertura Média:  52.02%
+    Medida-F (média): 54.03%
+    Medida-F (global):60.62%
+    Etiquetas corretas: 19,053 / 33,594
+
+  Top 10 etiquetas mais fáceis de prever:
+  #    Etiqueta              F1     Prec      Cob   Corretas
+  ----------------------------------------------------------
+  1    SYM              92.62%  91.13%  94.17%        113
+  2    ADP              91.44%  99.14%  84.86%       4259
+  3    AUX              88.74%  97.52%  81.40%        788
+  4    CCONJ            88.56% 100.00%  79.47%        654
+  5    DET              82.65%  72.77%  95.63%       4685
+  6    ADV              78.40%  88.77%  70.20%        893
+  7    PUNCT            72.03% 100.00%  56.29%       2501
+  8    PRON             68.49%  67.96%  69.02%        891
+  9    NUM              54.39% 100.00%  37.36%        229
+  10   VERB             40.93%  93.41%  26.20%        893
+
+  Top 10 etiquetas mais difíceis de prever:
+  #    Etiqueta              F1     Prec      Cob   Corretas
+  ----------------------------------------------------------
+  1    SCONJ            19.92%  78.79%  11.40%         52
+  2    ADJ              21.98%  12.61%  85.50%       1433
+  3    NOUN             30.78%  93.21%  18.43%       1167
+  4    PROPN            33.51%  66.44%  22.41%        495
+  5    VERB             40.93%  93.41%  26.20%        893
+  6    NUM              54.39% 100.00%  37.36%        229
+  7    PRON             68.49%  67.96%  69.02%        891
+  8    PUNCT            72.03% 100.00%  56.29%       2501
+  9    ADV              78.40%  88.77%  70.20%        893
+  10   DET              82.65%  72.77%  95.63%       4685
+
+  Top 10 palavras mais difíceis de etiquetar:
+  #    Palavra                 Taxa Erro    Acertos    Total
+  ----------------------------------------------------------
+  1    .                        100.00%          0     1636
+  2    )                        100.00%          0      128
+  3    mas                      100.00%          0       61
+  4    :                        100.00%          0       49
+  5    ?                        100.00%          0       46
+  6    -                        100.00%          0       44
+  7    Mas                      100.00%          0       36
+  8    empresa                  100.00%          0       29
+  9    Segundo                  100.00%          0       27
+  10   Para                     100.00%          0       26
+
+======================================================================
+

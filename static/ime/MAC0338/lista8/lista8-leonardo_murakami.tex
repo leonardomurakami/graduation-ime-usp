@@ -1,0 +1,128 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[portuguese]{babel}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage[portuguese,algoruled,lined,linesnumbered]{algorithm2e}
+\usepackage{geometry}
+\usepackage{hyperref}
+\geometry{a4paper, margin=1in}
+
+% ---- PREENCHA ----
+\newcommand{\Lista}{7}
+\newcommand{\Nome}{Leonardo Heidi Almeida Murakami}
+\newcommand{\NUSP}{11260186}
+% -----------------------------
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\Nome}
+\fancyhead[R]{NUSP \NUSP}
+\fancyfoot[L]{Lista \Lista}
+\fancyfoot[C]{MAC0338}
+\fancyfoot[R]{Página \thepage\ de \pageref{LastPage}}
+
+\begin{document}
+
+\section*{Exercício 3}
+
+\textbf{Enunciado:} Prove que o problema TAUTOLOGIA está em coNP.
+
+\subsection*{Prova}
+
+Para estabelecermos que o problema $\text{TAUTOLOGIA} \in \text{coNP}$, o caminho natural é verificar se o seu problema complementar, $\overline{\text{TAUTOLOGIA}}$, pertence à classe $\text{NP}$.
+
+\paragraph{Entendendo o Complemento:}
+O problema original, $\text{TAUTOLOGIA}$, questiona se uma dada fórmula booleana $\mathcal{C}$ resulta em verdadeiro para \textit{todas} as atribuições possíveis de suas variáveis. Por outro lado, o seu complemento, $\overline{\text{TAUTOLOGIA}}$, busca exatamente o oposto: "Existe pelo menos uma atribuição de valores para as variáveis de $X$ que faça com que a fórmula $\mathcal{C}$ \textbf{não} seja satisfeita (ou seja, resulte em Falso)?"
+
+Para confirmar que $\overline{\text{TAUTOLOGIA}} \in \text{NP}$, vamos construir um certificado e um algoritmo verificador que opere em tempo polinomial.
+
+\begin{enumerate}
+    \item \textbf{O Certificado:}
+    Podemos usar como certificado $A$ uma atribuição específica de valores de verdade (0 ou 1) para cada variável do conjunto $X$. Perceba que o tamanho desse certificado é linear em relação ao número de variáveis ($|X|$), mantendo-se, portanto, polinomial em relação ao tamanho da entrada.
+
+    \item \textbf{O Verificador $V$:}
+    O nosso algoritmo verificador recebe a instância $\langle X, \mathcal{C} \rangle$ juntamente com o certificado $A$ e procede da seguinte maneira:
+    \begin{enumerate}
+        \item Primeiro, ele substitui todas as variáveis em $\mathcal{C}$ pelos valores correspondentes fornecidos em $A$.
+        \item Em seguida, avalia a expressão booleana resultante.
+        \item Se o resultado dessa avaliação for \textbf{Falso}, o verificador aceita (retorna SIM). Isso é a prova de que $\mathcal{C}$ falhou para pelo menos uma atribuição, logo não é uma tautologia.
+        \item Caso contrário, se o resultado for Verdadeiro, o verificador rejeita o certificado.
+    \end{enumerate}
+    
+    \item \textbf{Análise de Complexidade:}
+    Avaliar uma fórmula booleana com valores já definidos é uma tarefa simples que pode ser feita em tempo polinomial no tamanho da fórmula (basta percorrer sua árvore sintática, por exemplo). Visto que o tamanho do certificado também é controlado (polinomial), garantimos que todo o processo de verificação $V$ ocorre em tempo polinomial.
+\end{enumerate}
+
+\paragraph{Conclusão:}
+Como fomos capazes de apresentar um verificador polinomial para $\overline{\text{TAUTOLOGIA}}$, mostramos que $\overline{\text{TAUTOLOGIA}} \in \text{NP}$. Pela própria definição da classe coNP, isso implica diretamente que $\text{TAUTOLOGIA} \in \text{coNP}$. \qed
+
+\newpage
+
+\section*{Exercício 6}
+
+\textbf{Enunciado:} Mostre que o problema COB (Cobertura de Vértices) é NP-completo.
+
+\subsection*{Prova}
+
+Para demonstrar que $\text{COB}$ é NP-completo, precisamos cumprir dois requisitos:
+\begin{enumerate}
+    \item Mostrar que $\text{COB} \in \text{NP}$.
+    \item Mostrar que $\text{COB}$ é NP-difícil.
+\end{enumerate}
+
+\subsubsection*{Parte 1: $\text{COB} \in \text{NP}$}
+
+Primeiramente, justificamos que o problema está em NP apresentando um certificado e um verificador eficiente.
+
+\begin{itemize}
+    \item \textbf{Certificado:} Um subconjunto de vértices $C' \subseteq V$ que propomos como solução.
+    \item \textbf{Verificador:} Dado o grafo $G=(V, E)$, o inteiro $k$ (tamanho máximo desejado) e o certificado $C'$, o algoritmo realiza os seguintes testes:
+    \begin{enumerate}
+        \item Confere se o tamanho $|C'|$ é menor ou igual a $k$. Se for maior, rejeita imediatamente.
+        \item Percorre todas as arestas $(u, v) \in E$. Para cada uma, verifica se pelo menos uma das pontas ($u$ ou $v$) pertence a $C'$.
+        \item Se encontrar alguma aresta que não é coberta por $C'$, rejeita.
+        \item Se passar por todas as arestas com sucesso, aceita.
+    \end{enumerate}
+\end{itemize}
+\textbf{Complexidade:} A verificação do tamanho do conjunto é trivial ($O(1)$ ou $O(|V|)$). A verificação da cobertura das arestas leva tempo proporcional a $O(|E| \cdot |V|)$ (ou $O(|E|)$ com estruturas adequadas). Em ambos os casos, o tempo é polinomial. Logo, $\text{COB} \in \text{NP}$.
+
+\subsubsection*{Parte 2: $\text{COB}$ é NP-difícil}
+
+Agora, faremos uma redução polinomial partindo do problema do Conjunto Independente (CI), que já sabemos ser NP-completo.
+$$ \text{CI} \leq_p \text{COB} $$
+
+\noindent\textbf{Relembrando o CI:} Dado um grafo $G=(V,E)$ e um inteiro $j$, queremos saber: existe um subconjunto $S \subseteq V$ com $|S| \ge j$ tal que não haja arestas conectando vértices dentro de $S$?
+
+\paragraph{A Redução:}
+Seja $\langle G, j \rangle$ uma instância qualquer de CI. Vamos construir uma instância correspondente $\langle G, k \rangle$ para o problema COB da seguinte forma:
+\begin{itemize}
+    \item O grafo $G$ é mantido idêntico.
+    \item Definimos o parâmetro $k$ como sendo $|V| - j$.
+\end{itemize}
+
+\paragraph{Prova da Equivalência:}
+Precisamos demonstrar que $G$ possui um conjunto independente de tamanho $\ge j$ se, e somente se, $G$ admite uma cobertura de vértices de tamanho $\le k$.
+
+\noindent $(\Rightarrow)$ Suponha que temos $S$, um conjunto independente em $G$ com $|S| \ge j$.
+Vamos considerar o conjunto complementar $C = V \setminus S$.
+Pela definição de conjunto independente, não existem arestas com ambas as pontas em $S$. Isso significa que, para qualquer aresta do grafo, pelo menos uma das pontas \textit{não} está em $S$, ou seja, está em $C$. Consequentemente, $C$ é uma cobertura de vértices.
+O tamanho de $C$ será:
+$$ |C| = |V| - |S| \le |V| - j = k $$
+Assim, provamos que existe uma cobertura de tamanho $\le k$.
+
+\noindent $(\Leftarrow)$ Por outro lado, suponha que $C$ seja uma cobertura de vértices em $G$ com $|C| \le k$.
+Considere o conjunto complementar $S = V \setminus C$.
+Como $C$ cobre todas as arestas, não pode existir nenhuma aresta $(u, v)$ onde nem $u$ nem $v$ estejam em $C$. Em outras palavras, não existe aresta com ambas as pontas em $S$ (pois $S$ contém apenas os elementos fora de $C$). Logo, $S$ é um conjunto independente.
+O tamanho de $S$ é:
+$$ |S| = |V| - |C| \ge |V| - k = |V| - (|V| - j) = j $$
+Portanto, garantimos a existência de um conjunto independente de tamanho $\ge j$.
+
+\paragraph{Conclusão:}
+Tendo mostrado que $\text{COB} \in \text{NP}$ e que $\text{CI} \leq_p \text{COB}$, concluímos que o problema de Cobertura de Vértices (COB) é, de fato, NP-completo. \qed
+
+\end{document}

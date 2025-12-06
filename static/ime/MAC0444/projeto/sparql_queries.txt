@@ -1,0 +1,229 @@
+# SPARQL
+
+PREFIX : <http://www.semanticweb.org/leonardomurakami/ontologies/2025/10/ontology-movies#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+# ============================================================================
+# QUERY 1: Quais os títulos dos filmes que foram dirigidos pelo diretor D, 
+#          em ordem lexicográfica?
+# ============================================================================
+
+SELECT ?TituloDoFilme
+WHERE {
+    VALUES ?D { :joel_coen }
+    
+    ?filme rdf:type :Movie .
+    ?filme :hasDirector ?D .
+    ?filme foaf:title ?TituloDoFilme .
+}
+ORDER BY ?TituloDoFilme
+
+# ============================================================================
+# QUERY 2: Quais os primeiros nomes e últimos nomes dos atores que participaram 
+#          do filme de título Ft, em ordem lexicográfica de nome e sobrenome, 
+#          com seus respectivos personagens?
+# ============================================================================
+
+SELECT ?PrimeiroNome ?UltimoNome ?Personagem
+WHERE {
+    VALUES ?Ft { "The Godfather" }
+    
+    ?filme rdf:type :Movie .
+    ?filme foaf:title ?Ft .
+    
+    { ?filme :hasActor ?pessoa . }
+    UNION
+    { ?filme :hasActress ?pessoa . }
+    
+    ?pessoa foaf:firstName ?PrimeiroNome .
+    ?pessoa foaf:familyName ?UltimoNome .
+    
+    ?pessoa :actsAs ?Personagem .
+    ?filme :hasCharacter ?Personagem .
+}
+ORDER BY ?PrimeiroNome ?UltimoNome
+
+# ============================================================================
+# QUERY 3: Em quais filmes os atores X e Y atuaram juntos, com os respectivos 
+#          diretores e anos de lançamento, do mais novo para o mais antigo?
+# ============================================================================
+
+SELECT ?Filme ?Diretor ?Ano
+WHERE {
+    VALUES ?X { :al_pacino }
+    VALUES ?Y { :diane_keaton }
+    
+    ?filme rdf:type :Movie .
+    ?filme foaf:title ?Filme .
+    ?filme :creationYear ?Ano .
+    ?filme :hasDirector ?Diretor .
+    
+    { ?filme :hasActor ?X . } UNION { ?filme :hasActress ?X . }
+    { ?filme :hasActor ?Y . } UNION { ?filme :hasActress ?Y . }
+}
+ORDER BY DESC(?Ano)
+
+# ============================================================================
+# QUERY 4: Quais filmes do diretor do filme F possuem X ou Y como atores, 
+#          com as respectivas durações em ordem crescente?
+# ============================================================================
+
+SELECT DISTINCT ?Filme ?Duracao
+WHERE {
+    VALUES ?F { "The Godfather" }
+    VALUES ?X { :al_pacino }
+    VALUES ?Y { :diane_keaton }
+    
+    ?filmeF rdf:type :Movie .
+    ?filmeF foaf:title ?F .
+    ?filmeF :hasDirector ?diretor .
+    
+    ?filme :hasDirector ?diretor .
+    ?filme foaf:title ?Filme .
+    ?filme :duration ?Duracao .
+    
+    {
+        { ?filme :hasActor ?X . } UNION { ?filme :hasActress ?X . }
+    }
+    UNION
+    {
+        { ?filme :hasActor ?Y . } UNION { ?filme :hasActress ?Y . }
+    }
+}
+ORDER BY ?Duracao
+
+# ============================================================================
+# QUERY 5: Quais pessoas atuaram em um filme e dirigiram algum filme 
+#          (não necessariamente o mesmo filme, mas obrigatoriamente a mesma pessoa)?
+# ============================================================================
+
+SELECT DISTINCT ?Pessoa ?FilmeAt ?FilmeDir
+WHERE {
+    { ?filmeAtuado :hasActor ?Pessoa . }
+    UNION
+    { ?filmeAtuado :hasActress ?Pessoa . }
+    
+    ?filmeDirigido :hasDirector ?Pessoa .
+    
+    
+    ?filmeAtuado foaf:title ?FilmeAt .
+    ?filmeDirigido foaf:title ?FilmeDir .
+}
+ORDER BY ?Pessoa ?FilmeAt ?FilmeDir
+
+# ============================================================================
+# QUERY 6: Quais diretores dirigiram algum filme em um ano entre os anos N1 e N2,
+#          em que os atores X e Y aparecem, do mais antigo para o mais novo?
+# ============================================================================
+
+SELECT ?Ano ?Diretor ?Filme
+WHERE {
+    VALUES ?N1 { 1940 }
+    VALUES ?N2 { 2000 }
+    VALUES ?X { :al_pacino }
+    VALUES ?Y { :al_martino }
+    
+    ?filme rdf:type :Movie .
+    ?filme foaf:title ?Filme .
+    ?filme :creationYear ?Ano .
+    ?filme :hasDirector ?Diretor .
+    
+    FILTER(?Ano >= ?N1 && ?Ano <= ?N2)
+    
+    { ?filme :hasActor ?X . } UNION { ?filme :hasActress ?X . }
+    { ?filme :hasActor ?Y . } UNION { ?filme :hasActress ?Y . }
+}
+ORDER BY ?Ano
+
+# ============================================================================
+# QUERY 7: Quais pares formados por uma atriz e um ator atuaram juntos em algum
+#          filme de duração entre M1 e M2?
+# ============================================================================
+
+SELECT DISTINCT ?Atriz ?Ator ?Filme ?Duracao
+WHERE {
+    VALUES ?M1 { 140 }
+    VALUES ?M2 { 150 }
+    
+    ?Filme rdf:type :Movie .
+    ?Filme :duration ?Duracao .
+    ?Filme :hasActress ?Atriz .
+    ?Filme :hasActor ?Ator .
+    
+    FILTER(?Duracao >= ?M1 && ?Duracao <= ?M2)
+}
+ORDER BY ?Atriz ?Ator
+
+# ============================================================================
+# QUERY 8: Qual o diretor que mais dirigiu filmes em que aparece o ator de 
+#          primeiro nome Xp e último nome Xu?
+# ============================================================================
+
+SELECT ?Diretor (COUNT(?filme) AS ?NumFilmes)
+WHERE {
+    VALUES ?Xp { "Al" }
+    VALUES ?Xu { "Pacino" }
+    
+    ?ator foaf:firstName ?Xp .
+    ?ator foaf:familyName ?Xu .
+    
+    { ?filme :hasActor ?ator . } UNION { ?filme :hasActress ?ator . }
+    
+    ?filme :hasDirector ?Diretor .
+}
+GROUP BY ?Diretor
+ORDER BY DESC(?NumFilmes)
+LIMIT 1
+
+# ============================================================================
+# QUERY 9: Qual o filme mais antigo em que o ator X atuou, em que ano foi 
+#          lançado e qual era seu personagem? Havendo empate, devolver todos 
+#          do mesmo ano.
+# ============================================================================
+
+SELECT ?Filme ?Ano ?Personagem
+WHERE {
+    VALUES ?X { :joel_coen }
+    
+    ?Filme rdf:type :Movie .
+    ?Filme foaf:title ?tituloFilme .
+    ?Filme :creationYear ?Ano .
+    
+    { ?Filme :hasActor ?X . } UNION { ?Filme :hasActress ?X . }
+    
+    ?X :actsAs ?Personagem .
+    ?Filme :hasCharacter ?Personagem .
+    
+    FILTER NOT EXISTS {
+        ?outroFilme :creationYear ?outroAno .
+        { ?outroFilme :hasActor ?X . } UNION { ?outroFilme :hasActress ?X . }
+        FILTER(?outroAno < ?Ano)
+    }
+}
+
+# ============================================================================
+# QUERY 10: Qual o filme mais longo dirigido por D, e qual a sua duração? 
+#           Havendo empate, devolver todos da mesma duração.
+# ============================================================================
+
+SELECT ?Filme ?Duracao
+WHERE {
+    VALUES ?D { :francis_ford_coppola }
+    
+    ?Filme rdf:type :Movie .
+    ?Filme :hasDirector ?D .
+    ?Filme :duration ?Duracao .
+    
+    {
+        SELECT (MAX(?duracaoMax) AS ?duracaoMaxima)
+        WHERE {
+            ?filmeInner :hasDirector ?D .
+            ?filmeInner :duration ?duracaoMax .
+        }
+    }
+    
+    FILTER(?Duracao = ?duracaoMaxima)
+}

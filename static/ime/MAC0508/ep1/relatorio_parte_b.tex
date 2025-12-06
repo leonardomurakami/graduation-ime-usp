@@ -1,0 +1,244 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[brazilian]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{float}
+
+\geometry{margin=2.5cm}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    language=Python,
+    showstringspaces=false,
+    commentstyle=\color{gray},
+    keywordstyle=\color{blue},
+    stringstyle=\color{red}
+}
+
+\title{\textbf{MAC0508 -- Introdução ao Processamento de Língua Natural}\\
+\Large{EP1 - Parte B}}
+\author{Leonardo Heidi Almeida Murakami \\ NUSP: 11260186}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Descrição da Implementação}
+
+\subsection{Arquitetura do Modelo}
+
+Usamos um HMM (Hidden Markov Model) de ordem 2 para etiquetagem morfossintática (UPOS), seguindo a ideia de transições \(XY \to YZ\). O código está na classe \texttt{HMMTagger} (arquivo \texttt{hmm\_model.py}) e foi escrito de forma vetorizada com NumPy para melhorar a eficiência computacional, evitando loops Python desnecessários nas operações com matrizes.
+
+O modelo \(\mu = (A, B, \pi)\) é definido assim:
+\begin{itemize}
+    \item \textbf{Estados}: as 17 etiquetas UPOS.
+    \item \textbf{Transições} (matriz \(A\)): \(289\) linhas (pares de etiquetas \(XY\)) e \(17\) colunas (próxima etiqueta \(Z\)). Cada linha soma 1.
+    \item \textbf{Emissões} (matriz \(B\)): \(17 \times |V|\), onde \(|V|\) é o vocabulário; linhas somam 1.
+    \item \textbf{Iniciais} (vetor \(\pi\)): distribuição sobre as 17 etiquetas iniciais; soma 1.
+\end{itemize}
+
+\subsection{Pré-processamento}
+
+O método \texttt{parse\_conllu()} lê os arquivos CoNLL-U e extrai:
+\begin{itemize}
+    \item Coluna 2 (FORM) como texto;
+    \item Coluna 4 (UPOS) como etiqueta.
+\end{itemize}
+Linhas de comentário e linhas vazias são ignoradas, assim como tokens multi-palavra (IDs com `-'). Não adicionamos tokens especiais de início/fim de sentença nas palavras; trabalhamos diretamente com a sequência de etiquetas para o HMM.
+
+\subsection{Inicialização dos Parâmetros}
+
+As matrizes são inicializadas por contagem no córpus de treinamento, com \textbf{Lidstone} (\(\alpha = 1\)) para evitar zeros:
+\begin{align*}
+\pi_i &= \frac{\text{contagem}(S_i) + \alpha}{\sum_j \text{contagem}(S_j) + \alpha\,|S|} \\
+A_{(X,Y),Z} &= \frac{\text{contagem}(XYZ) + \alpha}{\text{contagem}(XY) + \alpha\,|S|} \\
+B_{i,w} &= \frac{\text{contagem}(S_i, w) + \alpha}{\text{contagem}(S_i) + \alpha\,|V|}
+\end{align*}
+onde \(|S|=17\).
+
+\subsection{Palavras Desconhecidas}
+
+Usamos o conjunto de validação para identificar palavras fora do vocabulário e adicionar uma coluna \texttt{<DESC>} em \(B\). Estimamos \(B_{i,\texttt{<DESC>}}\) a partir das etiquetas observadas quando a palavra é desconhecida no \textit{dev}, e renormalizamos as linhas de \(B\). Em execução, palavras não vistas mapeiam para \texttt{<DESC>}.
+
+\subsection{Treinamento: Baum–Welch}
+
+O treinamento opcional refina \(A\), \(B\) e \(\pi\) com Baum–Welch (\textit{EM}), usando \(\alpha\) de Lidstone em cada reestimação. O critério de parada compara a distância entre iterações:
+\[
+\mathrm{dist}(\mu^s, \mu^{s+1}) = \sum_{i,j}\big(A_{ij}^{s+1}-A_{ij}^s\big)^2 + \sum_{i,k}\big(B_{ik}^{s+1}-B_{ik}^s\big)^2 + \sum_i\big(\pi_i^{s+1}-\pi_i^s\big)^2,
+\]
+encerrando quando \(\mathrm{dist}(\mu^s,\mu^{s+1})/\mathrm{dist}(\mu^0,\mu^1) < \varepsilon\) (padrão \(\varepsilon=10^{-2}\)), ou após 100 iterações.
+
+\subsection{Etiquetagem: Viterbi de ordem 2}
+
+Para cada sentença, aplicamos Viterbi de ordem 2. A implementação usa um tensor de \(A\) (\(17\times 17\times 17\)) para acelerar as transições \(XY\to YZ\).
+
+\section{Ativação do Programa}
+
+\subsection{Requisitos}
+
+\begin{itemize}
+    \item Python 3.7 ou superior
+    \item Bibliotecas: \texttt{numpy}, \texttt{tqdm}
+\end{itemize}
+
+Instalação rápida:
+\begin{lstlisting}[language=bash]
+pip install numpy tqdm
+\end{lstlisting}
+
+\subsection{Arquivos necessários}
+
+Coloque estes arquivos no mesmo diretório:
+\begin{itemize}
+    \item \texttt{hmm\_model.py}
+    \item \texttt{pt\_porttinari-ud-train.conllu}
+    \item \texttt{pt\_porttinari-ud-dev.conllu}
+    \item \texttt{pt\_porttinari-ud-test.conllu}
+\end{itemize}
+
+\subsection{Execução}
+
+Para treinar e avaliar:
+\begin{lstlisting}[language=bash]
+python hmm_model.py
+\end{lstlisting}
+
+O script verifica os arquivos, treina o HMM (com Baum–Welch), etiqueta o teste com Viterbi e imprime as métricas.
+
+\section{Resultados}
+
+\subsection{Resumo do Treinamento}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lr}
+\toprule
+\textbf{Métrica} & \textbf{Valor} \\
+\midrule
+Sentenças de treino & 5.893 \\
+Número de etiquetas & 16 \\
+Tamanho do vocabulário & 17.022 \\
+Pares de estados (XY) & 256 \\
+Palavras desconhecidas (dev) & 1.302 \\
+Ocorrências desconhecidas (dev) & 1.362 \\
+Iterações Baum--Welch & 2 \\
+Razão dist. final/inicial & $2{,}69\times10^{-4}$ \\
+\bottomrule
+\end{tabular}
+\caption{Resumo do treinamento (logs do programa).}
+\end{table}
+
+\subsection{Métricas Globais}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lr}
+\toprule
+\textbf{Métrica} & \textbf{Valor} \\
+\midrule
+Acurácia & 56,72\% \\
+Precisão Média & 72,61\% \\
+Cobertura Média & 52,02\% \\
+Medida-F (média) & 54,03\% \\
+Medida-F (global) & 60,62\% \\
+Etiquetas corretas & 19.053 / 33.594 \\
+\bottomrule
+\end{tabular}
+\caption{Métricas globais na avaliação do conjunto de teste.}
+\end{table}
+
+\subsection{Top 10 etiquetas mais fáceis de prever}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{clrrrr}
+\toprule
+\textbf{\#} & \textbf{Etiqueta} & \textbf{F1} & \textbf{Precisão} & \textbf{Cobertura} & \textbf{Corretas} \\
+\midrule
+1 & SYM   & 92,62\% & 91,13\% & 94,17\% & 113 \\
+2 & ADP   & 91,44\% & 99,14\% & 84,86\% & 4.259 \\
+3 & AUX   & 88,74\% & 97,52\% & 81,40\% & 788 \\
+4 & CCONJ & 88,56\% & 100,00\% & 79,47\% & 654 \\
+5 & DET   & 82,65\% & 72,77\% & 95,63\% & 4.685 \\
+6 & ADV   & 78,40\% & 88,77\% & 70,20\% & 893 \\
+7 & PUNCT & 72,03\% & 100,00\% & 56,29\% & 2.501 \\
+8 & PRON  & 68,49\% & 67,96\% & 69,02\% & 891 \\
+9 & NUM   & 54,39\% & 100,00\% & 37,36\% & 229 \\
+10 & VERB & 40,93\% & 93,41\% & 26,20\% & 893 \\
+\bottomrule
+\end{tabular}
+\caption{Etiquetas com melhor desempenho (por F1).}
+\end{table}
+
+\subsection{Top 10 etiquetas mais difíceis de prever}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{clrrrr}
+\toprule
+\textbf{\#} & \textbf{Etiqueta} & \textbf{F1} & \textbf{Precisão} & \textbf{Cobertura} & \textbf{Corretas} \\
+\midrule
+1 & SCONJ & 19,92\% & 78,79\% & 11,40\% & 52 \\
+2 & ADJ   & 21,98\% & 12,61\% & 85,50\% & 1.433 \\
+3 & NOUN  & 30,78\% & 93,21\% & 18,43\% & 1.167 \\
+4 & PROPN & 33,51\% & 66,44\% & 22,41\% & 495 \\
+5 & VERB  & 40,93\% & 93,41\% & 26,20\% & 893 \\
+6 & NUM   & 54,39\% & 100,00\% & 37,36\% & 229 \\
+7 & PRON  & 68,49\% & 67,96\% & 69,02\% & 891 \\
+8 & PUNCT & 72,03\% & 100,00\% & 56,29\% & 2.501 \\
+9 & ADV   & 78,40\% & 88,77\% & 70,20\% & 893 \\
+10 & DET  & 82,65\% & 72,77\% & 95,63\% & 4.685 \\
+\bottomrule
+\end{tabular}
+\caption{Etiquetas com pior desempenho relativo (por F1).}
+\end{table}
+
+\subsection{Top 10 palavras mais difíceis de etiquetar}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{clrrr}
+\toprule
+\textbf{\#} & \textbf{Palavra} & \textbf{Taxa de erro} & \textbf{Acertos} & \textbf{Total} \\
+\midrule
+1 & .        & 100,00\% & 0 & 1.636 \\
+2 & )        & 100,00\% & 0 & 128 \\
+3 & mas      & 100,00\% & 0 & 61 \\
+4 & :        & 100,00\% & 0 & 49 \\
+5 & ?        & 100,00\% & 0 & 46 \\
+6 & -        & 100,00\% & 0 & 44 \\
+7 & Mas      & 100,00\% & 0 & 36 \\
+8 & empresa  & 100,00\% & 0 & 29 \\
+9 & Segundo  & 100,00\% & 0 & 27 \\
+10 & Para    & 100,00\% & 0 & 26 \\
+\bottomrule
+\end{tabular}
+\caption{Palavras com maior taxa de erro (apenas termos com frequência mínima de 3).}
+\end{table}
+
+\section{Comentários e Conclusões}
+
+A acurácia de 56,72\% ficou abaixo do esperado. Embora o algoritmo de Baum--Welch tenha convergido rapidamente (apenas 2 iterações), os resultados mostram que o modelo tem dificuldades importantes.
+
+Um ponto que chamou atenção foi a discrepância enorme no desempenho entre diferentes etiquetas. Enquanto ADP e SYM tiveram F1 acima de 90\%, outras como SCONJ (19,92\%) e ADJ (21,98\%) ficaram completamente perdidas. Isso sugere que o contexto de pares de etiquetas não é suficiente para disambiguar casos mais complexos.
+
+O resultado mais estranho aparece quando olhamos as palavras mais difíceis de etiquetar. Apesar de PUNCT ter F1 de 72\% e precisão de 100\%, praticamente todas as pontuações específicas tiveram taxa de erro de 100\%: o ponto final errou todas as 1.636 ocorrências, o parêntese fechado errou as 128 vezes, e assim por diante. Isso não faz sentido à primeira vista.
+
+Analisando com calma, percebe-se que a cobertura de PUNCT é apenas 56\%, ou seja, o modelo está deixando de identificar quase metade das pontuações. Quando ele prevê PUNCT, acerta (daí os 100\% de precisão), mas ele simplesmente não está prevendo PUNCT para os símbolos mais comuns como ponto, vírgula e parênteses. Provavelmente o modelo está confundindo essas marcações com outras etiquetas, talvez por viés das sequências de treinamento.
+
+Outro problema visível é com palavras ambíguas como ``mas'' e ``Mas'', que também erraram 100\%. Essas palavras podem ser tanto conjunções (CCONJ) quanto advérbios (ADV) dependendo do contexto, e o HMM claramente não está capturando essas nuances.
+
+\end{document}
+
+

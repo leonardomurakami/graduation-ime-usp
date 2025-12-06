@@ -1,0 +1,114 @@
+{
+    "Collections": [
+        {
+            "sheetName": "diretores",
+            "startColumn": "A",
+            "endColumn": "D",
+            "startRow": "2",
+            "endRow": "+",
+            "comment": "",
+            "rule": "Individual: @B*\nFacts:\n  hasDirector @A*",
+            "active": true
+        },
+        {
+            "sheetName": "atores",
+            "startColumn": "A",
+            "endColumn": "F",
+            "startRow": "2",
+            "endRow": "+",
+            "comment": "",
+            "rule": "Individual: @B*\nFacts:\n  hasCharacter @F*",
+            "active": true
+        },
+        {
+            "sheetName": "atores",
+            "startColumn": "A",
+            "endColumn": "F",
+            "startRow": "2",
+            "endRow": "+",
+            "comment": "",
+            "rule": "Individual: @F*\nTypes: Character\nFacts:\n  isPlayedBy @A*",
+            "active": true
+        },
+        {
+            "sheetName": "atrizes",
+            "startColumn": "A",
+            "endColumn": "F",
+            "startRow": "2",
+            "endRow": "+",
+            "comment": "",
+            "rule": "Individual: @B*\nFacts:\n  hasCharacter @F*",
+            "active": true
+        },
+        {
+            "sheetName": "atrizes",
+            "startColumn": "A",
+            "endColumn": "F",
+            "startRow": "2",
+            "endRow": "+",
+            "comment": "",
+            "rule": "Individual: @F*\nTypes: Character\nFacts:\n  isPlayedBy @A*",
+            "active": true
+        },
+        {
+            "sheetName": "atores",
+            "startColumn": "A",
+            "endColumn": "F",
+            "startRow": "2",
+            "endRow": "+",
+            "comment": "",
+            "rule": "Individual: @B*\nFacts:\n  hasActor @A*",
+            "active": true
+        },
+        {
+            "sheetName": "atrizes",
+            "startColumn": "A",
+            "endColumn": "F",
+            "startRow": "2",
+            "endRow": "+",
+            "comment": "",
+            "rule": "Individual: @B*\nFacts:\n  hasActress @A*",
+            "active": true
+        },
+        {
+            "sheetName": "atrizes",
+            "startColumn": "A",
+            "endColumn": "F",
+            "startRow": "2",
+            "endRow": "+",
+            "comment": "",
+            "rule": "Individual: @A*\nTypes: Actress\nFacts:\n  firstName @D*,\n  familyName @E*,\n  actsIn @B*,\n  actsAs @F*",
+            "active": true
+        },
+        {
+            "sheetName": "diretores",
+            "startColumn": "A",
+            "endColumn": "D",
+            "startRow": "2",
+            "endRow": "+",
+            "comment": "",
+            "rule": "Individual: @A*\nTypes: Director\nFacts:\n  firstName @C*,\n  familyName @D*,\n  directs @B*",
+            "active": true
+        },
+        {
+            "sheetName": "atores",
+            "startColumn": "A",
+            "endColumn": "F",
+            "startRow": "2",
+            "endRow": "+",
+            "comment": "",
+            "rule": "Individual: @A*\nTypes: Actor\nFacts:\n  firstName @D*,\n  familyName @E*,\n  actsIn @B*,\n  actsAs @F*",
+            "active": true
+        },
+        {
+            "sheetName": "filmes",
+            "startColumn": "A",
+            "endColumn": "D",
+            "startRow": "2",
+            "endRow": "+",
+            "comment": "",
+            "rule": "Individual: @A*\nTypes: Movie\nFacts:\n  title @C*,\n  creationYear @B*(xsd:integer),\n  duration @D*(xsd:integer)",
+            "active": true
+        }
+    ]
+}

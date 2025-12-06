@@ -1,0 +1,34 @@
+[
+  {
+    "Experimento":"few-shot",
+    "Modelo":"facebook\/nllb-200-distilled-600M",
+    "Direção":"PT→TA",
+    "BLEU":27.5160604075,
+    "chrF1":32.8315090229,
+    "chrF3":42.0959392488
+  },
+  {
+    "Experimento":"few-shot",
+    "Modelo":"facebook\/nllb-200-distilled-600M",
+    "Direção":"TA→PT",
+    "BLEU":50.0,
+    "chrF1":49.1168904462,
+    "chrF3":50.6332071097
+  },
+  {
+    "Experimento":"zero-shot",
+    "Modelo":"facebook\/nllb-200-distilled-600M",
+    "Direção":"PT→TA",
+    "BLEU":5.5223977835,
+    "chrF1":13.4269244799,
+    "chrF3":16.7506092658
+  },
+  {
+    "Experimento":"zero-shot",
+    "Modelo":"facebook\/nllb-200-distilled-600M",
+    "Direção":"TA→PT",
+    "BLEU":45.1801001805,
+    "chrF1":30.5307063609,
+    "chrF3":22.1525995534
+  }
+]

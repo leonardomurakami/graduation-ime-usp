@@ -1,0 +1,24 @@
+Case =Teste01
+input =(letrec fat (lambda x (if (= x 0) 1 (* x (call fat (- x 1))))) (call fat 4))
+(@END)
+output =#(struct:letrecS fat #(struct:lamS x #(struct:ifS #(struct:equalS #(struct:idS x) #(struct:numS 0)) #(struct:numS 1) #(struct:multS #(struct:idS x) #(struct:appS #(struct:idS fat) #(struct:bminusS #(struct:idS x) #(struct:numS 1)))))) #(struct:appS #(struct:idS fat) #(struct:numS 4)))
+#(struct:letC fat #(struct:numC 1) #(struct:beginC #(struct:set!C fat #(struct:lamC x #(struct:ifC #(struct:equalC #(struct:idC x) #(struct:numC 0)) #(struct:numC 1) #(struct:multC #(struct:idC x) #(struct:appC #(struct:idC fat) #(struct:plusC #(struct:idC x) #(struct:multC #(struct:numC -1) #(struct:numC 1)))))))) #(struct:appC #(struct:idC fat) #(struct:numC 4))))
+#(struct:numV 24)
+Case =Teste02
+input =(let x 50 (begin (set! x 80) x))
+(@END)
+output =#(struct:letS x #(struct:numS 50) #(struct:beginS #(struct:set!S x #(struct:numS 80)) #(struct:idS x)))
+#(struct:letC x #(struct:numC 50) #(struct:beginC #(struct:set!C x #(struct:numC 80)) #(struct:idC x)))
+#(struct:numV 80)
+Case =Teste03
+input =(let* x 50 y (* x 4) (+ x y))
+(@END)
+output =#(struct:let*S x #(struct:numS 50) y #(struct:multS #(struct:idS x) #(struct:numS 4)) #(struct:plusS #(struct:idS x) #(struct:idS y)))
+#(struct:let*C x #(struct:numC 50) y #(struct:multC #(struct:idC x) #(struct:numC 4)) #(struct:plusC #(struct:idC x) #(struct:idC y)))
+#(struct:numV 250)
+Case =Teste04
+input =(call2 (lambda2 x y (+ x y)) 4 5)
+(@END)
+output =#(struct:app2S #(struct:lambda2S x y #(struct:plusS #(struct:idS x) #(struct:idS y))) #(struct:numS 4) #(struct:numS 5))
+#(struct:app2C #(struct:lambda2C x y #(struct:plusC #(struct:idC x) #(struct:idC y))) #(struct:numC 4) #(struct:numC 5))
+#(struct:numV 9)
