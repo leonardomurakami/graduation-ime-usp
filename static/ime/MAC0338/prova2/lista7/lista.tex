@@ -1,0 +1,200 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[portuguese]{babel}
+\usepackage{fancyhdr}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage[portuguese,algoruled,lined,linesnumbered]{algorithm2e}
+
+% ---- PREENCHA ----
+\newcommand{\Lista}{7}
+\newcommand{\Nome}{Leonardo Heidi Almeida Murakami}
+\newcommand{\NUSP}{11260186}
+% -----------------------------
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\Nome}
+\fancyhead[R]{NUSP \NUSP}
+\fancyfoot[L]{Lista \Lista}
+\fancyfoot[C]{MAC0338}
+
+\begin{document}
+
+\newpage
+\section*{Exercício 2}
+
+\textbf{Teorema:} Se todas as arestas de um grafo conexo $G$ têm pesos distintos, então $G$ possui uma única Árvore Geradora Mínima (MST).
+
+\textbf{Prova (por contradição):}
+Suponha, para fins de contradição, que existam duas MSTs distintas, $T_1$ e $T_2$, para o grafo $G$.
+
+\begin{enumerate}
+    \item Como $T_1 \neq T_2$, existe pelo menos uma aresta que pertence a uma árvore mas não à outra. Seja $e = (u, v)$ a aresta de \textbf{menor peso} que está em apenas uma das árvores. Sem perda de generalidade, assuma que $e \in T_1$ e $e \notin T_2$.
+    
+    \item Como $T_2$ é uma árvore geradora, a adição da aresta $e$ a $T_2$ cria um único ciclo $C$.
+    
+    \item Como $T_1$ é uma árvore (não tem ciclos), pelo menos uma aresta $e'$ desse ciclo $C$ não pode pertencer a $T_1$.
+    
+    \item Como $e$ e $e'$ são arestas diferentes e os pesos do grafo são todos distintos, temos duas possibilidades: $w(e) < w(e')$ ou $w(e') < w(e)$.
+    
+    \item \textbf{Análise:}
+    \begin{itemize}
+        \item Se $w(e') < w(e)$: Isso contradiz nossa escolha inicial de $e$, pois definimos $e$ como a aresta de menor peso que difere entre as duas árvores. Como $e' \notin T_1$ (pois está no ciclo formado em $T_2$ mas $T_1$ é acíclica) e $e' \in T_2$, $e'$ seria uma candidata melhor que $e$.
+        \item Se $w(e) < w(e')$: Podemos substituir $e'$ por $e$ em $T_2$, criando uma nova árvore $T_2' = (T_2 \setminus \{e'\}) \cup \{e\}$. O peso total seria:
+        $$w(T_2') = w(T_2) - w(e') + w(e)$$
+        Como $w(e) < w(e')$, então $w(T_2') < w(T_2)$. Isso contradiz o fato de que $T_2$ era uma Árvore Geradora \textit{Mínima}.
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Conclusão:} A suposição de que existem duas MSTs distintas leva a uma contradição. Portanto, a MST deve ser única. $\blacksquare$
+\newpage
+\newpage
+\section*{Exercício 3}
+
+\textbf{Afirmação:} Falsa.
+
+\textbf{Justificativa (Contra-exemplo):}
+O fato de uma aresta ser a mínima em um ciclo $C$ específico não impede que ela seja a aresta de maior peso em um \textit{outro} ciclo $C'$ presente no grafo.
+
+Considere um grafo $G = (V, E)$ com $V = \{u, v, w, z\}$.
+Defina as arestas e pesos tal que formem o ciclo $C = \{(u,v), (v,w), (w,u)\}$ e um caminho alternativo:
+\begin{itemize}
+    \item $w(u, v) = 100$
+    \item $w(v, w) = 200$
+    \item $w(w, u) = 300$
+    \item $w(u, z) = 1$
+    \item $w(z, v) = 2$
+\end{itemize}
+
+No ciclo $C$, a aresta $e = (u, v)$ tem o custo mínimo ($100 < 200 < 300$).
+Entretanto, existe um outro ciclo $C'$ formado pelas arestas $\{(u,v), (v,z), (z,u)\}$. Neste ciclo $C'$, os pesos são $\{100, 2, 1\}$.
+Pela \textbf{Propriedade do Ciclo} das MSTs, a aresta de maior peso em qualquer ciclo não pode pertencer à MST. Como $100 > 2$ e $100 > 1$, a aresta $(u, v)$ é a mais pesada de $C'$ e, portanto, \textbf{não pertence à MST}, mesmo sendo a mais leve do ciclo $C$.
+
+\newpage
+\section*{Exercício 5 (CLRS 23.1-3)}
+
+\textbf{Afirmação:} Verdadeira.
+
+\textbf{Prova:}
+Seja $T$ uma Árvore Geradora Mínima (MST) de um grafo $G$, e seja $e = (u, v)$ uma aresta pertencente a $T$.
+
+Vamos construir um corte $(S, V-S)$ para o qual $e$ é uma aresta de peso mínimo.
+
+\begin{enumerate}
+    \item Ao removermos a aresta $e$ de $T$, a árvore é dividida em dois componentes conexos disjuntos. Seja $S$ o conjunto de vértices de um desses componentes e $V-S$ o conjunto de vértices do outro.
+    
+    \item A aresta $e$ conecta um vértice em $S$ a um vértice em $V-S$, portanto, $e$ atravessa o corte $(S, V-S)$.
+    
+    \item Suponha, para fins de contradição, que $e$ \textbf{não} seja uma aresta de peso mínimo através desse corte. Isso implicaria que existe uma outra aresta $e' = (x, y)$ tal que $x \in S$, $y \in V-S$ e $w(e') < w(e)$.
+    
+    \item Se substituirmos $e$ por $e'$ na árvore original (formando $T' = (T \setminus \{e\}) \cup \{e'\}$), reconectamos os dois componentes $S$ e $V-S$, criando uma nova árvore geradora.
+    
+    \item O peso total dessa nova árvore seria:
+    $$w(T') = w(T) - w(e) + w(e')$$
+    Como assumimos $w(e') < w(e)$, então $w(T') < w(T)$.
+    
+    \item Isso contradiz o fato de que $T$ é uma Árvore Geradora Mínima.
+\end{enumerate}
+
+\textbf{Conclusão:} Portanto, a suposição de que existe uma aresta mais leve cruzando o corte é falsa. Logo, $e$ deve ser uma aresta de peso mínimo (light edge) para o corte $(S, V-S)$ gerado pela sua remoção. $\blacksquare$
+
+\newpage
+\section*{Exercício 6 (CLRS 23.1-7)}
+
+\textbf{Parte 1: Pesos Positivos}
+
+\textbf{Prova:}
+Seja $G=(V, E)$ um grafo conexo com pesos estritamente positivos ($w(e) > 0$ para todo $e \in E$).
+Seja $S \subseteq E$ um subconjunto de arestas que conecta todos os vértices de $V$ tal que o peso total $w(S) = \sum_{e \in S} w(e)$ seja mínimo.
+
+Precisamos provar que $S$ forma uma árvore.
+Sabemos que $S$ conecta todos os vértices. Para ser uma árvore, $S$ também precisa ser \textbf{acíclico}.
+
+Suponha, por contradição, que $S$ contenha um ciclo $C$.
+\begin{enumerate}
+    \item Escolha qualquer aresta $e$ pertencente a esse ciclo $C$.
+    \item Como os pesos são positivos, $w(e) > 0$.
+    \item Se removermos $e$ de $S$, o conjunto resultante $S' = S \setminus \{e\}$ continua conectado (pois remover uma aresta de um ciclo não desconecta o grafo).
+    \item O peso do novo conjunto é:
+    $$w(S') = w(S) - w(e)$$
+    \item Como $w(e) > 0$, então $w(S') < w(S)$.
+\end{enumerate}
+
+Isso gera uma contradição, pois assumimos que $S$ tinha o peso mínimo possível. Logo, $S$ não pode conter ciclos. Como $S$ é conexo e acíclico, $S$ forma uma árvore. $\blacksquare$
+
+\vspace{0.5cm}
+
+\textbf{Parte 2: Pesos Negativos}
+
+\textbf{Resposta:} A propriedade \textbf{não} vale se houver pesos negativos.
+
+\textbf{Contra-exemplo:}
+Considere um grafo com 3 vértices ($u, v, z$) formando um triângulo com os seguintes pesos:
+\begin{itemize}
+    \item $w(u, v) = 10$
+    \item $w(v, z) = 10$
+    \item $w(z, u) = -5$
+\end{itemize}
+
+Para conectar todos os vértices usando uma árvore (sem ciclos), precisaríamos de 2 arestas. A árvore de menor custo seria usar $(u, v)$ e $(z, u)$ (ou $(v, z)$ e $(z, u)$), resultando em um custo total de $10 + (-5) = 5$.
+
+No entanto, se escolhermos o conjunto com todas as 3 arestas (formando um ciclo), o custo total seria:
+$$10 + 10 + (-5) = 15$$
+\textit{(Nota: O contra-exemplo acima não funcionou bem porque o ciclo ficou mais caro. Vamos ajustar para um caso onde o ciclo fica mais barato).}
+
+\textbf{Contra-exemplo Ajustado:}
+Imagine que $S_{tree}$ é uma árvore que conecta todos os vértices com peso total $W$.
+Se adicionarmos uma aresta $e=(u, v)$ com peso $w(e) = -10$, criamos um ciclo.
+O novo peso será $W - 10$.
+Como $W - 10 < W$, o subconjunto com o ciclo tem peso menor que a árvore. Logo, o subconjunto de peso mínimo conterá o ciclo e \textbf{não será uma árvore}.
+
+\newpage
+\section*{Exercício 7}
+
+\textbf{Afirmação:} Verdadeira.
+
+\textbf{Justificativa:}
+A estrutura de uma Árvore Geradora Mínima (MST) depende exclusivamente da \textbf{ordem relativa} dos pesos das arestas, e não de seus valores absolutos. Algoritmos como o de Kruskal constroem a MST selecionando arestas em ordem crescente de peso.
+
+Seja $w(e)$ o peso original de uma aresta e $w'(e) = (w(e))^2$ o novo peso.
+A função $f(x) = x^2$ é estritamente crescente para todo $x > 0$.
+Isso implica que, para quaisquer duas arestas $e_1$ e $e_2$ com pesos positivos:
+$$w(e_1) < w(e_2) \iff (w(e_1))^2 < (w(e_2))^2$$
+
+Como a desigualdade entre os pesos é preservada, a ordem de classificação das arestas permanece inalterada. Consequentemente, o conjunto de arestas selecionado por qualquer algoritmo de MST (como Kruskal ou Prim) será exatamente o mesmo para os pesos originais $w$ e para os pesos ao quadrado $w'$.
+
+Portanto, $T$ continua sendo uma MST para o novo grafo.
+
+\newpage
+\section*{Exercício 8}
+
+\textbf{Resposta:} Sim, o grafo $\mathcal{H}$ é sempre conexo.
+
+\textbf{Prova:}
+Sejam $T$ e $T'$ duas Árvores Geradoras Mínimas (MSTs) distintas de $G$. Vamos provar que existe um caminho em $\mathcal{H}$ conectando $T'$ a $T$.
+
+A prova segue por indução no número de arestas que diferem entre as duas árvores, denotado por $k = |T \setminus T'|$.
+Se $k=0$, $T=T'$ e já estamos no destino.
+
+Passo Indutivo: Suponha que $T \neq T'$.
+\begin{enumerate}
+    \item Existe pelo menos uma aresta $e$ tal que $e \in T$ e $e \notin T'$.
+    \item Se adicionarmos $e$ à árvore $T'$, criamos um único ciclo $C$ em $T' \cup \{e\}$.
+    \item Como $T$ é uma árvore (acíclica), esse ciclo $C$ deve conter pelo menos uma aresta $f$ tal que $f \notin T$.
+    \item \textbf{Análise de Pesos:}
+    \begin{itemize}
+        \item Como $T'$ é uma MST, $w(e) \ge w(f)$ (pela propriedade do ciclo em $T'$).
+        \item Como $T$ é uma MST, se adicionássemos $f$ a $T$, criaríamos um ciclo onde $f$ seria máxima. Mas sabemos que $e$ está nesse ciclo (formado em $T \cup \{f\}$) e $e \in T$. Logo, $w(f) \ge w(e)$.
+        \item Conclusão: $w(e) = w(f)$.
+    \end{itemize}
+    \item Podemos então construir uma nova árvore $T'' = (T' \setminus \{f\}) \cup \{e\}$.
+    \item Como $w(e) = w(f)$, o peso total de $T''$ é igual ao de $T'$, logo $T''$ também é uma MST.
+    \item Por definição, $T''$ e $T'$ são \textbf{vizinhas} em $\mathcal{H}$ (diferem por exatamente uma troca).
+    \item Note que $T''$ possui a aresta $e$ (que queríamos de $T$) e removeu a aresta $f$ (que não estava em $T$). Portanto, $T''$ tem uma aresta a mais em comum com $T$ do que $T'$ tinha.
+\end{enumerate}
+
+Repetindo esse processo, reduzimos a diferença entre a árvore atual e a árvore alvo $T$ em 1 aresta a cada passo. Eventualmente, transformaremos $T'$ em $T$ caminhando apenas por vizinhos. Logo, existe um caminho entre quaisquer dois vértices de $\mathcal{H}$, provando que $\mathcal{H}$ é conexo. $\blacksquare$
+\end{document}

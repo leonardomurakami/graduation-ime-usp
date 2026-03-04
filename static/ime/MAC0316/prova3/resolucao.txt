@@ -1,0 +1,31 @@
+a <- 5
+l1 <- '(a)
+OUT: (a)
+l2 <- (5 5)
+OUT: (5 5)
+OUT: (a 5)
+OUT: mf (1 . 2) (3 . 4)
+OUT: mf (2) (1 . 4)
+OUT: mf () (2 . 4)
+OUT: (2 . 4)
+
+2:
+falso
+true
+falso
+true
+falso
+true
+?
+true
+true
+?
+true
+falso
+?
+true
+?
+false
+?
+true
+false
