@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="jupiter.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="icon" href="https://uspdigital.usp.br/comumwebdev/imagens/favicon.ico" type="image/x-icon">
+        <title>Jupiterweb</title>
+    </head>
+    <body>
+        <header>
+            <table width="100%" height="60" border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td width="180" rowspan="3" align="center">
+                        <a href="http://www.usp.br" target="_blank">
+                            <img src="https://uspdigital.usp.br/comumwebdev/imagens/cabecalho/usp-logo.png" width="122" height="49" alt="USP Logo" border="0">
+                        </a>
+                    </td>
+                    <td>
+                        <a href="http://www.usp.br" target="_blank">
+                            <img src="https://uspdigital.usp.br/comumwebdev/imagens/cabecalho/usp-logo-texto.png" alt="Universidade de São Paulo" width="260" height="44" border="0">
+                        </a>
+                    </td>
+                </tr>
+            </table>
+            <div style="width: 100%; height: 14px; background-image: url('https://uspdigital.usp.br/comumwebdev/imagens/cabecalho/bg-headtop.gif'); margin-bottom: 5px; text-align: right; color: white; padding-top: 12px; padding-right: 3px; font-family: Verdana; font-size: 10px;"></div>
+        </header>
+
+        <div class="content">
+            <aside>
+                <nav>
+                    <ul class="menulist">
+                        <li class="menuHeader">Público</li>
+
+                        <li>
+                            <span tabindex="0">Calendário Escolar</span>
+                            <ul>
+                                <li><a href="https://uspdigital.usp.br/jupiterweb/jupArquivosPublicos.jsp?tiparq=8&anoprg=2025&codmnu=7920">2025</a></li>
+                                <li><a href="https://uspdigital.usp.br/jupiterweb/jupArquivosPublicos.jsp?tiparq=9&anoprg=2026&codmnu=6863">2026</a></li>
+                            </ul>
+                        </li>
+
+                        <li><a href="https://uspdigital.usp.br/jupiterweb/jupCarreira.jsp?codmnu=8275">Cursos de ingresso</a></li>
+
+                        <li>
+                            <span tabindex="0">Disciplina</span>
+                            <ul>
+                                <li><a href="https://uspdigital.usp.br/jupiterweb/jupDisciplinaBusca?tipo=D&codmnu=6755">Busca por Disciplinas</a></li>
+                                <li><a href="https://uspdigital.usp.br/jupiterweb/jupDisciplinaBusca?tipo=T&codmnu=6756">Busca por Turmas</a></li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <span tabindex="0">Editais</span>
+                            <ul>
+                                <li>
+                                    <span tabindex="0">Programa Unificado de Bolsas (PUB)</span>
+                                    <ul>
+                                        <li><a href="https://uspdigital.usp.br/juno/bnfArquivosPublicos.jsp?tiparq=1&anoprg=2024&codmnu=10872">Edital 2024-2025</a></li>
+                                        <li><a href="https://uspdigital.usp.br/juno/bnfArquivosPublicos.jsp?tiparq=1&anoprg=2025&codmnu=11502">Edital 2025-2026</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="http://www.prg.usp.br/?page_id=399">PEEG</a></li>
+                                <li><a href="https://prg.usp.br/programas-e-bolsas/">PAP</a></li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <span tabindex="0">FAQ</span>
+                            <ul>
+                                <li>
+                                    <span tabindex="0">Matrícula Interativa</span>
+                                    <ul>
+                                        <li><a href="https://uspdigital.usp.br/jupiterweb/FAQ.jsp?codmnu=9326">FAQ</a></li>
+                                        <li><a href="https://uspdigital.usp.br/jupiterweb/grdMatriculainterativaInformacoes.jsp?codmnu=9327">Informações gerais</a></li>
+                                        <li><a href="https://uspdigital.usp.br/jupiterweb/graduacaoAjudaNovaMatricula?codmnu=8946">TUTORIAL - NOVA MATRÍCULA</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="http://www.prg.usp.br/?p=20746&codmnu=6749">Jupiterweb em Vídeos</a></li>
+                                <li><a href="http://www.prg.usp.br/?p=20741&codmnu=8063">Informações gerais sobre a Graduação</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+
+                    <ul class="menulist">
+                        <li class="menuHeader">Acesso Restrito</li>
+                        <li><a href="https://uspdigital.usp.br/jupiterweb/webLogin.jsp">Entrar</a></li>
+                        <li><a href="https://uspdigital.usp.br/jupiterweb/esqueciSenha">Esqueci a Senha</a></li>
+                        <li><a href="https://uspdigital.usp.br/jupiterweb/primeiroAcesso">Primeiro Acesso</a></li>
+                    </ul>
+                </nav>
+            </aside>
+
+            <main>
+                <div id="cabecalho">Login</div>
+
+                <br>
+                <form name="form1" method="post" action="https://uspdigital.usp.br/jupiterweb/autenticar">
+                    <table border="0" align="center" cellspacing="3" cellpadding="2">
+                        <tr>
+                            <td><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Usuário:</font></td>
+                            <td>
+                                <input type="text" name="codpes" value="" size="10">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="right"><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Senha:</font></td>
+                            <td>
+                                <input type="password" name="senusu" size="10">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td>
+                                <input type="submit" name="Submit" value=" Entrar ">
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+
+                <footer>
+                    <hr size="1">
+                    <font face="Arial, Helvetica, sans-serif" size="1">
+                        <a href="https://uspdigital.usp.br/jupiterweb/creditos.jsp">Créditos</a>
+                        | <a href="https://uspdigital.usp.br/jupiterweb/jupColegiadoEmailLista">Fale conosco</a><br>
+                        &copy; 1999 - 2026 - Superintendência de Tecnologia da Informação/USP
+                    </font>
+                </footer>
+            </main>
+        </div>
+    </body>
+</html>
