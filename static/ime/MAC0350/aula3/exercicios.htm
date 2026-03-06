@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-br"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercícios - Introdução ao JavaScript</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com/">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+    <link href="Exerc%C3%ADcios%20-%20Introdu%C3%A7%C3%A3o%20ao%20JavaScript_files/css2.css" rel="stylesheet">
+    <style>
+        :root {
+            --background-color: #292827;
+            --surface-color: #363636;
+            --primary-text-color: #e0e0e0;
+            --secondary-text-color: #a0a0a0;
+            --accent-color-1: #ff690a;
+            --accent-color-2: #ff690a;
+            --border-color: #444;
+            --code-bg: #404040;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.7;
+            background-color: var(--background-color);
+            color: var(--primary-text-color);
+            margin: 0;
+            padding: 2rem 1.5rem;
+        }
+
+        .container { 
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1, h2, h3 { color: var(--accent-color-1); font-weight: 700; }
+        h1 { border-bottom: 2px solid var(--border-color); padding-bottom: 10px; margin-bottom: 30px; }
+        
+        .exercise-box {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-left: 5px solid var(--accent-color-1);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        code {
+            background-color: var(--code-bg);
+            color: var(--accent-color-2);
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        button {
+            background-color: var(--code-bg);
+            color: var(--accent-color-1);
+            border: 1px solid var(--accent-color-1);
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            margin-top: 15px;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--accent-color-1);
+            color: #fff;
+        }
+
+        .output-text {
+            display: inline-block;
+            margin-left: 15px;
+            font-weight: bold;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Exercícios Práticos: JavaScript Básico</h1>
+    <p>Utilize a tag <code>&lt;script&gt;</code> no final deste arquivo para escrever a lógica de cada um dos botões abaixo.</p>
+
+    <div class="exercise-box">
+        <h3>1. O Primeiro Evento</h3>
+        <p>Crie uma função chamada <code>dispararAlerta()</code> que exiba uma mensagem de boas-vindas usando <code>alert()</code>. Vincule esta função ao clique do botão abaixo.</p>
+        <button onclick="dispararAlerta()">Exibir Alerta</button>
+    </div>
+
+    <div class="exercise-box">
+        <h3>2. Loops e Console</h3>
+        <p>Crie uma função chamada <code>contarPares()</code>. Ela deve usar um laço <code>for</code> de 1 a 10 e imprimir no <strong>console do navegador</strong> apenas os números pares. Lembre-se de abrir o F12 para ver o resultado!</p>
+        
+        
+        
+        <br>
+        <button onclick="contarPares()">Imprimir Pares no Console</button>
+    </div>
+
+    <div class="exercise-box">
+        <h3>3. Manipulando a DOM (querySelector)</h3>
+        <p>Use o <code>document.querySelector</code> para selecionar o texto ao lado do botão. Quando o botão for clicado, mude o <code>innerHTML</code> desse texto para "JavaScript Dominado!".</p>
+        <button onclick="mudarTexto()">Mudar Texto</button>
+        <span id="texto-alvo" class="output-text">Texto Original</span>
+    </div>
+
+    <div class="exercise-box">
+        <h3>4. Condicionais e Tipagem (===)</h3>
+        <p>Crie uma função que verifique o estado do texto abaixo. Se o 
+texto for estritamente igual a "Desligado", mude-o para "Ligado". Caso 
+contrário, mude de volta para "Desligado".</p>
+        <button onclick="alternarEstado()">Alternar (Toggle)</button>
+        <span id="texto-estado" class="output-text">Desligado</span>
+    </div>
+
+    <div class="exercise-box">
+        <h3>5. Contador Dinâmico com Template Literals</h3>
+        <p>Declare uma variável global com valor 10. Toda vez que clicar no botão, diminua 1 do valor e atualize a tela. Use <em>Template Literals</em> para exibir um <code>alert(`Fim do tempo!`)</code> quando chegar a zero.</p>
+        <button onclick="contagemRegressiva()">Diminuir</button>
+        <span id="visor-contador" class="output-text">10</span>
+    </div>
+
+</div>
+
+<script>
+    // Exercício 1
+    function dispararAlerta() {
+        alert('Alerta da Defesa Civil')
+    }
+
+    // Exercício 2
+    function contarPares() {
+        for (let i = 1; i <= 10; i++) {
+            if (i % 2 === 0) {
+                console.log(i);
+            }
+        }
+    }
+
+    // Exercício 3
+    function mudarTexto() {
+        document.querySelector('#texto-alvo').innerHTML = 'JavaScript Dominado!';
+    }
+
+    // Exercício 4
+    function alternarEstado() {
+        if (document.querySelector('#texto-estado').innerHTML === 'Desligado') {
+            document.querySelector('#texto-estado').innerHTML = 'Ligado';
+        } else {
+            document.querySelector('#texto-estado').innerHTML = 'Desligado';
+        }
+    }
+
+    // Exercício 5
+    let valorContador = 10;
+    function contagemRegressiva() {
+        valorContador--;
+        document.querySelector('#visor-contador').innerHTML = valorContador;
+        if (valorContador === 0) {
+            alert('Fim do tempo!');
+        }
+    }
+</script>
+</body></html>

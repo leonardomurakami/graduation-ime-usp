@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-br"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para Casa - JS Parte 1</title>
+    <link href="Exerc%C3%ADcios%20-%20Introdu%C3%A7%C3%A3o%20ao%20JavaScript_files/css2.css" rel="stylesheet">
+    <link href="Para%20Casa%20-%20JS%20Parte%201_files/css2.css" rel="stylesheet">
+    <style>
+        :root {
+            --background-color: #292827;
+            --surface-color: #363636;
+            --primary-text-color: #e0e0e0;
+            --secondary-text-color: #a0a0a0;
+            --accent-color-1: #ff690a;
+            --accent-color-2: #ff690a;
+            --border-color: #444;
+            --code-bg: #404040;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.7;
+            background-color: var(--background-color);
+            color: var(--primary-text-color);
+            margin: 0;
+            padding: 2rem 1.5rem;
+        }
+
+        .container { 
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1, h2, h3 { color: var(--accent-color-1); font-weight: 700; }
+        h1 { border-bottom: 2px solid var(--border-color); padding-bottom: 10px; margin-bottom: 30px; }
+        
+        .exercise-box {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-left: 5px solid var(--accent-color-1);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        code {
+            background-color: var(--code-bg);
+            color: var(--accent-color-2);
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        button {
+            background-color: var(--code-bg);
+            color: var(--accent-color-1);
+            border: 1px solid var(--accent-color-1);
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            margin-top: 15px;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--accent-color-1);
+            color: #fff;
+        }
+
+        .output-text {
+            display: inline-block;
+            margin-left: 15px;
+            font-weight: bold;
+            color: var(--primary-text-color);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Desafios para Casa: JavaScript Básico</h1>
+    <p>Utilize os conceitos vistos na aula para resolver os desafios abaixo. Você deve escrever o HTML e incluir a tag <code>&lt;script&gt;</code> no próprio arquivo por enquanto.</p>
+
+    <div class="challenge">
+        <h3>Desafio 1: O Interruptor (Modo Claro/Escuro simples)</h3>
+        <p><strong>Cenário:</strong> Crie um botão e um texto que diz "A luz está APAGADA".</p>
+        <p><strong>Requisitos:</strong></p>
+        <ul>
+            <li>Crie uma função chamada <code>alternarLuz()</code> e coloque no <code>onclick</code> do botão.</li>
+            <li>Use <code>document.querySelector</code> para pegar o texto.</li>
+            <li>Use uma condicional (<code>if</code> e <code>===</code>). Se o texto for "A luz está APAGADA", mude para "A luz está ACESA". Se não, mude de volta para "A luz está APAGADA".</li>
+        </ul>
+    </div>
+
+    <button onclick="alternarLuz()">Alternar Luz</button>
+    <span id="texto-luz" class="output-text">A luz está APAGADA</span>
+
+    <div class="challenge">
+        <h3>Desafio 2: O Multiplicador</h3>
+        <p><strong>Cenário:</strong> Crie uma variação do contador da aula. Desta vez, vamos multiplicar os números.</p>
+        <p><strong>Requisitos:</strong></p>
+        <ul>
+            <li>Comece com uma variável <code>let valor = 2;</code> e exiba esse número em um <code>&lt;h1&gt;</code>.</li>
+            <li>Crie um botão "Dobrar" com uma função atrelada a ele.</li>
+            <li>Toda vez que clicar, o número deve multiplicar por 2 (ex: <code>valor = valor * 2;</code>) e atualizar a tela.</li>
+            <li><strong>Extra:</strong> Usando <em>Template Literals</em>, se o valor passar de 100, exiba um alerta: <code>`Cuidado, o número ${valor} está ficando muito grande!`</code></li>
+        </ul>
+    </div>
+
+    <button onclick="dobrarValor()">Dobrar</button>
+    <h1 id="valor-display" class="output-text">2</h1>
+
+</body>
+<script>
+    function alternarLuz() {
+        const root = document.documentElement;
+        if (document.querySelector('#texto-luz').innerHTML === 'A luz está APAGADA') {
+            document.querySelector('#texto-luz').innerHTML = 'A luz está ACESA';
+            root.style.setProperty('--background-color', 'white');
+            root.style.setProperty('--primary-text-color', '#292827');
+            root.style.setProperty('--secondary-text-color', '#363636');
+        } else {
+            document.querySelector('#texto-luz').innerHTML = 'A luz está APAGADA';
+            root.style.setProperty('--background-color', '#292827');
+            root.style.setProperty('--primary-text-color', '#e0e0e0');
+            root.style.setProperty('--secondary-text-color', '#a0a0a0');
+        }
+    }
+
+    let valor = 2;
+    function dobrarValor() {
+        valor = valor * 2;
+        if (valor > 100 && valor < 1000000) {
+            alert(`Cuidado, o número ${valor} está ficando muito grande!`);
+        } else if (valor > 1000000) {
+            alert(`Sugiro encontrar algo melhor para fazer`);
+        }
+        document.querySelector('#valor-display').innerHTML = valor;
+    }
+</script>
+
+</html>
