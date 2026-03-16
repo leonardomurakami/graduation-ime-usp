@@ -1,0 +1,37 @@
+---
+title: 'EP1 - Modelos de Linguagem e HMM'
+description: 'Implementação de modelo de bigramas e Hidden Markov Model para etiquetagem morfossintática'
+date: '2024'
+tags: ['nlp', 'python', 'bigram', 'hmm', 'pos-tagging']
+---
+
+# EP1 - Modelos de Linguagem e HMM
+
+## Parte A: Modelo de Bigramas
+
+Implementação de um modelo de linguagem baseado em bigramas com:
+- Cálculo de probabilidades de co-ocorrência
+- Geração de texto
+- Suavização (smoothing) de probabilidades
+
+## Parte B: Modelo de Markov Oculto (HMM)
+
+Implementação de um HMM para etiquetagem morfossintática:
+- Algoritmos Forward-Backward
+- Algoritmo de Viterbi para decodificação
+- Treinamento com dados anotados
+
+## Códigos
+
+import CodeBrowser from '@site/src/components/CodeBrowser';
+
+<CodeBrowser 
+    rootDir="ime/MAC0508/ep1" 
+    defaultOpenFile="bigram_model.py" 
+/>
+
+export default ({ children }) => (
+  <article className="prose prose-lg max-w-none">
+    {children}
+  </article>
+);
