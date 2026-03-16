@@ -1,0 +1,80 @@
+---
+title: 'MAP2212 - Laboratório de Computação e Simulação'
+description: 'Técnicas de Monte Carlo, geração de números aleatórios, MCMC e modelos estatísticos bayesianos'
+date: '2021'
+tags: ['simulation', 'monte-carlo', 'mcmc', 'python', 'statistics', 'bayesian']
+---
+
+# Laboratório de Computação e Simulação
+
+## Sobre a Disciplina
+
+A disciplina **MAP2212** desenvolve habilidades de projeto, organização e programação para computação numérica, incluindo conceitos elementares de simulação estocástica e programação paralela.
+
+### Conteúdo Programático
+
+#### 1. Integração por Monte Carlo
+- Integração por Monte Carlo Bruto
+- Métodos de Redução de Variância:
+  - Hit-or-Miss
+  - Amostragem por Importância
+  - Variáveis de Controle
+
+#### 2. Geradores de Números Aleatórios
+- Geradores físicos e pseudoaleatórios
+- Testes de qualidade
+- Geradores congruenciais lineares
+- Entropia, neguentropia e percepção de aleatoriedade
+
+#### 3. Amostragem Não Uniforme
+- Método da inversão da função acumulada
+- Transformações via caracterizações
+- Método de aceitação e rejeição
+- Propriedades reprodutivas de distribuições
+
+#### 4. Cadeias de Markov Monte Carlo (MCMC)
+- Conceitos fundamentais de cadeias de Markov
+- Distribuição invariante e teoremas de convergência
+- Equação de balanço detalhado
+- Algoritmos Metropolis-Hastings e Barker
+- Implementação computacional
+
+#### 5. Modelos Estatísticos Bayesianos
+- Comparação entre abordagens frequentista e bayesiana
+- Distribuições a priori, a posteriori e de referência
+- Funções de surpresa e de verdade
+- Valor epistêmico e propriedades assintóticas
+
+#### 6. Estudo de Caso Aplicado
+- Aplicação de MCMC e modelagem bayesiana em consultoria ou pesquisa científica
+- Discussão dos resultados e limitações práticas
+
+## Programas
+
+### Programa 1 - Introdução à Simulação
+Primeiros passos em simulação estocástica e geração de números aleatórios.
+
+### Programa 2 - Redução de Variância
+Implementação de técnicas de redução de variância em integração Monte Carlo.
+
+### Programa 3 - Amostragem por Importância
+Métodos avançados de amostragem para distribuições complexas.
+
+### Programa 4 - MCMC
+Implementação do algoritmo de Metropolis-Hastings e análise de convergência.
+
+### Programa 5 - Modelagem Bayesiana
+Aplicação completa de modelos estatísticos bayesianos com MCMC.
+
+## Tecnologias Utilizadas
+
+- **Python**: Linguagem principal de implementação
+- **NumPy/SciPy**: Computação numérica e estatística
+- **Matplotlib**: Visualização de dados e distribuições
+- **Pandas**: Manipulação de dados
+
+export default ({ children }) => (
+  <article className="prose prose-lg max-w-none">
+    {children}
+  </article>
+);
