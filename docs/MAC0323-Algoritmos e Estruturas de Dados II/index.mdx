@@ -1,0 +1,63 @@
+---
+title: 'MAC0323 - Algoritmos e Estruturas de Dados II'
+description: 'Estruturas de dados e algoritmos amplamente utilizados: tabelas de símbolos, grafos e processamento de texto'
+date: '2024'
+tags: ['java', 'data-structures', 'algorithms', 'graphs', 'hash-tables']
+---
+
+# Algoritmos e Estruturas de Dados II
+
+## Sobre a Disciplina
+
+A disciplina **MAC0323** apresenta estruturas de dados e algoritmos amplamente utilizados e discute sua implementação e desempenho.
+
+### Conteúdo Programático
+
+- **Tipos abstratos de dados** e suas implementações
+- **Tabelas de símbolos**: Árvores de busca balanceadas, tabelas de espalhamento (hashing), tries ternárias de busca
+- **Grafos**: Busca em profundidade, busca em largura, caminhos mínimos (Dijkstra), ordenação topológica, componentes fortes
+- **Processamento de texto**: Expressões regulares, busca de padrões (KMP, Rabin-Karp), compressão de dados (Huffman), vetores de sufixos
+
+## Programa 1 - Tabela de Símbolos e Grafos
+
+Implementação de estruturas de dados fundamentais:
+
+### Estruturas Implementadas
+- **`SimpleList.java`**: Lista simples encadeada
+- **`MyHashTable.java`**: Tabela hash com tratamento de colisões
+- **`DirectedGraph.java`**: Grafo direcionado com operações básicas
+- **`CycleDetector.java`**: Detecção de ciclos em grafos
+- **`PathFinder.java`**: Algoritmos de busca de caminhos
+
+### Funcionalidades
+- Inserção, remoção e busca em tabelas de símbolos
+- Operações básicas em grafos direcionados
+- Detecção de ciclos usando DFS
+- Algoritmos de caminho mínimo
+
+## Códigos
+
+import CodeBrowser from '@site/src/components/CodeBrowser';
+
+<CodeBrowser 
+    rootDir="ime/MAC0323" 
+    defaultOpenFile="programa1/DirectedGraph.java" 
+/>
+
+## Exercícios Teóricos
+
+O diretório inclui resoluções de exercícios teóricos:
+- **ET2**: Algoritmos de compressão (Huffman, LZW)
+- **Prova 2**: Algoritmo de Floyd-Warshall e árvores de Huffman
+
+## Tecnologias Utilizadas
+
+- **Java**: Linguagem principal da disciplina
+- **Makefile**: Automação de compilação
+- **Estruturas**: Listas, Hash Tables, Grafos
+
+export default ({ children }) => (
+  <article className="prose prose-lg max-w-none">
+    {children}
+  </article>
+);

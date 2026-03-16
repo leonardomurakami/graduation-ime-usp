@@ -1,0 +1,22 @@
+{
+  "name": "ep1",
+  "path": "ep1",
+  "type": "directory",
+  "children": [
+    {
+      "name": "bigram_model.py",
+      "path": "ep1/bigram_model.py",
+      "type": "file"
+    },
+    {
+      "name": "hmm_model.py",
+      "path": "ep1/hmm_model.py",
+      "type": "file"
+    },
+    {
+      "name": "enunciado.md",
+      "path": "ep1/enunciado.md",
+      "type": "file"
+    }
+  ]
+}

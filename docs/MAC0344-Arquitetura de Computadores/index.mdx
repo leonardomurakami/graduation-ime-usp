@@ -1,0 +1,64 @@
+---
+title: 'MAC0344 - Arquitetura de Computadores'
+description: 'Conceitos básicos de arquitetura de computadores, pipeline, memória cache e hierarquia de memória'
+date: '2023'
+tags: ['computer-architecture', 'assembly', 'verilog', 'latex']
+---
+
+# Arquitetura de Computadores
+
+## Sobre a Disciplina
+
+A disciplina **MAC0344** aborda conceitos fundamentais de arquitetura de computadores, desde o histórico das gerações até aspectos avançados de desempenho e organização interna.
+
+### Conteúdo Programático
+
+- **Conceitos básicos de arquitetura**: Histórico dos computadores e gerações
+- **Desempenho**: Pipeline, RISC, instruções superescalares, multicore
+- **Memória cache**: Tipos e implementações
+- **Estrutura interna da memória**: DRAM, SDRAM, Flash, correção de erros
+- **Memória externa**: Discos magnéticos, estado sólido, discos ópticos, RAID
+- **Paginação e segmentação**: TLBs, memória virtual
+- **Instruções de máquina**: RISC e CISC, execução fora de ordem, modos de endereçamento, interrupções e proteção
+
+## Listas de Exercícios
+
+### Lista 1
+- Conceitos básicos de arquitetura
+- Métricas de desempenho
+- Lei de Amdahl
+
+### Lista 2
+- Circuitos lógicos
+- Portas NAND/NOR
+- Transistores e implementação de circuitos
+- Implementação de portas de múltiplas entradas
+
+### Lista 3
+- Pipeline
+- Hazards (conflitos)
+- Escalonamento de instruções
+
+### Lista 4
+- Memória cache
+- Mapeamento direto, associativo e associativo por conjunto
+- Políticas de substituição e escrita
+
+## Monografia
+
+O diretório inclui uma monografia sobre arquitetura de processadores modernos, incluindo:
+- Análise de arquiteturas TPU (Tensor Processing Unit)
+- Comparação entre arquiteturas CPU, GPU e TPU
+- Aspectos de paralelismo em hardware especializado
+
+## Tecnologias
+
+- **LaTeX**: Para elaboração de listas e monografia
+- **Verilog/VHDL**: Para descrição de circuitos (quando aplicável)
+- **Ferramentas de simulação**: Para modelagem de arquiteturas
+
+export default ({ children }) => (
+  <article className="prose prose-lg max-w-none">
+    {children}
+  </article>
+);

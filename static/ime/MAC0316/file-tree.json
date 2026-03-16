@@ -1,0 +1,43 @@
+{
+  "name": "MAC0316",
+  "path": "MAC0316",
+  "type": "directory",
+  "children": [
+    {
+      "name": "programa0",
+      "path": "MAC0316/programa0",
+      "type": "directory",
+      "children": [
+        {
+          "name": "ep0.rkt",
+          "path": "MAC0316/programa0/ep0.rkt",
+          "type": "file"
+        }
+      ]
+    },
+    {
+      "name": "programa1",
+      "path": "MAC0316/programa1",
+      "type": "directory",
+      "children": [
+        {
+          "name": "ep1.rkt",
+          "path": "MAC0316/programa1/ep1.rkt",
+          "type": "file"
+        }
+      ]
+    },
+    {
+      "name": "programa2",
+      "path": "MAC0316/programa2",
+      "type": "directory",
+      "children": [
+        {
+          "name": "ep2.rkt",
+          "path": "MAC0316/programa2/ep2.rkt",
+          "type": "file"
+        }
+      ]
+    }
+  ]
+}

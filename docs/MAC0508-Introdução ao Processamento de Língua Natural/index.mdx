@@ -1,0 +1,85 @@
+---
+title: 'MAC0508 - Introdução ao Processamento de Língua Natural'
+description: 'Métodos simbólicos, modelos probabilísticos e deep learning para processamento computacional de linguagem natural'
+date: '2024'
+tags: ['nlp', 'python', 'machine-learning', 'deep-learning', 'hmm', 'transformers']
+---
+
+# Introdução ao Processamento de Língua Natural
+
+## Sobre a Disciplina
+
+A disciplina **MAC0508** apresenta os principais paradigmas de processamento computacional de língua natural: métodos simbólicos, modelos probabilísticos e modelagem por meio de redes neurais e deep learning.
+
+### Conteúdo Programático
+
+#### 1. Linguagens Formais e Processamento Simbólico
+- Revisão sobre linguagens regulares e autômatos
+- Gramáticas formais, gramáticas regulares e gramáticas livres de contexto
+- Extração de informações por meio de expressões regulares
+- Parseamento de sentenças, ambiguidade léxica e sintática
+
+#### 2. Modelos Probabilísticos
+- Cadeias de Markov ocultas (HMM)
+- Gramáticas estocásticas
+- Etiquetagem morfossintática (POS tagging)
+- Algoritmo de Viterbi
+
+#### 3. Deep Learning para PLN
+- Perceptrons e redes multi-camadas
+- Representações multidimensionais de palavras (embeddings)
+- Modelo codificador-decodificador e redes neurais recorrentes
+- **Transformers** e aplicações
+- Grandes modelos de linguagem (LLMs)
+- Classificação de sentenças e Reconhecimento de Entidades Nomeadas (NER)
+
+## EP1 - Modelos de Linguagem
+
+### Parte A: Modelo de Bigramas
+Implementação de um modelo de linguagem baseado em bigramas com:
+- Cálculo de probabilidades de co-ocorrência
+- Geração de texto
+- Suavização (smoothing) de probabilidades
+
+### Parte B: Modelo de Markov Oculto (HMM)
+Implementação de um HMM para etiquetagem morfossintática:
+- Algoritmos Forward-Backward
+- Algoritmo de Viterbi para decodificação
+- Treinamento com dados anotados
+
+## Códigos
+
+import CodeBrowser from '@site/src/components/CodeBrowser';
+
+<CodeBrowser 
+    rootDir="ime/MAC0508/ep1" 
+    defaultOpenFile="bigram_model.py" 
+/>
+
+## EP2 - Classificação e Análise de Texto
+
+O segundo exercício programa foca em:
+- Pré-processamento de corpus
+- Extração de features
+- Modelos de classificação de texto
+- Análise comparativa de modelos
+
+## Tecnologias Utilizadas
+
+- **Python**: Linguagem principal
+- **NLTK/spaCy**: Bibliotecas de PLN
+- **PyTorch/TensorFlow**: Frameworks de deep learning
+- **Transformers**: Biblioteca Hugging Face
+- **Pandas/NumPy**: Manipulação de dados
+
+## Referências
+
+- Speech and Language Processing (Jurafsky & Martin)
+- Brasileiras em PLN (livro colaborativo)
+- Natural Language Processing with Transformers
+
+export default ({ children }) => (
+  <article className="prose prose-lg max-w-none">
+    {children}
+  </article>
+);
