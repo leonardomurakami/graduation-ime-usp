@@ -1,0 +1,71 @@
+---
+title: 'MAC0444 - Sistemas Baseados em Conhecimento'
+description: 'Fundamentos da Inteligência Artificial, representação de conhecimento, raciocínio lógico e processamento de linguagem natural'
+date: '2023'
+tags: ['artificial-intelligence', 'knowledge-representation', 'prolog', 'sparql', 'rdf', 'ontology']
+---
+
+# Sistemas Baseados em Conhecimento
+
+## Sobre a Disciplina
+
+A disciplina **MAC0444** expõe os alunos às diversas áreas da Inteligência Artificial, com aprofundamento em tópicos como raciocínio lógico, raciocínio com incerteza, construção de bases de conhecimento, engenharia de conhecimento, ontologia e processamento de linguagem natural.
+
+### Conteúdo Programático
+
+- **Fundamentos da Inteligência Artificial**
+- **Resolução de problemas** com técnicas de busca
+- **Representação de conhecimento**
+- **Raciocínio lógico**: Inferência em lógica de predicados de primeira ordem
+- **Provador de teoremas**
+- **Construção de bases de conhecimento**
+- **Engenharia de conhecimento** e uso de **ontologias**
+- **Programação lógica** (Prolog)
+- **Sistemas de produção** e **redes semânticas**
+- **Aprendizagem de conhecimento**: Programação lógica indutiva
+- **Agentes que se comunicam**: Processamento de linguagem natural
+
+## Listas de Exercícios
+
+### Lista 1
+- Introdução à Inteligência Artificial
+- Agentes inteligentes
+- Resolução de problemas por busca
+
+### Lista 2
+- Lógica proposicional e de predicados
+- Inferência lógica
+- Formas normais e resolução
+
+### Lista 3
+- Programação em Prolog
+- Unificação e backtracking
+- Listas e estruturas de dados em Prolog
+
+## Projeto - Sistema de Recomendação de Filmes
+
+O projeto final consiste na criação de um sistema baseado em conhecimento para recomendação de filmes, incluindo:
+
+### Componentes
+- **Ontologia de filmes**: Representação do domínio usando RDF
+- **Base de conhecimento**: Regras sobre filmes, atores, gêneros
+- **Motor de inferência**: Sistema de recomendação baseado em preferências
+- **Consultas SPARQL**: Para recuperação de informações
+
+### Arquivos do Projeto
+- **`ontology-movies.rdf`**: Ontologia em formato RDF
+- **`rules.json`**: Regras de inferência e recomendação
+- **`sparql_queries.txt`**: Consultas SPARQL de exemplo
+
+## Tecnologias Utilizadas
+
+- **Prolog**: Programação lógica
+- **RDF/OWL**: Representação de ontologias
+- **SPARQL**: Consultas em bases de conhecimento
+- **JSON**: Armazenamento de regras
+
+export default ({ children }) => (
+  <article className="prose prose-lg max-w-none">
+    {children}
+  </article>
+);

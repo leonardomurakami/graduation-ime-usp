@@ -1,0 +1,12 @@
+{
+  "name": "aula5",
+  "path": "aula5",
+  "type": "directory",
+  "children": [
+    {
+      "name": "app.py",
+      "path": "aula5/app.py",
+      "type": "file"
+    }
+  ]
+}

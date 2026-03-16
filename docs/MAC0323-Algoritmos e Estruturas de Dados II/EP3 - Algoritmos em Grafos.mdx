@@ -1,0 +1,46 @@
+---
+title: 'EP3 - Algoritmos em Grafos'
+description: 'Implementação de algoritmos avançados em grafos: caminhos mínimos, ordenação topológica e componentes fortes'
+date: '2024'
+tags: ['java', 'graphs', 'dijkstra', 'topological-sort', 'strongly-connected-components']
+---
+
+# EP3 - Algoritmos em Grafos
+
+## Descrição do Problema
+
+Este exercício implementa algoritmos avançados em grafos:
+
+1. **Caminhos Mínimos**: Algoritmo de Dijkstra
+2. **Ordenação Topológica**: Para grafos acíclicos direcionados
+3. **Componentes Fortes**: Algoritmo de Kosaraju ou Tarjan
+
+## Algoritmos Implementados
+
+### Dijkstra
+- Encontra caminho mínimo de um vértice para todos os outros
+- Usa fila de prioridade (min-heap)
+- Complexidade: O((V+E) log V)
+
+### Ordenação Topológica
+- Baseada em DFS
+- Usada para scheduling de tarefas com dependências
+
+### Componentes Fortemente Conectados
+- Decomposição do grafo em SCCs
+- Algoritmo de Kosaraju (duas passadas de DFS)
+
+## Códigos
+
+import CodeBrowser from '@site/src/components/CodeBrowser';
+
+<CodeBrowser 
+    rootDir="ime/MAC0323/programa3" 
+    defaultOpenFile="GraphAlgorithms.java" 
+/>
+
+export default ({ children }) => (
+  <article className="prose prose-lg max-w-none">
+    {children}
+  </article>
+);

@@ -1,0 +1,54 @@
+---
+title: 'EP4 - Comunicação Cliente-Servidor'
+description: 'Implementação de sistema cliente-servidor usando sockets e comunicação inter-processos'
+date: '2024'
+tags: ['so', 'c', 'sockets', 'client-server', 'ipc', 'networking']
+---
+
+# EP4: Comunicação Cliente-Servidor
+
+## Descrição do Problema
+
+Este exercício implementa um sistema distribuído cliente-servidor:
+
+- **Sockets**: Comunicação via rede usando TCP/UDP
+- **Protocolo**: Definição de mensagens entre cliente e servidor
+- **Concorrência**: Múltiplos clientes simultâneos
+- **Sincronização**: Coordenação de acesso a recursos compartilhados
+
+## Arquitetura
+
+### Servidor
+- Escuta em porta específica
+- Aceita múltiplas conexões (fork ou thread por cliente)
+- Processa requisições e retorna respostas
+- Gerencia estado compartilhado entre clientes
+
+### Cliente
+- Conecta ao servidor
+- Envia requisições
+- Recebe e processa respostas
+- Interface de usuário (CLI ou comandos)
+
+## Códigos
+
+import CodeBrowser from '@site/src/components/CodeBrowser';
+
+<CodeBrowser 
+    rootDir="ime/MAC0422/programa4/ep4-leonardo_murakami" 
+    defaultOpenFile="client.c" 
+/>
+
+## Protocolo de Comunicação
+
+Definição das mensagens trocadas entre cliente e servidor:
+- Formato das requisições
+- Códigos de resposta
+- Tratamento de erros
+- Encerramento de conexão
+
+export default ({ children }) => (
+  <article className="prose prose-lg max-w-none">
+    {children}
+  </article>
+);

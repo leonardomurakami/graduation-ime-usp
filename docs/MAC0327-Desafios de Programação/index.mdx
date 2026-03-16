@@ -1,0 +1,92 @@
+---
+title: 'MAC0327 - Desafios de Programação'
+description: 'Desenvolvimento de habilidades de resolução de problemas computacionais com problemas de competições de programação'
+date: '2024'
+tags: ['competitive-programming', 'cpp', 'golang', 'algorithms']
+---
+
+# Desafios de Programação
+
+## Sobre a Disciplina
+
+A disciplina **MAC0327 - Desafios de Programação** tem como objetivo criar condições para que o aluno de computação desenvolva suas habilidades de resolução de problemas computacionais.
+
+### Metodologia
+
+O ambiente é semelhante aos concursos de programação **ACM International Collegiate Programming Contest** e **Maratona de Programação**. A cada aula o aluno recebe uma coleção de problemas para os quais deve implementar algoritmos, preferivelmente durante o período da aula.
+
+### Conteúdo
+
+- Técnicas de resolução de problemas
+- Estruturas de dados avançadas
+- Algoritmos de grafos
+- Programação dinâmica
+- Geometria computacional
+- Teoria dos números
+- Backtracking e busca
+
+## Exercícios Resolvidos
+
+Os exercícios estão organizados por categoria e linguagem:
+
+### Exercícios 1A-1F
+Problemas introdutórios cobrindo diferentes técnicas:
+- **1A**: Problema básico de entrada/saída
+- **1B**: Manipulação de strings
+- **1C**: Algoritmos de ordenação
+- **1D**: Busca e processamento de dados
+- **1E**: Geometria computacional
+- **1F**: Matemática e teoria dos números
+
+### Exercícios 2A
+Problemas avançados de grafos e programação dinâmica.
+
+## Linguagens Utilizadas
+
+- **C++**: Principal linguagem para competições (performance)
+- **Go**: Alternativa para aprendizado de nova sintaxe
+
+## Códigos
+
+import CodeBrowser from '@site/src/components/CodeBrowser';
+
+<CodeBrowser 
+    rootDir="ime/MAC0327" 
+    defaultOpenFile="ex1A.go" 
+/>
+
+## Makefile
+
+O projeto inclui um Makefile para facilitar a compilação e teste dos programas em C/C++:
+
+```makefile
+PROG  = xxx
+ENTRA = yyy
+SAI   = zzz
+
+CFLAGS = -Wall -ansi -pedantic -g -O2 -I.
+
+LDLIBS = -lm
+
+default :
+	@echo ""
+	gcc $(CFLAGS) $(PROG).c $(LDLIBS) -o $(PROG)
+	@echo ""
+	@echo "-----------------------------------"
+	@echo "Teste:"
+	-$(PROG) <$(ENTRA) >$(SAI)
+	cat $(SAI)
+```
+
+## Juízes Online
+
+Os problemas são submetidos em juízes online como:
+- **UVa Online Judge**
+- **Programming Challenges (PC) Judge**
+- **URI Online Judge**
+
+export default ({ children }) => (
+  <article className="prose prose-lg max-w-none">
+    {children}
+  </article>
+);

@@ -1,0 +1,57 @@
+---
+title: 'EP2 - Compressão e Interpolação de Imagens'
+description: 'Implementação de algoritmos de compressão de imagens usando interpolação bilinear e bicúbica'
+date: '2024'
+tags: ['python', 'numerical-methods', 'image-processing', 'interpolation']
+---
+
+# EP2 - Compressão e Interpolação de Imagens
+
+## Descrição do Problema
+
+Este projeto implementa um sistema de **compressão e descompressão de imagens** usando técnicas de interpolação numérica. O sistema é capaz de:
+
+1. **Comprimir** uma imagem reduzindo sua resolução (downsampling)
+2. **Descomprimir** a imagem usando interpolação para restaurar a resolução original
+
+## Algoritmos Implementados
+
+### Interpolação Bilinear
+A interpolação bilinear calcula o valor de um pixel desconhecido usando uma média ponderada dos 4 pixels vizinhos mais próximos na imagem original.
+
+### Interpolação Bicúbica
+A interpolação bicúbica utiliza uma abordagem mais sofisticada, considerando 16 pixels vizinhos e funções de interpolação cúbica para produzir resultados de maior qualidade.
+
+## Estrutura do Projeto
+
+O projeto está organizado nos seguintes arquivos:
+
+- **`compress.py`**: Implementa a compressão de imagens (downsampling)
+- **`decompress.py`**: Implementa a descompressão usando interpolação
+- **`bilinear.py`**: Implementação do algoritmo de interpolação bilinear
+- **`bicubic.py`**: Implementação do algoritmo de interpolação bicúbica
+- **`image_generator.py`**: Utilitários para geração e manipulação de imagens
+- **`calculateError.py`**: Cálculo de métricas de erro (MSE, PSNR)
+
+## Códigos
+
+import CodeBrowser from '@site/src/components/CodeBrowser';
+
+<CodeBrowser 
+    rootDir="ime/MAC0210/programa2" 
+    defaultOpenFile="compress.py" 
+/>
+
+## Análise de Resultados
+
+O projeto inclui um relatório em PDF comparando os resultados obtidos com diferentes métodos de interpolação:
+
+- Qualidade visual das imagens reconstruídas
+- Métricas quantitativas de erro (MSE - Mean Squared Error)
+- Taxa de compressão alcançada
+
+export default ({ children }) => (
+  <article className="prose prose-lg max-w-none">
+    {children}
+  </article>
+);

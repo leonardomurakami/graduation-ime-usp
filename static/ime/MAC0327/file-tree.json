@@ -1,0 +1,47 @@
+{
+  "name": "MAC0327",
+  "path": "MAC0327",
+  "type": "directory",
+  "children": [
+    {
+      "name": "ex1A.go",
+      "path": "MAC0327/ex1A.go",
+      "type": "file"
+    },
+    {
+      "name": "ex1B.go",
+      "path": "MAC0327/ex1B.go",
+      "type": "file"
+    },
+    {
+      "name": "ex1C.cpp",
+      "path": "MAC0327/ex1C.cpp",
+      "type": "file"
+    },
+    {
+      "name": "ex1D.cpp",
+      "path": "MAC0327/ex1D.cpp",
+      "type": "file"
+    },
+    {
+      "name": "ex1E.go",
+      "path": "MAC0327/ex1E.go",
+      "type": "file"
+    },
+    {
+      "name": "ex1F.cpp",
+      "path": "MAC0327/ex1F.cpp",
+      "type": "file"
+    },
+    {
+      "name": "ex2A.cpp",
+      "path": "MAC0327/ex2A.cpp",
+      "type": "file"
+    },
+    {
+      "name": "Makefile",
+      "path": "MAC0327/Makefile",
+      "type": "file"
+    }
+  ]
+}

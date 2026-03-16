@@ -1,0 +1,42 @@
+{
+  "name": "programa2",
+  "path": "programa2",
+  "type": "directory",
+  "children": [
+    {
+      "name": "compress.py",
+      "path": "programa2/compress.py",
+      "type": "file"
+    },
+    {
+      "name": "decompress.py",
+      "path": "programa2/decompress.py",
+      "type": "file"
+    },
+    {
+      "name": "bilinear.py",
+      "path": "programa2/bilinear.py",
+      "type": "file"
+    },
+    {
+      "name": "bicubic.py",
+      "path": "programa2/bicubic.py",
+      "type": "file"
+    },
+    {
+      "name": "image_generator.py",
+      "path": "programa2/image_generator.py",
+      "type": "file"
+    },
+    {
+      "name": "calculateError.py",
+      "path": "programa2/calculateError.py",
+      "type": "file"
+    },
+    {
+      "name": "main.py",
+      "path": "programa2/main.py",
+      "type": "file"
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+---
+title: 'EP3 - Alocação de Memória'
+description: 'Implementação de algoritmos de alocação de memória: first-fit, best-fit, next-fit, worst-fit'
+date: '2024'
+tags: ['so', 'c', 'memory-allocation', 'first-fit', 'best-fit', 'next-fit', 'worst-fit']
+---
+
+# EP3: Alocação de Memória
+
+## Descrição do Problema
+
+Este exercício implementa e compara diferentes algoritmos de alocação de memória:
+
+1. **First-Fit**: Aloca no primeiro bloco livre suficiente
+2. **Best-Fit**: Aloca no menor bloco livre suficiente (menos fragmentação)
+3. **Next-Fit**: Similar ao first-fit, mas começa da última alocação
+4. **Worst-Fit**: Aloca no maior bloco livre (deixa fragmentos grandes)
+
+## Algoritmos Implementados
+
+Cada algoritmo é testado com traces de alocação/desalocação para avaliar:
+- Eficiência de uso de memória
+- Tempo de busca por blocos
+- Grau de fragmentação externa
+
+## Estrutura do Projeto
+
+- **`ep3.c`**: Implementação dos algoritmos de alocação
+- **`ep3.h`**: Definições e estruturas de dados
+- **`trace-*`**: Arquivos de trace para testes (bestfit, firstfit, nextfit, worstfit)
+- **`slides-ep3.pdf`**: Documentação e análise dos algoritmos
+
+## Códigos
+
+import CodeBrowser from '@site/src/components/CodeBrowser';
+
+<CodeBrowser 
+    rootDir="ime/MAC0422/programa3" 
+    defaultOpenFile="ep3.c" 
+/>
+
+## Comparação de Algoritmos
+
+| Algoritmo | Vantagens | Desvantagens |
+|-----------|-----------|--------------|
+| First-Fit | Rápido, simples | Pode fragmentar início da memória |
+| Best-Fit | Menos fragmentação | Busca mais lenta |
+| Next-Fit | Distribui alocações | Performance imprevisível |
+| Worst-Fit | Fragmentos grandes | Maior desperdício |
+
+export default ({ children }) => (
+  <article className="prose prose-lg max-w-none">
+    {children}
+  </article>
+);

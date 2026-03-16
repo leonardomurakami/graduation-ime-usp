@@ -1,0 +1,53 @@
+---
+title: 'EP2 - Gerenciamento de Memória'
+description: 'Análise de uso de memória e desempenho com Valgrind e profiling'
+date: '2024'
+tags: ['so', 'c', 'memory', 'valgrind', 'profiling', 'performance']
+---
+
+# EP2: Gerenciamento de Memória
+
+## Descrição do Problema
+
+Este exercício foca na análise de uso de memória e desempenho de programas:
+
+- **Profiling de memória**: Uso do Valgrind (Massif) para análise de heap
+- **Profiling de tempo**: Medição de desempenho de diferentes implementações
+- **Otimização**: Identificação de gargalos e melhorias
+
+## Ferramentas Utilizadas
+
+- **Valgrind/Massif**: Análise detalhada de alocação de memória
+- **Scripts Python**: Processamento e visualização de resultados
+- **Benchmarks**: Comparação de diferentes estratégias
+
+## Estrutura do Projeto
+
+- **`ep2.c`**: Implementação principal para análise
+- **`massif_analyzer.py`**: Analisador de logs do Valgrind Massif
+- **`time_analyzer.py`**: Analisador de métricas de tempo
+- **`run_memory_tests.sh`**: Script para execução de testes de memória
+- **`run_time_tests.sh`**: Script para execução de testes de tempo
+
+## Códigos
+
+import CodeBrowser from '@site/src/components/CodeBrowser';
+
+<CodeBrowser 
+    rootDir="ime/MAC0422/programa2" 
+    defaultOpenFile="ep2.c" 
+/>
+
+## Análise de Resultados
+
+Os scripts Python geram visualizações e estatísticas sobre:
+- Pico de uso de memória heap
+- Padrões de alocação/desalocação
+- Tempo de execução em diferentes cenários
+- Comparação entre implementações
+
+export default ({ children }) => (
+  <article className="prose prose-lg max-w-none">
+    {children}
+  </article>
+);

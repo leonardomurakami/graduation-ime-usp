@@ -1,0 +1,51 @@
+{
+  "name": "MAC0323",
+  "path": "MAC0323",
+  "type": "directory",
+  "children": [
+    {
+      "name": "programa1",
+      "path": "MAC0323/programa1",
+      "type": "directory",
+      "children": [
+        {
+          "name": "DirectedGraph.java",
+          "path": "MAC0323/programa1/DirectedGraph.java",
+          "type": "file"
+        },
+        {
+          "name": "SimpleList.java",
+          "path": "MAC0323/programa1/SimpleList.java",
+          "type": "file"
+        },
+        {
+          "name": "MyHashTable.java",
+          "path": "MAC0323/programa1/MyHashTable.java",
+          "type": "file"
+        },
+        {
+          "name": "Makefile",
+          "path": "MAC0323/programa1/Makefile",
+          "type": "file"
+        }
+      ]
+    },
+    {
+      "name": "prova2",
+      "path": "MAC0323/prova2",
+      "type": "directory",
+      "children": [
+        {
+          "name": "huffman.py",
+          "path": "MAC0323/prova2/huffman.py",
+          "type": "file"
+        },
+        {
+          "name": "floyd_warshall.py",
+          "path": "MAC0323/prova2/floyd_warshall.py",
+          "type": "file"
+        }
+      ]
+    }
+  ]
+}
