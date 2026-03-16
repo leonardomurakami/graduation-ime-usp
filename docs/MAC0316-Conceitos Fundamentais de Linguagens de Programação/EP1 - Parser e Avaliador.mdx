@@ -1,0 +1,43 @@
+---
+title: 'EP1 - Parser e Avaliador'
+description: 'Implementação de um parser e avaliador para uma linguagem simples'
+date: '2025'
+tags: ['racket', 'parser', 'evaluator', 'ast', 'interpreter']
+---
+
+# EP1 - Parser e Avaliador
+
+## Descrição do Problema
+
+Este exercício implementa um parser e avaliador para uma linguagem simples, incluindo:
+
+1. **Lexing**: Tokenização da entrada
+2. **Parsing**: Construção da árvore sintática abstrata (AST)
+3. **Avaliação**: Interpretação da AST
+
+## Implementação
+
+### Parser
+- Análise sintática recursiva descendente
+- Tratamento de expressões aritméticas
+- Precedência de operadores
+
+### Avaliador
+- Ambiente de execução
+- Avaliação de expressões
+- Tratamento de variáveis
+
+## Códigos
+
+import CodeBrowser from '@site/src/components/CodeBrowser';
+
+<CodeBrowser 
+    rootDir="ime/MAC0316/programa1" 
+    defaultOpenFile="ep1.rkt" 
+/>
+
+export default ({ children }) => (
+  <article className="prose prose-lg max-w-none">
+    {children}
+  </article>
+);

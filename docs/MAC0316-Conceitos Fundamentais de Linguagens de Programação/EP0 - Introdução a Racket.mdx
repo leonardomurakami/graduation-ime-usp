@@ -1,0 +1,39 @@
+---
+title: 'EP0 - Introdução a Racket'
+description: 'Introdução à linguagem Racket/Scheme e conceitos funcionais'
+date: '2025'
+tags: ['racket', 'scheme', 'functional-programming', 'introduction']
+---
+
+# EP0 - Introdução a Racket
+
+## Descrição
+
+Este exercício introdutório apresenta os fundamentos da linguagem Racket (dialeto Scheme):
+
+- Sintaxe básica e expressões S-expr
+- Funções como valores de primeira ordem
+- Recursão e processamento de listas
+- Ambientes e escopo léxico
+
+## Conteúdo
+
+- Definição de funções simples
+- Operações com listas (car, cdr, cons)
+- Recursão em cauda (tail recursion)
+- Funções anônimas (lambda)
+
+## Códigos
+
+import CodeBrowser from '@site/src/components/CodeBrowser';
+
+<CodeBrowser 
+    rootDir="ime/MAC0316/programa0" 
+    defaultOpenFile="ep0.rkt" 
+/>
+
+export default ({ children }) => (
+  <article className="prose prose-lg max-w-none">
+    {children}
+  </article>
+);

@@ -1,0 +1,45 @@
+---
+title: 'EP1 - Tabela de Símbolos e Grafos'
+description: 'Implementação de estruturas de dados fundamentais: tabelas de símbolos e grafos direcionados'
+date: '2024'
+tags: ['java', 'data-structures', 'hash-table', 'graph', 'symbol-table']
+---
+
+# EP1 - Tabela de Símbolos e Grafos
+
+## Descrição do Problema
+
+Este exercício implementa estruturas de dados fundamentais:
+
+1. **Tabela de Símbolos**: Implementações com lista e hash table
+2. **Grafos Direcionados**: Representação e operações básicas
+
+## Estruturas Implementadas
+
+- **`SimpleList.java`**: Lista simples encadeada
+- **`MyHashTable.java`**: Tabela hash com tratamento de colisões
+- **`DirectedGraph.java`**: Grafo direcionado com operações básicas
+- **`CycleDetector.java`**: Detecção de ciclos em grafos
+- **`PathFinder.java`**: Algoritmos de busca de caminhos
+
+## Funcionalidades
+
+- Inserção, remoção e busca em tabelas de símbolos
+- Operações básicas em grafos direcionados
+- Detecção de ciclos usando DFS
+- Algoritmos de caminho mínimo
+
+## Códigos
+
+import CodeBrowser from '@site/src/components/CodeBrowser';
+
+<CodeBrowser 
+    rootDir="ime/MAC0323/programa1" 
+    defaultOpenFile="DirectedGraph.java" 
+/>
+
+export default ({ children }) => (
+  <article className="prose prose-lg max-w-none">
+    {children}
+  </article>
+);

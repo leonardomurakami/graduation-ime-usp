@@ -1,0 +1,55 @@
+---
+title: 'EP1 - Métodos de Newton e Ponto Fixo'
+description: 'Implementação de métodos numéricos para encontrar raízes de equações'
+date: '2024'
+tags: ['c', 'numerical-methods', 'newton', 'fixed-point', 'root-finding']
+---
+
+# EP1 - Métodos de Newton e Ponto Fixo
+
+## Descrição do Problema
+
+Este projeto implementa dois métodos numéricos clássicos para encontrar raízes de equações:
+
+1. **Método de Newton**: Utiliza a derivada da função para convergência quadrática
+2. **Método do Ponto Fixo**: Baseado em iterações sucessivas até convergência
+
+## Algoritmos Implementados
+
+### Método de Newton
+- Requer a função e sua derivada
+- Convergência mais rápida quando próximo da raiz
+- Implementação em `newton.c`
+
+### Método do Ponto Fixo
+- Transforma f(x) = 0 em x = g(x)
+- Iterações sucessivas até |x_{n+1} - x_n| < epsilon
+- Implementação em `ponto_fixo.c`
+
+## Estrutura do Projeto
+
+- **`newton.c`**: Implementação do método de Newton
+- **`ponto_fixo.c`**: Implementação do método do ponto fixo
+- **`relatorio.pdf`**: Análise comparativa dos métodos
+
+## Códigos
+
+import CodeBrowser from '@site/src/components/CodeBrowser';
+
+<CodeBrowser 
+    rootDir="ime/MAC0210/programa1" 
+    defaultOpenFile="newton.c" 
+/>
+
+## Resultados
+
+O relatório inclui análise de:
+- Taxa de convergência de cada método
+- Condições de convergência
+- Comparação de desempenho
+
+export default ({ children }) => (
+  <article className="prose prose-lg max-w-none">
+    {children}
+  </article>
+);

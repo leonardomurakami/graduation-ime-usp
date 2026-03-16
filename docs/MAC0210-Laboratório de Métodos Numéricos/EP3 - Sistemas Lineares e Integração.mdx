@@ -1,0 +1,57 @@
+---
+title: 'EP3 - Sistemas Lineares e Integração'
+description: 'Implementação de métodos para resolver sistemas lineares e calcular integrais numéricas'
+date: '2024'
+tags: ['c', 'numerical-methods', 'linear-systems', 'integration', 'gaussian-elimination']
+---
+
+# EP3 - Sistemas Lineares e Integração
+
+## Descrição do Problema
+
+Este projeto implementa métodos numéricos para:
+
+1. **Resolver sistemas lineares**: Eliminação gaussiana com pivotamento parcial
+2. **Integração numérica**: Regras de Simpson e trapezoidal
+
+## Algoritmos Implementados
+
+### Resolução de Sistemas Lineares
+- Eliminação gaussiana com pivotamento parcial
+- Decomposição LU para múltiplos sistemas
+- Cálculo de determinante
+
+### Integração Numérica
+- Regra do trapézio composta
+- Regra de Simpson 1/3 e 3/8
+- Estimativa de erro
+
+## Estrutura do Projeto
+
+- **`ep3.c`**: Implementação principal
+- **`ep3.h`**: Cabeçalhos e definições
+- **`Makefile`**: Automação de compilação
+- **`relatorio.pdf`**: Análise dos resultados
+- **`LEIAME`**: Instruções de uso
+
+## Códigos
+
+import CodeBrowser from '@site/src/components/CodeBrowser';
+
+<CodeBrowser 
+    rootDir="ime/MAC0210/programa3" 
+    defaultOpenFile="ep3.c" 
+/>
+
+## Análise de Resultados
+
+O relatório aborda:
+- Estabilidade numérica dos métodos
+- Complexidade computacional
+- Precisão em diferentes cenários
+
+export default ({ children }) => (
+  <article className="prose prose-lg max-w-none">
+    {children}
+  </article>
+);

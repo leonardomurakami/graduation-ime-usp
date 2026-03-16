@@ -1,0 +1,54 @@
+---
+title: 'EP2 - Interpretador Completo'
+description: 'Desenvolvimento de um interpretador completo com suporte a funções de primeira classe e closures'
+date: '2025'
+tags: ['racket', 'interpreter', 'closures', 'first-class-functions', 'lazy-evaluation']
+---
+
+# EP2 - Interpretador Completo
+
+## Descrição do Problema
+
+Este exercício desenvolve um interpretador completo com recursos avançados:
+
+- Variáveis e ambientes
+- Funções de primeira classe
+- Closures (fechamentos léxicos)
+- Recursão
+- Avaliação lazy (preguiçosa)
+
+## Recursos Implementados
+
+### Ambientes
+- Pilha de frames
+- Escopo léxico
+- Extensão de ambiente
+
+### Funções
+- Definição e aplicação
+- Funções anônimas (lambda)
+- Currying e aplicação parcial
+
+### Closures
+- Captura de variáveis do escopo externo
+- Comportamento em ambientes aninhados
+
+### Avaliação Lazy
+- Promises (promessas)
+- Forçar avaliação quando necessário
+- Memomização de resultados
+
+## Códigos
+
+import CodeBrowser from '@site/src/components/CodeBrowser';
+
+<CodeBrowser 
+    rootDir="ime/MAC0316/programa2" 
+    defaultOpenFile="ep2.rkt" 
+/>
+
+export default ({ children }) => (
+  <article className="prose prose-lg max-w-none">
+    {children}
+  </article>
+);
