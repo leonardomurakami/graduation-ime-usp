@@ -2,6 +2,7 @@
 using namespace std;
 
 #define endl '\n'
+#define ll long long
 
 int main() {
     ios_base::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);
@@ -13,30 +14,31 @@ int main() {
         cin >> q;
 
         deque<int> arr;
-        long long sum_arr = 0;
-        long long rizz = 0;
+        ll sum_arr = 0;
+        ll rizz = 0;
         bool reversed = false;
 
         for (int j = 0; j < q; j++) {
             cin >> s;
-            long long n = (long long)arr.size();
-
+            ll n = (ll)arr.size();
             if (s == 1) {
-                long long back = reversed ? arr.front() : arr.back();
-                rizz += sum_arr - n * back;
-                if (reversed) {
-                    arr.push_front(arr.back());
+                ll back;
+                if (!reversed) {
+                    back = arr.back();
+                    arr.push_front(back);
                     arr.pop_back();
                 } else {
-                    arr.push_back(arr.front());
+                    back = arr.front();
+                    arr.push_back(back);
                     arr.pop_front();
                 }
+                rizz += sum_arr - n * back;
             } else if (s == 2) {
                 rizz = (n + 1) * sum_arr - rizz;
                 reversed = !reversed;
             } else {
                 cin >> k;
-                if (reversed) arr.push_back(k);
+                if (!reversed) arr.push_back(k);
                 else arr.push_front(k);
             
                 rizz += (n + 1) * k;
@@ -45,6 +47,5 @@ int main() {
             cout << rizz << endl;;
         }
     }
-
     return 0;
 }
