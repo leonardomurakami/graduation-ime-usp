@@ -1,0 +1,23 @@
+<!-- Arquivo index.html -->
+
+<DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <title>Meu Site</title>
+        <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.js" integrity="sha384-ezjq8118wdwdRMj+nX4bevEi+cDLTbhLAeFF688VK8tPDGeLUe0WoY2MZtSla72F" crossorigin="anonymous"></script>
+    </head>
+    <body>
+        <h1>Meu Site</h1>
+        <p>Bem vindo ao meu site!</p>
+        <button hx-post="/curtir" hx-target="#curtidas" hx-swap="innerHTML">
+            Curtir
+        </button>
+        <div id="curtidas">
+            <p>Curtidas: 0</p>
+        </div>
+        <button hx-delete="/curtir" hx-target="#curtidas" hx-swap="innerHTML" hx-confirm="Tem certeza disso?">
+            Deletar Curtidas
+        </button>
+        <hr>
+    </body>
+</html>
