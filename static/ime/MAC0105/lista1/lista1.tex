@@ -1,0 +1,379 @@
+\documentclass[11pt,reqno,a4paper]{amsart}
+
+\usepackage{setspace}
+\usepackage[portuguese]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{tikz}
+\usetikzlibrary{angles,quotes,calc}
+
+\usepackage{fullpage}
+\usepackage{lastpage}
+\usepackage{fancyhdr}
+
+% Rodapé: número da página e total (ex.: 2 de 10)
+\fancypagestyle{plain}{%
+  \fancyhf{}%
+  \fancyfoot[C]{\small\thepage\ de \pageref{LastPage}}%
+  \renewcommand{\headrulewidth}{0pt}%
+}
+
+% --- metadados da folha (altere aqui) ---
+\newcommand{\CodigoDisciplina}{MAC0105}
+\newcommand{\NomeDisciplina}{Fundamentos de Matemática para Computação}
+\newcommand{\NomeAluno}{Leonardo Heidi Almeida Murakami}
+\newcommand{\NUSPAluno}{11260186}
+\newcommand{\TituloLista}{Lista 1}
+\newcommand{\DescricaoExercicio}{\TituloLista{} - \CodigoDisciplina}
+\newcommand{\DataEntrega}{\today}
+
+\begin{document}
+\parindent=0pt
+
+\title{\textsl{
+    \CodigoDisciplina{} - \NomeDisciplina}\\\vspace{3\jot}
+  Folha de solução}
+\author[\CodigoDisciplina{} Folha de solução]{}
+
+\maketitle
+% amsart usa firstpage na capa (rodapé diferente); plain traz o mesmo rodapé das outras páginas
+\thispagestyle{plain}
+\pagestyle{plain}
+\onehalfspacing
+
+\textbf{Nome:} \NomeAluno\enspace \hfill \enspace
+\textbf{NUSP:} \NUSPAluno\enspace\hfill
+
+\bigskip
+
+\textbf{Exercício:} \DescricaoExercicio\enspace\hfill\enspace
+\textbf{Data:} \DataEntrega\enspace
+
+\bigskip
+\noindent\textbf{SOLUÇÃO}
+
+\section*{Exercício 1}
+
+Considere um triângulo retângulo $ABC$, com ângulo reto em $C$, catetos $a$ e $b$, e hipotenusa $c$.
+
+\begin{center}
+\begin{tikzpicture}[
+    scale=1.15,
+    line join=round,
+    line cap=round,
+    every node/.style={font=\small},
+  ]
+    % Triângulo 3-4-5 com ângulo reto em $C$: $AB=5$, $AC=3$, $BC=4$
+    \coordinate (A) at (0,0);
+    \coordinate (B) at (5,0);
+    \coordinate (C) at (9/5,12/5);
+    \coordinate (D) at ($(A)!(C)!(B)$); % pé da altura de $C$ em $AB$
+
+    \fill[blue!7] (A) -- (B) -- (C) -- cycle;
+    \draw[thick] (A) -- (B) -- (C) -- cycle;
+    \draw[densely dashed, gray!65!black] (C) -- (D);
+
+    % Lados $a$, $b$, $c$
+    \path (A) -- (B) node[midway, below=3pt] {$c$};
+    \path (B) -- (C) node[pos=0.52, sloped, above, inner sep=1.5pt] {$a$};
+    \path (C) -- (A) node[pos=0.52, sloped, above, inner sep=1.5pt] {$b$};
+
+    % Altura e partes da hipotenusa
+    \path (C) -- (D) node[midway, right=2pt, inner sep=0pt] {$h$};
+    \path (A) -- (D) node[midway, below=3pt] {$x$};
+    \path (D) -- (B) node[midway, below=3pt] {$y$};
+
+    % Vértices (ligeiramente afastados do desenho)
+    \node[below left=1pt]  at (A) {$A$};
+    \node[below right=1pt] at (B) {$B$};
+    \node[above=1pt]       at (C) {$C$};
+    \node[below=2pt]       at (D) {$D$};
+
+    % Marcadores de ângulo reto (em $C$ e em $D$)
+    \pic[draw, angle radius=3.2mm, angle eccentricity=1] {right angle = B--C--A};
+    \pic[draw, angle radius=3.2mm] {right angle = C--D--A};
+\end{tikzpicture}
+\end{center}
+
+Seja $h$ a altura relativa à hipotenusa, que divide $c$ em dois segmentos: $AD = x$ e $DB = y$, tal que $c = x + y$.
+
+Pela semelhança entre os triângulos $\triangle ABC$ e $\triangle ACD$:
+\begin{equation}
+\frac{b}{c} = \frac{x}{b} \implies b^2 = c \cdot x
+\end{equation}
+
+Pela semelhança entre os triângulos $\triangle ABC$ e $\triangle CBD$:
+\begin{equation}
+\frac{a}{c} = \frac{y}{a} \implies a^2 = c \cdot y
+\end{equation}
+
+Somando as duas equações:
+\begin{equation}
+a^2 + b^2 = (c \cdot y) + (c \cdot x)
+\end{equation}
+
+Colocando $c$ em evidência:
+\begin{equation}
+a^2 + b^2 = c(y + x)
+\end{equation}
+
+Como sabemos que $y + x = c$, substituímos:
+\begin{equation}
+a^2 + b^2 = c(c) = c^2
+\end{equation}
+
+Portanto:
+\textbf{\[ a^2 + b^2 = c^2\, \blacksquare \]}
+
+\newpage
+\section*{Exercício 2}
+\begin{equation}
+    S = 1 + 2 + 3 + \dots + \frac{n+1}{2} + \dots + (n-1) + n
+\end{equation}
+Agrupando os termos em pares temos
+\begin{equation}
+    S = (n + 1) + (n - 1 + 2) + (n - 2 + 3) + \dots + \frac{n+1}{2}
+\end{equation}
+Simplificando, temos $\frac{n-1}{2}$ termos com valor $(n + 1)$
+\begin{equation}
+    S = \frac{n+1}{2} + (n+1)\frac{n-1}{2}
+\end{equation}
+Colocando o $\frac{n+1}{2}$ em evidencia
+\begin{equation}
+\begin{aligned}
+    S &= \left(\frac{n+1}{2}\right)\bigl[(n-1) + 1\bigr] \\
+    S &= \left(\frac{n+1}{2}\right) n \\
+    S &= \frac{n(n+1)}{2}
+\end{aligned}
+\end{equation}
+
+\newpage
+\section*{Exercício 3}
+
+\textbf{Teorema:} Dados conjuntos $X, Y$ e $Z$, vale que:
+\[ (X \cap Y) \cup (X \cap Z) \subseteq X \cap (Y \cup Z) \]
+
+\textbf{Demonstração:}
+
+Seja um elemento $a$ tal que $a \in (X \cap Y) \cup (X \cap Z)$. Pela definição de união, temos duas possibilidades:
+\[ a \in (X \cap Y) \quad \text{ou} \quad a \in (X \cap Z) \]
+
+Analizemos cada caso:
+
+\begin{enumerate}
+    \item \textbf{Caso 1: $a \in (X \cap Y)$} \\
+    Pela definição de intersecção, sabemos que $a \in X$ e $a \in Y$. 
+    Como $a \in Y$, pela definição de união, temos que $a \in (Y \cup Z)$. 
+    Portanto, como $a \in X$ e $a \in (Y \cup Z)$, concluímos que $a \in X \cap (Y \cup Z)$.
+
+    \item \textbf{Caso 2: $a \in (X \cap Z)$} \\
+    Também pela definição de intersecção, sabemos que $a \in X$ e $a \in Z$. 
+    Como $a \in Z$, pela definição de união, é imediato que $a \in (Y \cup Z)$. 
+    Portanto, como $a \in X$ e $a \in (Y \cup Z)$, concluímos que $a \in X \cap (Y \cup Z)$.
+\end{enumerate}
+
+Em ambos os casos, o elemento $a$ pertence ao conjunto $X \cap (Y \cup Z)$. 
+
+Como todo elemento de $(X \cap Y) \cup (X \cap Z)$ também pertence a $X \cap (Y \cup Z)$, pela definição de subconjunto, está provado que:
+$(X \cap Y) \cup (X \cap Z) \subseteq X \cap (Y \cup Z)\,\blacksquare$
+
+\newpage 
+\section*{Exercício 4}
+
+\textbf{Definição:} Dois conjuntos $A$ e $B$ são \textit{comparáveis} se $A \subseteq B$ ou $B \subseteq A$.
+
+\textbf{Teorema:} Seja $X$ um conjunto finito com $|X| = n$. Dada uma coleção de $n+2$ subconjuntos distintos de $X$, existem pelo menos dois deles que não são comparáveis.
+
+\textbf{Demonstração: }
+Cada subconjunto de $X$ tem cardinalidade em $\{0, 1, 2, \dots, n\}$, ou seja, há $n+1$ valores possíveis. Como a coleção possui $n+2$ subconjuntos distintos, pelo Princípio da Casa dos Pombos existem pelo menos dois deles, digamos $A_i$ e $A_j$, com a mesma cardinalidade: $|A_i| = |A_j|$.
+
+Como $A_i$ e $A_j$ são distintos e têm o mesmo número de elementos, nenhum pode estar contido no outro: se $A_i \subseteq A_j$ e $|A_i| = |A_j|$, teríamos $A_i = A_j$, uma contradição. Logo, $A_i \not\subseteq A_j$ e $A_j \not\subseteq A_i$, isto é, $A_i$ e $A_j$ não são comparáveis.
+
+\newpage
+\section*{Exercício 5}
+
+\begin{itemize}
+    \item \textbf{Conjunto:} $\{\mu, \sigma, \{\pi, \beta\}\}$ \\
+    Os elementos são:
+    \begin{enumerate}
+        \item $\mu$
+        \item $\sigma$
+        \item $\{\pi, \beta\}$
+    \end{enumerate}
+    \textbf{Cardinalidade:} 3
+
+    \item \textbf{Conjunto:} $\{\text{gatos}, \emptyset, \{\emptyset\}\}$ \\
+    Os elementos são:
+    \begin{enumerate}
+        \item o termo "gatos"
+        \item o conjunto vazio $\emptyset$
+        \item o conjunto $\{\emptyset\}$
+    \end{enumerate}
+    \textbf{Cardinalidade:} 3
+
+    \item \textbf{Conjunto:} $\{\emptyset, \{\emptyset\}, \{\{\emptyset\}\}\}$ \\
+    Os elementos são:
+    \begin{enumerate}
+        \item $\emptyset$
+        \item $\{\emptyset\}$
+        \item $\{\{\emptyset\}\}$
+    \end{enumerate}
+    \textbf{Cardinalidade:} 3
+\end{itemize}
+
+\newpage
+\section*{Exercício 6}
+
+\begin{itemize}
+    \item \textbf{Para todo conjunto, vale que $X \subseteq X$.} \\
+    \textbf{Resposta: Verdadeiro.} \\
+    \textit{Justificativa:} Por definição, $A \subseteq B$ se, e somente se, todo elemento de $A$ pertence a $B$. Como todo elemento pertencente a $X$ é, por senso comum, um elemento de $X$, a relação de inclusão é reflexiva.
+
+    \item \textbf{O conjunto $\{1, 2\}$ é um elemento do conjunto $\{1, 2, 3\}$.} \\
+    \textbf{Resposta: Falso.} \\
+    \textit{Justificativa:} Os elementos do conjunto $\{1, 2, 3\}$ são os números $1, 2$ e $3$. O objeto $\{1, 2\}$ é um conjunto, e ele não aparece listado como elemento dentro das chaves externas.
+
+    \item \textbf{Os números 1 e 2 são elementos do conjunto $\{1, \{1, 2\}\}$.} \\
+    \textbf{Resposta: Falso.} \\
+    \textit{Justificativa:} O conjunto possui dois elementos: o número $1$ e o conjunto $\{1, 2\}$. O número $2$ não é um elemento direto do conjunto principal; ele é apenas um elemento de um elemento.
+
+    \item \textbf{O conjunto $\{1, 2\}$ é um subconjunto de $\{\{1, 2\}, 5\}$.} \\
+    \textbf{Resposta: Falso.} \\ 
+    \textit{Justificativa:} Para que $\{1, 2\}$ fosse um subconjunto, seus elementos ($1$ e $2$) precisariam ser elementos do conjunto $\{\{1, 2\}, 5\}$. No entanto, os únicos elementos deste conjunto são $\{1, 2\}$ e $5$.
+
+    \item \textbf{O conjunto $\{1, 2\}$ é um elemento de $\{\{1, 2\}, 5\}$.} \\
+    \textbf{Resposta: Verdadeiro.} \\
+    \textit{Justificativa:} O conjunto $\{1, 2\}$ aparece explicitamente como um dos objetos listados entre as chaves do conjunto principal.
+\end{itemize}
+
+\newpage
+\section*{Exercício 7}
+
+\textbf{Teorema:} Dados dois conjuntos $A$ e $B$, prove que:
+\[ (A \cup B) \setminus (A \cap B) = (A \setminus B) \cup (B \setminus A) \]
+
+\textbf{Demonstração:}
+
+Seja $x$ um elemento qualquer. Utilizaremos as definições de união ($\cup$), intersecção ($\cap$) e diferença ($\setminus$) para estabelecer a igualdade:
+
+\begin{align*}
+x \in (A \cup B) \setminus (A \cap B) &\iff x \in (A \cup B) \land x \notin (A \cap B) \tag{Def. de diferença} \\
+&\iff (x \in A \lor x \in B) \land \neg(x \in A \land x \in B) \tag{Def. de $\cup$ e $\cap$} \\
+&\iff (x \in A \lor x \in B) \land (x \notin A \lor x \notin B) \tag{Lei de De Morgan}
+\end{align*}
+
+Aplicando a propriedade distributiva da lógica ($\land$ sobre $\lor$):
+\begin{align*}
+\dots &\iff [(x \in A \lor x \in B) \land x \notin A] \lor [(x \in A \lor x \in B) \land x \notin B] \\
+&\iff [(x \in A \land x \notin A) \lor (x \in B \land x \notin A)] \lor [(x \in A \land x \notin B) \lor (x \in B \land x \notin B)]
+\end{align*}
+
+Como $(x \in A \land x \notin A)$ e $(x \in B \land x \notin B)$ são contradições, podemos simplioficar para para:
+\begin{align*}
+\dots &\iff (x \in B \land x \notin A) \lor (x \in A \land x \notin B) \\
+&\iff x \in (B \setminus A) \lor x \in (A \setminus B) \tag{Def. de diferença} \\
+&\iff x \in (A \setminus B) \cup (B \setminus A) \tag{Def. de união}
+\end{align*}
+
+Como a sequência de equivalências é válida para qualquer $x$, concluímos que:
+\[ (A \cup B) \setminus (A \cap B) = (A \setminus B) \cup (B \setminus A) \]
+
+\newpage
+\section*{Exercício 8}
+
+Considere as definições dadas: $\mathbb{N} = \{1, 2, \dots\}$ e $[n] = \{1, 2, \dots, n\}$.
+
+\begin{itemize}
+    \item \textbf{Item (a):} $\mathbb{Z} \cap \mathbb{N}$ \\
+    Como $\mathbb{N} \subset \mathbb{Z}$, a intersecção resulta no próprio conjunto dos naturais:
+    \[ \mathbb{Z} \cap \mathbb{N} = \mathbb{N} \]
+
+    \item \textbf{Item (b):} $\mathbb{Z} \cup \mathbb{N}$ \\
+    Como $\mathbb{N}$ já é um subconjunto de $\mathbb{Z}$, a união não acrescenta novos elementos:
+    \[ \mathbb{Z} \cup \mathbb{N} = \mathbb{Z} \]
+
+    \item \textbf{Item (c):} $\{x \in \mathbb{Z} : 3/2 \leq x \leq 10\} \cap [6]$ \\
+    Seja $A = \{x \in \mathbb{Z} : 1.5 \leq x \leq 10\} = \{2, 3, 4, 5, 6, 7, 8, 9, 10\}$. \\
+    Seja $B = [6] = \{1, 2, 3, 4, 5, 6\}$. \\
+    A intersecção é:
+    \[ A \cap B = \{2, 3, 4, 5, 6\} \]
+
+    \item \textbf{Item (d):} $([n] \setminus [n-3]) \cap ([n-1] \setminus [n-4])$ \\
+    Expandindo os termos:
+    \begin{align*}
+        [n] \setminus [n-3] &= \{n-2, n-1, n\} \\
+        [n-1] \setminus [n-4] &= \{n-3, n-2, n-1\}
+    \end{align*}
+    A intersecção entre os dois conjuntos resultantes é:
+    \[ \{n-2, n-1\} \]
+\end{itemize}
+
+\newpage
+\section*{Exercício 9}
+
+\textbf{Teorema:} Dados conjuntos $A, B$ e $C$, prove que:
+\[ A \cap (B \setminus C) = (A \cap B) \setminus (A \cap C) \]
+
+\textbf{Demonstração:}
+
+Seja $x$ um elemento qualquer. Faremos a prova através de uma cadeia de equivalências lógicas baseada nas definições de intersecção ($\cap$) e diferença ($\setminus$):
+
+\begin{align*}
+x \in A \cap (B \setminus C) &\iff x \in A \land x \in (B \setminus C) \tag{Def. de $\cap$} \\
+&\iff x \in A \land (x \in B \land x \notin C) \tag{Def. de $\setminus$} \\
+&\iff (x \in A \land x \in B) \land x \notin C \tag{Associatividade da lógica $\land$}
+\end{align*}
+
+Agora, observe que se $x \in A$ e $x \notin C$, então é impossível que $x$ pertença à intersecção $A \cap C$. Isso implica que $\neg(x \in A \land x \in C)$. Assim:
+
+\begin{align*}
+(x \in A \land x \in B) \land x \notin C &\iff (x \in A \land x \in B) \land \neg(x \in A \land x \in C) \\
+&\iff x \in (A \cap B) \land x \notin (A \cap C) \tag{Def. de $\cap$} \\
+&\iff x \in (A \cap B) \setminus (A \cap C) \tag{Def. de $\setminus$}
+\end{align*}
+
+Concluímos então que: $A \cap (B \setminus C) = (A \cap B) \setminus (A \cap C)\,\blacksquare$
+
+\newpage
+\section*{Exercício 10}
+
+\textbf{Teorema:} Dados conjuntos $A, B$ e $C$, prove que:
+\[ (A \Delta B) \cap (C \setminus (A \cap B)) = ((A \cap C) \setminus B) \cup ((B \cap C) \setminus A) \]
+
+\textbf{Demonstração:}
+
+Seja $x$ um elemento qualquer. Vamos expandir o lado esquerdo da igualdade usando as definições de diferença simétrica ($X \Delta Y = (X \setminus Y) \cup (Y \setminus X)$) e diferença de conjuntos:
+
+\begin{align*}
+x \in (A \Delta B) \cap (C \setminus (A \cap B)) \iff & [x \in (A \setminus B) \lor x \in (B \setminus A)] \\
+& \land [x \in C \land x \notin (A \cap B)]
+\end{align*}
+
+Expandindo as negações e intersecções:
+\begin{align*}
+\iff & [(x \in A \land x \notin B) \lor (x \in B \land x \notin A)] \\
+& \land [x \in C \land (x \notin A \lor x \notin B)] \tag{Lei de De Morgan}
+\end{align*}
+
+Agora, aplicamos a propriedade distributiva da conjunção ($\land$) sobre a disjunção ($\lor$):
+\begin{align*}
+\iff & [ (x \in A \land x \notin B) \land x \in C \land (x \notin A \lor x \notin B) ] \\
+\lor & [ (x \in B \land x \notin A) \land x \in C \land (x \notin A \lor x \notin B) ]
+\end{align*}
+
+Analitemos as condições de cada termo:
+\begin{itemize}
+    \item No primeiro termo, já temos $x \notin B$. Portanto, a condição $(x \notin A \lor x \notin B)$ é verdadeira. O termo simplifica para: $(x \in A \land x \in C \land x \notin B)$, que é $x \in (A \cap C) \setminus B$.
+    \item No segundo termo, já temos $x \notin A$. Portanto, a condição $(x \notin A \lor x \notin B)$ também é verdadeira. O termo simplifica para: $(x \in B \land x \in C \land x \notin A)$, que é $x \in (B \cap C) \setminus A$.
+\end{itemize}
+
+Unindo os resultados:
+\begin{align*}
+\iff & x \in ((A \cap C) \setminus B) \cup ((B \cap C) \setminus A)\, \blacksquare
+\end{align*}
+
+Como partimos do lado esquerdo e chegamos ao lado direito, a identidade está provada.
+
+\end{document}
