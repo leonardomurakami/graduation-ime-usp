@@ -1,0 +1,77 @@
+# Instruções para o Agente LaTeX (Relatório EP1 - MAC0425)
+
+Você deve escrever o relatório final em LaTeX contendo no máximo 4 páginas. O formato deve ser um artigo claro e sucinto. Insira no preâmbulo os pacotes usuais (amsmath, graphicx, booktabs, geometry) para gerar um PDF bem formatado. 
+
+Siga esta estrutura para o documento:
+
+## Título e Autoria
+- Título: "MAC0425 - Primeiro Exercício-Programa: Agente de Busca para o Pac-Man"
+- Identificação: Coloque o NUSP e NOME COMPLETO do aluno em destaque no título (esta instrução pedirá que o usuário preencha com seus dados ou você pode deixar espaço visível, ex: NUSP - NOME DO ALUNO).
+
+## 1. Tabelas de Estatísticas das Buscas
+Apresente os seguintes dados tabelados de forma organizada para os dois cenários:
+
+**Cenário 1 (Encontrando a comida numa única localização):**
+- **DFS:** 
+  - tinyMaze: Custo=10, Nós Expandidos=14
+  - mediumMaze: Custo=130, Nós Expandidos=144
+  - bigMaze: Custo=210, Nós Expandidos=390
+- **BFS:** 
+  - tinyMaze: Custo=8, Nós Expandidos=15
+  - mediumMaze: Custo=68, Nós Expandidos=269
+  - bigMaze: Custo=210, Nós Expandidos=620
+- **UCS:**
+  - mediumMaze: Custo=68, Nós Expandidos=269
+  - mediumDottedMaze (StayEast): Custo=1, Nós Expandidos=186
+  - mediumScaryMaze (StayWest): Custo=68719479864, Nós Expandidos=108
+- **A* (Manhattan):** 
+  - tinyMaze: Custo=8, Nós Expandidos=14
+  - mediumMaze: Custo=68, Nós Expandidos=221
+  - bigMaze: Custo=210, Nós Expandidos=549
+- **ID-DFS:**
+  - tinyMaze: Custo=8, Nós Expandidos=58
+  - mediumMaze: Custo=68, Nós Expandidos=15429
+  - bigMaze: Custo=210, Nós Expandidos=60312
+- **LRTA* (no mediumMaze):**
+  - *Heurística Nula:*
+    - 10 trials: Custo=76, Nós Expandidos=3658, H(s0)=16
+    - 30 trials: Custo=130, Nós Expandidos=7486, H(s0)=30
+    - 50 trials: Custo=110, Nós Expandidos=9950, H(s0)=39
+    - 100 trials: Custo=74, Nós Expandidos=15034, H(s0)=59
+    - 150 trials: Custo=68, Nós Expandidos=18874, H(s0)=68
+  - *Heurística Manhattan:*
+    - 10 trials: Custo=74, Nós Expandidos=2130, H(s0)=56
+    - 30 trials: Custo=68, Nós Expandidos=5168, H(s0)=66
+    - 50 trials: Custo=68, Nós Expandidos=6580, H(s0)=68
+    - 100 trials: Custo=68, Nós Expandidos=9980, H(s0)=68
+    - 150 trials: Custo=68, Nós Expandidos=13380, H(s0)=68
+
+**Cenário 2 (Cantos do Labirinto):**
+- **BFS:**
+  - tinyCorners: Custo=28, Nós Expandidos=252
+  - mediumCorners: Custo=106, Nós Expandidos=1966
+  - bigCorners: Custo=162, Nós Expandidos=7949
+- **A* (Corners Heuristic):**
+  - tinyCorners: Custo=28, Nós Expandidos=154
+  - mediumCorners: Custo=106, Nós Expandidos=692
+  - bigCorners: Custo=162, Nós Expandidos=1725
+
+## 2. Discussão Comparativa (Vantagens e Desvantagens)
+Com base nos dados das tabelas, você deve redigir um breve texto argumentativo:
+- **DFS:** Rápido, gasta pouca memória (menos expansões na tabela), porém a rota encontrada nem sempre é a ótima (ex: tamanho do plano é 130 no mediumMaze, onde BFS encontra custo 68).
+- **BFS:** Explora exaustivamente, portanto expande muito mais nós que DFS, porém garante um plano de custo mínimo (ótimo). 
+- **UCS:** Lida adequadamente quando passos tem custos desiguais e gera um caminho ótimo ponderado, dependendo da função custo (comparar mediumDottedMaze e mediumScaryMaze).
+- **A*:** A escolha ideal de equilíbrio entre exploração e caminho ótimo: garante caminho ótimo reduzindo muito o número de expansões do BFS quando guiado por boa heurística (Manhattan, CornersHeuristic).
+- **ID-DFS:** Custo de caminho ótimo, mas em contrapartida, por gerar as camadas de novo a cada depth, expandiu o maior número de nós nos ambientes grandes. Sem memória extensa.
+- **LRTA*:** Ilustrar como, com o passar dos "trials" (episodes), o agente vai calibrando o custo estimado inicial (H(s0)) da heurística nula até convergir para o custo real (~68). A Heurística Manhattan faz com que convirja muito mais depressa por já começar com uma boa estimativa em direção ao caminho certo.
+
+## 3. Resposta das Questões (Obrigatório, transcrever baseando-se nos dados)
+Escreva e responda:
+- **Questão 1:** Falar sobre a ordem das direções (North, South, East, West) da DFS. Se rodar em árvore sem grafo, o algoritmo se prenderia em ciclos infinitos na malha com passagens duplicadas.
+- **Questão 2:** A BFS encontra sim caminho de comprimento mínimo (1 passo = custo 1). Se mudar a ordem de sucessores ela achará caminhos equivalentes que empatem no custo ótimo.
+- **Questão 3:** StayEast reduz o preço à medida que anda pra direita; portanto, o UCS vai preferir explorar caminhos longos à direita porque são baratos. O StayWest exacerba o custo a cada ponto para a direita (2^x), então o UCS evita ir à direita, preferindo o menor número de movimentos desse passo caro ou dando a volta se possível.
+- **Questão 4:** O A* foca a busca não só por quem já andou menos (como UCS) mas quem "parece estar mais perto" do objetivo pela heurística. A função consistente não superestima o caminho e garante monotonicidade.
+- **Questão 5:** Explicar o que acontece com a estimativa do LRTA* (vide dados acima), ele se atende a atualizar custos durante execuções sucessivas, permitindo aprendizado online. Com a Manhattan Heuristic ele converge sob muito menos expansão porque seus valores iniciais exigem menos correções.
+
+## 4. Melhorias e Dificuldades
+Encerre com uma pequena sessão comentando uma dificuldade comum (ex: encontrar representação de estados leve para os cantos e não botar GameState; rodar o ID-DFS sem que fique super lento em grafos densos) e sugerir melhorias (como poda de nós na DFS ou tentar heurísticas ainda mais robustas para Corners). 

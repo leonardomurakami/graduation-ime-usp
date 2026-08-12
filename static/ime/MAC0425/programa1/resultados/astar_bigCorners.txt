@@ -1,0 +1,7 @@
+Path found with total cost of 162 in 0.0 seconds
+Search nodes expanded: 1725
+Pacman emerges victorious! Score: 378
+Average Score: 378.0
+Scores:        378.0
+Win Rate:      1/1 (1.00)
+Record:        Win

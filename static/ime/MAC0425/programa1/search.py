@@ -86,18 +86,71 @@ def depthFirstSearch(problem: SearchProblem):
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    frontier = util.Stack()
+    start = problem.getStartState()
+    frontier.push((start, []))
+    visited = set()
+    pushed = {start}
+ 
+    while not frontier.isEmpty():
+        state, actions = frontier.pop()
+        if state in visited:
+            continue
+        visited.add(state)
+
+        if problem.isGoalState(state):
+            return actions
+
+        successors = problem.getSuccessors(state)
+        for successor, action, _ in successors:
+            if successor not in visited and successor not in pushed:
+                pushed.add(successor)
+                frontier.push((successor, actions + [action]))
+
+    return []
 
 def breadthFirstSearch(problem: SearchProblem):
     """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    frontier = util.Queue()
+    frontier.push((problem.getStartState(), []))
+    visited = set()
+    visited.add(problem.getStartState())
+
+    while not frontier.isEmpty():
+        state, actions = frontier.pop()
+
+        if problem.isGoalState(state):
+            return actions
+
+        for successor, action, _ in problem.getSuccessors(state):
+            if successor not in visited:
+                visited.add(successor)
+                frontier.push((successor, actions + [action]))
+
+    return []
 
 def uniformCostSearch(problem: SearchProblem):
     """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    frontier = util.PriorityQueue()
+    frontier.push((problem.getStartState(), [], 0), 0)
+    visited = {}
+
+    while not frontier.isEmpty():
+        state, actions, cost = frontier.pop()
+
+        if state in visited and visited[state] <= cost:
+            continue
+        visited[state] = cost
+
+        if problem.isGoalState(state):
+            return actions
+
+        for successor, action, step_cost in problem.getSuccessors(state):
+            new_cost = cost + step_cost
+            if successor not in visited or visited[successor] > new_cost:
+                frontier.push((successor, actions + [action], new_cost), new_cost)
+
+    return []
 
 def nullHeuristic(state, problem: SearchProblem = None):
     """
@@ -108,17 +161,57 @@ def nullHeuristic(state, problem: SearchProblem = None):
 
 def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    start = problem.getStartState()
+    frontier = util.PriorityQueue()
+    frontier.push((start, [], 0), heuristic(start, problem))
+    visited = {}
 
-# Código obrigatórios para a pós-graduação:
+    while not frontier.isEmpty():
+        state, actions, g_cost = frontier.pop()
+
+        if state in visited and visited[state] <= g_cost:
+            continue
+        visited[state] = g_cost
+
+        if problem.isGoalState(state):
+            return actions
+
+        for successor, action, step_cost in problem.getSuccessors(state):
+            new_g = g_cost + step_cost
+            if successor not in visited or visited[successor] > new_g:
+                f = new_g + heuristic(successor, problem)
+                frontier.push((successor, actions + [action], new_g), f)
+
+    return []
+
+def _dls(problem: SearchProblem, state, actions, depth, visited):
+    """Busca em profundidade limitada (helper para IDDFS)."""
+    if problem.isGoalState(state):
+        return actions
+    if depth == 0:
+        return None
+
+    for successor, action, _ in problem.getSuccessors(state):
+        if successor not in visited:
+            visited.add(successor)
+            result = _dls(problem, successor, actions + [action], depth - 1, visited)
+            visited.discard(successor)
+            if result is not None:
+                return result
+    return None
 
 def iddfsSearch(problem: SearchProblem):
     """Search the deepest nodes in the search tree first, limited by an iteratively increasing depth.
     Create an additional function if needed.
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    start = problem.getStartState()
+    depth = 0
+    while True:
+        visited = {start}
+        result = _dls(problem, start, [], depth, visited)
+        if result is not None:
+            return result
+        depth += 1
 
 
 def policyToPlan(problem: SearchProblem, policy):

@@ -1,0 +1,32 @@
+- **astar_bigCorners.txt**: Cost=162, Expanded=1725
+- **astar_bigMaze.txt**: Cost=210, Expanded=549
+- **astar_mediumCorners.txt**: Cost=106, Expanded=692
+- **astar_mediumMaze.txt**: Cost=68, Expanded=221
+- **astar_tinyCorners.txt**: Cost=28, Expanded=154
+- **astar_tinyMaze.txt**: Cost=8, Expanded=14
+- **bfs_bigCorners.txt**: Cost=162, Expanded=7949
+- **bfs_bigMaze.txt**: Cost=210, Expanded=620
+- **bfs_mediumCorners.txt**: Cost=106, Expanded=1966
+- **bfs_mediumMaze.txt**: Cost=68, Expanded=269
+- **bfs_tinyCorners.txt**: Cost=28, Expanded=252
+- **bfs_tinyMaze.txt**: Cost=8, Expanded=15
+- **dfs_bigMaze.txt**: Cost=210, Expanded=390
+- **dfs_mediumMaze.txt**: Cost=130, Expanded=144
+- **dfs_tinyMaze.txt**: Cost=10, Expanded=14
+- **iddfs_bigMaze.txt**: Cost=210, Expanded=60312
+- **iddfs_mediumMaze.txt**: Cost=68, Expanded=15429
+- **iddfs_tinyMaze.txt**: Cost=8, Expanded=58
+- **lrta_manhattan_10.txt**: Cost=74, Expanded=2130, StartEstimate=56
+- **lrta_manhattan_100.txt**: Cost=68, Expanded=9980, StartEstimate=68
+- **lrta_manhattan_150.txt**: Cost=68, Expanded=13380, StartEstimate=68
+- **lrta_manhattan_30.txt**: Cost=68, Expanded=5168, StartEstimate=66
+- **lrta_manhattan_50.txt**: Cost=68, Expanded=6580, StartEstimate=68
+- **lrta_null_10.txt**: Cost=76, Expanded=3658, StartEstimate=16
+- **lrta_null_100.txt**: Cost=74, Expanded=15034, StartEstimate=59
+- **lrta_null_150.txt**: Cost=68, Expanded=18874, StartEstimate=68
+- **lrta_null_30.txt**: Cost=130, Expanded=7486, StartEstimate=30
+- **lrta_null_50.txt**: Cost=110, Expanded=9950, StartEstimate=39
+- **lrta_tinyCorners.txt**: Cost=28, Expanded=3522, StartEstimate=28
+- **ucs_mediumDottedMaze_StayEast.txt**: Cost=1, Expanded=186
+- **ucs_mediumMaze.txt**: Cost=68, Expanded=269
+- **ucs_mediumScaryMaze_StayWest.txt**: Cost=68719479864, Expanded=108

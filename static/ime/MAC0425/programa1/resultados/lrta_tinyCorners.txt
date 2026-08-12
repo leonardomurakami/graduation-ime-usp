@@ -1,0 +1,8 @@
+Final H-value of the initial state: 28
+Path found with total cost of 28 in 0.0 seconds
+Search nodes expanded: 3522
+Pacman emerges victorious! Score: 512
+Average Score: 512.0
+Scores:        512.0
+Win Rate:      1/1 (1.00)
+Record:        Win

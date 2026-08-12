@@ -1,0 +1,6 @@
+*
+!Makefile
+!*.cpp
+!*.go
+!templates
+!.gitignore

@@ -1,0 +1,9 @@
+[SearchAgent] using function depthFirstSearch
+[SearchAgent] using problem type PositionSearchProblem
+Path found with total cost of 10 in 0.0 seconds
+Search nodes expanded: 14
+Pacman emerges victorious! Score: 500
+Average Score: 500.0
+Scores:        500.0
+Win Rate:      1/1 (1.00)
+Record:        Win
