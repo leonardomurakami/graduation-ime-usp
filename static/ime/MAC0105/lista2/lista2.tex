@@ -1,0 +1,567 @@
+% =============================================================================
+% Template — resolução de listas (MAC0425 ou outras disciplinas IME)
+% Compilação: pdflatex (recomendado) ou latexmk -pdf template-lista.tex
+% =============================================================================
+\documentclass[a4paper,11pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+
+\usepackage[margin=2.4cm, top=2.7cm, bottom=2.6cm, headheight=14pt]{geometry}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{bookmark}
+\usepackage{etoolbox}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{tikz}
+\usetikzlibrary{trees, positioning, arrows.meta, shadows, calc}
+
+\usepackage{parskip}
+\usepackage[linesnumbered,ruled,vlined,portuguese]{algorithm2e}
+\SetKwProg{Fn}{Função}{:}{Fim}
+\usepackage{listings}
+\usepackage[most]{tcolorbox}
+
+% --- Hiperlinks discretos ---
+\hypersetup{
+  colorlinks=true,
+  linkcolor=IMEblue!85!black,
+  urlcolor=IMEblue!75!black,
+  citecolor=IMEblue!75!black,
+}
+
+% --- Paleta ---
+\definecolor{IMEblue}{RGB}{0, 72, 125}
+\definecolor{IMEgray}{RGB}{88, 89, 91}
+\definecolor{IMElightgray}{RGB}{245, 247, 250}
+
+% --- Configuração do Listings (Estilo para Códigos) ---
+\lstset{
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{IMEblue}\bfseries,
+  commentstyle=\color{IMEgray}\itshape,
+  stringstyle=\color{green!50!black},
+  backgroundcolor=\color{IMElightgray},
+  frame=single,
+  rulecolor=\color{IMEgray!40},
+  breaklines=true,
+  showstringspaces=false
+}
+
+% --- Atalhos Matemáticos ---
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator{\E}{\mathbb{E}}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\newcommand{\mbf}[1]{\mathbf{#1}}
+
+% ----======== PREENCHA  ========----
+\newcommand{\CodigoDisciplina}{MAC0105}
+\newcommand{\NomeDisciplina}{Fundamentos de Matemática para a Computação}
+\newcommand{\NumeroLista}{2}
+\newcommand{\TituloListaExtra}{Lista de exercícios 2}
+\newcommand{\NomeAluno}{Leonardo Heidi Almeida Murakami}
+\newcommand{\NUSP}{11260186}
+\newcommand{\DataEntrega}{\today}
+% ----=========================================----
+
+% Cabeçalho e rodapé
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{IMEgray}\NomeAluno}
+\fancyhead[R]{\small\color{IMEgray}NUSP \NUSP}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{IMEgray!40}\leaders\hrule height \headrulewidth\hfill}}
+\fancyfoot[L]{\small\color{IMEgray}\CodigoDisciplina\ -- Lista \NumeroLista}
+\fancyfoot[C]{\small\color{IMEgray}\NomeDisciplina}
+\fancyfoot[R]{\small\color{IMEgray}\thepage\ / \pageref{LastPage}}
+
+\fancypagestyle{plain}{
+  \fancyhf{}
+  \fancyfoot[R]{\small\color{IMEgray}\thepage\ / \pageref{LastPage}}
+  \renewcommand{\headrulewidth}{0pt}
+}
+
+% Teoremas / demonstrações
+\theoremstyle{definition}
+\newtheorem{definicao}{Definição}[section]
+
+\theoremstyle{plain}
+\newtheorem{teorema}{Teorema}[section]
+
+\theoremstyle{remark}
+\newtheorem*{observacao}{Observação}
+
+% Ambiente: enunciado
+\newenvironment{enunciado}
+  {\par\noindent\color{IMEgray}\itshape}
+  {\par\medskip}
+
+% --- EXERCICIOS ---
+
+% 1. Exercício com contador automático
+\newcounter{questao}[section]
+\newtcolorbox[use counter=questao]{questao}[1][]{
+  enhanced,
+  colback=white,
+  colframe=IMElightgray,
+  fonttitle=\bfseries\color{IMEblue},
+  coltitle=IMEblue,
+  colbacktitle=IMElightgray,
+  title={Questão~\thetcbcounter\ifstrempty{#1}{}{ \textnormal{\color{black}#1}}},
+  boxrule=1pt,
+  arc=2pt,
+  outer arc=2pt,
+  top=3mm,
+  bottom=3mm,
+  left=3mm,
+  right=3mm,
+  breakable
+}
+
+\newtcolorbox{questaoManually}[1]{%
+  enhanced,
+  colback=white,
+  colframe=IMElightgray,
+  fonttitle=\bfseries\color{IMEblue},
+  coltitle=IMEblue,
+  colbacktitle=IMElightgray,
+  title={#1},
+  boxrule=1pt,
+  arc=2pt,
+  outer arc=2pt,
+  top=3mm,
+  bottom=3mm,
+  left=3mm,
+  right=3mm,
+  breakable
+}
+
+\newcommand{\makelistatitle}{%
+  \thispagestyle{plain}
+  \noindent
+  \begin{minipage}[t]{0.70\linewidth}
+    {\LARGE\bfseries\color{IMEblue}\CodigoDisciplina}\par\vspace{0.15em}
+    {\large\color{IMEgray}\NomeDisciplina}\par\vspace{1.1em}
+    {\Large\bfseries Lista \NumeroLista
+      \ifdefempty{\TituloListaExtra}{}{ --- \TituloListaExtra}%
+    }
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.28\linewidth}
+    \raggedleft\small\color{IMEgray}
+    \textbf{\NomeAluno}\\[0.25em]
+    NUSP \NUSP\\[0.5em]
+    \DataEntrega
+  \end{minipage}
+  \par\vspace{1.2em}
+  \noindent{\color{IMEgray!35}\rule{\linewidth}{0.6pt}}
+  \par\vspace{1em}
+}
+
+\begin{document}
+
+\makelistatitle
+
+\begin{questaoManually}{Exercício 1}
+Determine se as expressões lógicas são tautologias.
+
+\begin{enumerate}
+\item \textbf{$((p \to q) \land (q \to r)) \to (p \to r)$} \\
+\textit{Resposta: Tautologia.} \\
+\textit{Justificativa:} Silogismo hipotético. Por transformações equivalentes:
+\begin{align*}
+((p \to q) \land (q \to r)) \to (p \to r) &\iff \neg ( (\neg p \lor q) \land (\neg q \lor r) ) \lor (\neg p \lor r) \\
+&\iff \neg (\neg p \lor q) \lor \neg (\neg q \lor r) \lor (\neg p \lor r) \tag{De Morgan}\\
+&\iff (p \land \neg q) \lor (q \land \neg r) \lor \neg p \lor r \\
+&\iff ((p \land \neg q) \lor \neg p) \lor ((q \land \neg r) \lor r) \tag{Associatividade}\\
+&\iff (\neg p \lor \neg q) \lor (q \lor r) \tag{Absorção}\\
+&\iff \neg p \lor (\neg q \lor q) \lor r \\
+&\iff \neg p \lor V \lor r \iff V
+\end{align*}
+
+\item \textbf{$((p \to q) \land (p \to \neg q)) \to \neg p$} \\
+\textit{Resposta: Tautologia.} \\
+\textit{Justificativa:}
+\begin{align*}
+((p \to q) \land (p \to \neg q)) &\iff (\neg p \lor q) \land (\neg p \lor \neg q) \\
+&\iff \neg p \lor (q \land \neg q) \tag{Distributividade}\\
+&\iff \neg p \lor F \iff \neg p
+\end{align*}
+A expressão inteira se torna $\neg p \to \neg p \iff \neg(\neg p) \lor \neg p \iff p \lor \neg p \iff V$.
+
+\item \textbf{$(p \land (p \to q)) \to q$} \\
+\textit{Resposta: Tautologia.} \\
+\textit{Justificativa:} Conhecida como \textit{Modus Ponens}.
+\begin{align*}
+(p \land (p \to q)) \to q &\iff (p \land (\neg p \lor q)) \to q \\
+&\iff ((p \land \neg p) \lor (p \land q)) \to q \\
+&\iff (F \lor (p \land q)) \to q \iff (p \land q) \to q \\
+&\iff \neg(p \land q) \lor q \iff \neg p \lor \neg q \lor q \\
+&\iff \neg p \lor V \iff V
+\end{align*}
+
+\item \textbf{$(p \to q) \lor (q \to p)$} \\
+\textit{Resposta: Tautologia.} \\
+\textit{Justificativa:}
+\begin{align*}
+(p \to q) \lor (q \to p) &\iff (\neg p \lor q) \lor (\neg q \lor p) \\
+&\iff (\neg p \lor p) \lor (\neg q \lor q) \\
+&\iff V \lor V \iff V
+\end{align*}
+
+\item \textbf{$(p \oplus q) \leftrightarrow \neg(p \leftrightarrow q)$} \\
+\textit{Resposta: Tautologia.} \\
+\textit{Justificativa:} Sabemos que $p \leftrightarrow q \iff (p \land q) \lor (\neg p \land \neg q)$. Negando a bicondicional:
+\begin{align*}
+\neg(p \leftrightarrow q) &\iff \neg((p \land q) \lor (\neg p \land \neg q)) \\
+&\iff \neg(p \land q) \land \neg(\neg p \land \neg q) \\
+&\iff (\neg p \lor \neg q) \land (p \lor q) \\
+&\iff (\neg p \land p) \lor (\neg p \land q) \lor (\neg q \land p) \lor (\neg q \land q) \\
+&\iff F \lor (\neg p \land q) \lor (p \land \neg q) \lor F \\
+&\iff (p \land \neg q) \lor (\neg p \land q)
+\end{align*}
+A última linha é a exata definição de $p \oplus q$.
+
+\item \textbf{$(p \land q) \lor (\neg p \land \neg q)$} \\
+\textit{Resposta: Não é tautologia.} \\
+\textit{Justificativa:} Esta é a definição de $p \leftrightarrow q$. A expressão é falsa se $p$ e $q$ tiverem valores diferentes. Exemplo: se $p = V$ e $q = F$, $(V \land F) \lor (F \land V) \iff F \lor F \iff F$.
+
+\item \textbf{$p \land (q \lor r) \leftrightarrow (p \land q) \lor (p \land r)$} \\
+\textit{Resposta: Tautologia.} \\
+\textit{Justificativa:} Trata-se da Lei Distributiva da conjunção sobre a disjunção, que é uma equivalência lógica fundamental.
+
+\item \textbf{$((p \to q) \land (q \to p)) \to (p \leftrightarrow q)$} \\
+\textit{Resposta: Tautologia.} \\
+\textit{Justificativa:} A premissa $((p \to q) \land (q \to p))$ é exatamente a definição da bicondicional $(p \leftrightarrow q)$. Logo, temos $(p \leftrightarrow q) \to (p \leftrightarrow q)$, o que é trivialmente $V$.
+
+\item \textbf{$((p \to q) \land (p \to \neg q)) \to p$} \\
+\textit{Resposta: Não é tautologia.} \\
+\textit{Justificativa:} Vimos no item 2 que a premissa é equivalente a $\neg p$. A expressão reduz-se a $\neg p \to p \iff \neg(\neg p) \lor p \iff p \lor p \iff p$. Como o resultado depende do valor de $p$, não é uma tautologia (falsa quando $p = F$).
+\end{enumerate}
+
+\end{questaoManually}
+\newpage \begin{questaoManually}{Exercício 2}
+Com base na imagem do tabuleiro fornecida:
+
+\begin{enumerate}
+\item \textbf{$\forall x, y (Triângulo(x, y) \to \neg Azul(x, y))$} \\
+\textit{Resposta: Verdadeiro.} \\
+\textit{Justificativa:} A afirmação diz que ``todo triângulo não é azul'' . Inspecionando o tabuleiro, os únicos triângulos presentes são verdes (nas casas $(1, 8)$ e $(3, 6)$) e vermelhos (nas casas $(2, 2)$ e $(6, 4)$) . Como não existe nenhum triângulo azul na imagem, a condição lógica é totalmente satisfeita [1, 2].
+
+\item \textbf{$\forall x, y (\neg Azul(x, y) \to Triângulo(x, y))$} \\
+\textit{Resposta: Falso.} \\
+\textit{Justificativa:} A proposição dita que ``qualquer posição que não possua uma peça azul obrigatoriamente contém um triângulo'' . Podemos facilmente encontrar contraexemplos que invalidam isso, como a casa $(2, 3)$, que possui um quadrado verde (não é azul e também não é triângulo) . 
+
+\item \textbf{$\exists x, y (\neg Azul(x, y) \to (Triângulo(x, y) \lor Vazio(x, y)))$} \\
+\textit{Resposta: Verdadeiro.} \\
+\textit{Justificativa:} A afirmação existencial pede que encontremos pelo menos uma casa onde a implicação seja válida . Tomando a casa $(1, 8)$ como exemplo, temos um triângulo verde . A premissa $\neg Azul(1, 8)$ é verdadeira, e a conclusão de ser um triângulo ou estar vazio também é verdadeira, confirmando a proposição como um todo [1, 2].
+
+\item \textbf{$\exists x, y (\neg Vermelho(x, y) \land Triângulo(x, y))$} \\
+\textit{Resposta: Verdadeiro.} \\
+\textit{Justificativa:} A proposição afirma que ``existe ao menos um triângulo que não é vermelho'' . Os triângulos de cor verde localizados nas coordenadas $(1, 8)$ e $(3, 6)$ satisfazem exatamente esta exigência .
+
+\item \textbf{$\forall x \exists y (\neg Vazio(x, y) \land \neg Triângulo(x, y))$} \\
+\textit{Resposta: Verdadeiro.} \\
+\textit{Justificativa:} Afirma-se que ``em cada uma das 8 colunas ($x$), existe ao menos uma linha ($y$) contendo uma peça que não é um triângulo'' . Inspecionando o tabuleiro da esquerda para a direita , encontramos as seguintes peças não triangulares em cada coluna respectiva:
+Círculo azul em $(1, 4)$; Quadrado verde em $(2, 3)$; Quadrado vermelho em $(3, 2)$; Quadrado azul em $(4, 6)$; Círculo azul em $(5, 2)$; Círculo vermelho em $(6, 3)$; Quadrado vermelho em $(7, 1)$; Círculo azul em $(8, 1)$. Logo, todas as colunas cumprem o requisito .
+
+\item \textbf{$\exists y \forall x (Vazio(x, y) \lor (\neg Triângulo(x, y) \land Verde(x, y)))$} \\
+\textit{Resposta: Verdadeiro.} \\
+\textit{Justificativa:} Esta proposição exige que exista uma linha inteira ($y$) formada unicamente por casas vazias ou por peças verdes que não sejam triângulos . Observando a \textbf{linha 5}, notamos que as posições ocupadas são $(5, 5)$ e $(7, 5)$, as quais contêm, respectivamente, um círculo verde e um quadrado verde . Todas as demais casas desta linha estão estritamente vazias, o que torna a proposição verdadeira [1, 2].
+
+\item \textbf{$\exists x \forall y (Círculo(x, y) \lor \neg(Quadrado(x, y) \lor Triângulo(x, y)))$} \\
+\textit{Resposta: Verdadeiro.} \\
+\textit{Justificativa:} Aplicando a Lei de De Morgan no trecho negado, temos a equivalência $\exists x \forall y (Círculo(x, y) \lor (\neg Quadrado(x, y) \land \neg Triângulo(x, y)))$ . Lendo em português, isso significa que ``existe uma coluna ($x$) inteira onde todas as peças presentes são círculos ou a casa está vazia'' (ou seja, livre de quadrados e triângulos) . As \textbf{colunas 5 e 8} atendem perfeitamente a isso: a coluna 5 possui apenas um círculo azul em $(5, 2)$ e um círculo verde em $(5, 5)$, enquanto a coluna 8 possui apenas um círculo azul na ponta em $(8, 1)$ . Nenhuma delas possui triângulos ou quadrados .
+\end{enumerate}
+
+\end{questaoManually}
+\newpage \begin{questaoManually}{Exercício 3}
+Com base nos predicados descritos, transcrevemos as afirmações para a linguagem lógica:
+
+\begin{enumerate}
+\item \textbf{Todo círculo azul contém um quadrado a esquerda.}
+\begin{equation}
+\forall c (Círculo(c) \land Azul(c) \to \exists d (Quadrado(d) \land Esquerda(d, c)))
+\end{equation}
+
+\item \textbf{Todo objeto azul contém um objeto verde abaixo.}
+\begin{equation}
+\forall c (Azul(c) \to \exists d (Verde(d) \land Acima(c, d)))
+\end{equation}
+
+\item \textbf{Existe um quadrado com um triângulo abaixo.}
+\begin{equation}
+\exists c \exists d (Quadrado(c) \land Triângulo(d) \land Acima(c, d))
+\end{equation}
+
+\item \textbf{Existe uma casa vazia com um quadrado acima e um triângulo a esquerda.}
+\begin{equation}
+\exists c, d, e (Vazio(c) \land Quadrado(d) \land Acima(d, c) \land Triângulo(e) \land Esquerda(e, c))
+\end{equation}
+
+\item \textbf{Existe uma casa com um objeto verde nos dois lados.}
+\begin{equation}
+\exists c, d, e (Verde(d) \land Esquerda(d, c) \land Verde(e) \land Esquerda(c, e))
+\end{equation}
+
+\item \textbf{Existe uma coluna contendo apenas um círculo na sua casa mais baixa.}
+\begin{equation}
+\exists c (Círculo(c) \land \neg \exists d (Acima(c, d)) \land \forall e (Acima(e, c) \to \neg Círculo(e)))
+\end{equation}
+\end{enumerate}
+
+\end{questaoManually}
+\newpage \begin{questaoManually}{Exercício 4}
+
+\textbf{(a) Se $x$ é ímpar, então $x^2$ é ímpar.}
+
+\textit{Demonstração (Prova Direta):}
+Seja $x$ um número inteiro ímpar. Pela definição, podemos escrever $x = 2k + 1$, para algum $k \in \mathbb{Z}$.
+Calculando o valor de $x^2$:
+\begin{align*}
+x^2 &= (2k + 1)^2 \\
+&= 4k^2 + 4k + 1 \\
+&= 2(2k^2 + 2k) + 1
+\end{align*}
+Como $k \in \mathbb{Z}$, temos que $2k^2 + 2k$ também é um número inteiro. Seja $m = 2k^2 + 2k$. Podemos reescrever:
+\begin{equation}
+x^2 = 2m + 1
+\end{equation}
+Esta é precisamente a forma de um número ímpar, concluindo a prova. \blacksquare
+
+\textbf{(b) Suponha que $x$ e $y$ são números reais. Se $y^3 + yx^2 \le x^3 + xy^2$, então $y \le x$.}
+
+\textit{Demonstração (Contrapositiva):}
+Provaremos a contrapositiva: Se $y > x$, então $y^3 + yx^2 > x^3 + xy^2$.
+Suponha $y > x$, o que nos dá $y - x > 0$.
+Vamos analisar a expressão $(y^3 + yx^2) - (x^3 + xy^2)$:
+\begin{align*}
+y^3 - x^3 + yx^2 - xy^2 &= y^3 - xy^2 + yx^2 - x^3 \\
+&= y^2(y - x) + x^2(y - x) \\
+&= (y^2 + x^2)(y - x)
+\end{align*}
+Como impomos $y > x$, é impossível que $y$ e $x$ sejam simultaneamente nulos. Assim, temos sempre $y^2 + x^2 > 0$.
+Sabendo por hipótese que $(y - x) > 0$, concluímos que o produto de ambos os fatores deve ser positivo:
+\begin{align*}
+(y^2 + x^2)(y - x) &> 0 \\
+y^3 + yx^2 - x^3 - xy^2 &> 0 \implies y^3 + yx^2 > x^3 + xy^2
+\end{align*}
+Como a contrapositiva é verdadeira, a afirmação original é provada. \blacksquare
+
+\end{questaoManually}
+\newpage \begin{questaoManually}{Exercício 5}
+
+\textbf{(a) $x < n \iff \lfloor x \rfloor < n$}
+
+\textit{Resposta: Verdadeiro.}
+
+\textit{Demonstração:}
+($\implies$) Se $x < n$, por definição do piso sabemos que $\lfloor x \rfloor \le x$. Por transitividade, $\lfloor x \rfloor < n$.
+($\impliedby$) Se $\lfloor x \rfloor < n$, como $\lfloor x \rfloor$ e $n$ são números inteiros, a desigualdade estrita garante que $\lfloor x \rfloor \le n - 1$.
+Pela definição de piso, temos sempre a propriedade fundamental $x < \lfloor x \rfloor + 1$. Substituindo a limitação que acabamos de deduzir:
+\begin{equation}
+x < \lfloor x \rfloor + 1 \le (n - 1) + 1 = n \implies x < n \ \blacksquare
+\end{equation}
+
+
+\textbf{(b) $x \ge n \iff \lceil x \rceil < n$}
+
+\textit{Resposta: Falso.}
+
+\textit{Contraexemplo:}
+Considere $x = 1.5$ e o inteiro $n = 1$.
+Avaliando a premissa à esquerda, temos $1.5 \ge 1$, o que é \textbf{Verdadeiro}.
+No entanto, $\lceil 1.5 \rceil = 2$. Verificando o lado direito, teríamos $2 < 1$, o que é \textbf{Falso}.
+Como a condicional $(V \iff F)$ resulta em falso, demonstramos que a propriedade não é válida em todos os casos. \blacksquare
+
+
+\end{questaoManually}
+\newpage \begin{questaoManually}{Exercício 6}
+Prove que $H_{2^n} \ge 1 + n/2$ para todo inteiro $n \ge 0$.
+
+\textit{Demonstração (Por Indução):}
+Sabe-se que o número harmônico é definido por $H_m = \sum_{i=1}^m \frac{1}{i}$.
+
+\textbf{Passo Base ($n=0$):}
+\begin{equation}
+H_{2^0} = H_1 = \sum_{i=1}^1 \frac{1}{i} = 1
+\end{equation}
+Verificando do outro lado da desigualdade: $1 + \frac{0}{2} = 1$.
+Como $1 \ge 1$ é verdadeiro, a base está correta.
+
+\textbf{Passo Indutivo:}
+Suponha que a propriedade seja verdadeira para um inteiro genérico $k \ge 0$, o que nos dá nossa \textit{Hipótese de Indução (H.I.)}:
+\begin{equation}
+H_{2^k} \ge 1 + \frac{k}{2}
+\end{equation}
+Queremos demonstrar que o caso $k+1$ também é válido: $H_{2^{k+1}} \ge 1 + \frac{k+1}{2}$.
+Expandindo a soma para a potência $2^{k+1}$:
+\begin{align*}
+H_{2^{k+1}} &= \sum_{i=1}^{2^{k+1}} \frac{1}{i} \\
+&= \sum_{i=1}^{2^k} \frac{1}{i} + \sum_{i=2^k+1}^{2^{k+1}} \frac{1}{i} \\
+&= H_{2^k} + \sum_{i=2^k+1}^{2^{k+1}} \frac{1}{i}
+\end{align*}
+A segunda somatória possui exatamente $2^{k+1} - 2^k = 2^k(2 - 1) = 2^k$ termos. O menor valor contido nela encontra-se no final (quando $i = 2^{k+1}$). Portanto, ao substituir todas as frações por $\frac{1}{2^{k+1}}$, montamos um limitante inferior:
+\begin{equation}
+\sum_{i=2^k+1}^{2^{k+1}} \frac{1}{i} \ge \sum_{i=2^k+1}^{2^{k+1}} \frac{1}{2^{k+1}} = 2^k \left( \frac{1}{2^{k+1}} \right) = \frac{1}{2}
+\end{equation}
+Voltando à nossa equação e substituindo a H.I. e o limitante calculado:
+\begin{align*}
+H_{2^{k+1}} &\ge H_{2^k} + \frac{1}{2} \\
+H_{2^{k+1}} &\ge \left( 1 + \frac{k}{2} \right) + \frac{1}{2} \\
+H_{2^{k+1}} &\ge 1 + \frac{k+1}{2}
+\end{align*}
+O passo indutivo foi garantido. Pela indução finita, a relação $H_{2^n} \ge 1 + n/2$ se sustenta para todo inteiro $n \ge 0$. \blacksquare
+
+\end{questaoManually}
+\newpage \begin{questaoManually}{Exercício 7}
+Mostre que para todo inteiro positivo $n$ valem os seguinte itens .
+
+\textbf{(a)} $\sum_{i=1}^n i^3 = \left( \sum_{i=1}^n i \right)^2$
+
+\textit{Demonstração (Por Indução):}
+Sabemos que a soma dos $n$ primeiros inteiros é dada por $\sum_{i=1}^n i = \frac{n(n+1)}{2}$. Logo, queremos provar a equivalência $\sum_{i=1}^n i^3 = \frac{n^2(n+1)^2}{4}$ .
+
+\textbf{Passo Base ($n=1$):}
+O lado esquerdo resulta em $1^3 = 1$. O lado direito é $\frac{1^2(1+1)^2}{4} = \frac{4}{4} = 1$. A base é verdadeira.
+
+\textbf{Passo Indutivo:}
+Suponha que a propriedade seja verdadeira para um inteiro $k \ge 1$, que será nossa Hipótese de Indução (H.I.):
+\begin{equation}
+\sum_{i=1}^k i^3 = \frac{k^2(k+1)^2}{4}
+\end{equation}
+Queremos provar para o sucessor $n = k+1$:
+\begin{align*}
+\sum_{i=1}^{k+1} i^3 &= \sum_{i=1}^k i^3 + (k+1)^3 \\
+&= \frac{k^2(k+1)^2}{4} + (k+1)^3 \tag{Substituição da H.I.} \\
+&= \frac{k^2(k+1)^2 + 4(k+1)^3}{4} \\
+&= \frac{(k+1)^2 [k^2 + 4(k+1)]}{4} \tag{Colocando $(k+1)^2$ em evidência} \\
+&= \frac{(k+1)^2 (k^2 + 4k + 4)}{4} \\
+&= \frac{(k+1)^2 (k+2)^2}{4}
+\end{align*}
+O resultado alcançado é exatamente a expressão correspondente a $n = k+1$. Por indução, a igualdade é válida para todo inteiro positivo. \blacksquare
+\bigskip
+
+\textbf{(b)} $\sum_{i=1}^n i^2 = \frac{2n^3 + 3n^2 + n}{6}$
+
+\textit{Demonstração (Por Indução):}
+Note inicialmente que o numerador do lado direito pode ser fatorado como $n(2n^2 + 3n + 1) = n(n+1)(2n+1)$ . 
+
+\textbf{Passo Base ($n=1$):}
+Esquerda: $1^2 = 1$. Direita: $\frac{2(1)^3 + 3(1)^2 + 1}{6} = \frac{6}{6} = 1$. A base é verdadeira.
+
+\textbf{Passo Indutivo:}
+Assuma que para um $k \ge 1$ valha $\sum_{i=1}^k i^2 = \frac{2k^3 + 3k^2 + k}{6}$.
+Avaliando o caso para $n = k+1$:
+\begin{align*}
+\sum_{i=1}^{k+1} i^2 &= \sum_{i=1}^k i^2 + (k+1)^2 \\
+&= \frac{2k^3 + 3k^2 + k}{6} + (k+1)^2 \tag{H.I.}\\
+&= \frac{2k^3 + 3k^2 + k + 6(k^2 + 2k + 1)}{6} \\
+&= \frac{2k^3 + 9k^2 + 13k + 6}{6}
+\end{align*}
+Agora, vamos verificar o resultado da fórmula do polinômio original aplicada diretamente a $(k+1)$:
+\begin{align*}
+\frac{2(k+1)^3 + 3(k+1)^2 + (k+1)}{6} &= \frac{2(k^3+3k^2+3k+1) + 3(k^2+2k+1) + k + 1}{6} \\
+&= \frac{2k^3 + 6k^2 + 6k + 2 + 3k^2 + 6k + 3 + k + 1}{6} \\
+&= \frac{2k^3 + 9k^2 + 13k + 6}{6}
+\end{align*}
+Como ambas as expansões convergem exatamente ao mesmo polinômio, o passo indutivo é válido. \blacksquare
+
+\end{questaoManually}
+\newpage \begin{questaoManually}{Exercício 8}
+Prove que para um inteiro $n \ge 10$ temos que $100n \le 2^n$ .
+
+\textit{Demonstração (Por Indução):}
+
+\textbf{Passo Base ($n=10$):}
+Calculando os valores: $100(10) = 1000$ e $2^{10} = 1024$. Como a afirmação $1000 \le 1024$ é verdadeira, a base é garantida .
+
+\textbf{Passo Indutivo:}
+Suponha que a desigualdade se sustente para um inteiro $k \ge 10$, isto é, a H.I. é $100k \le 2^k$.
+Deseja-se provar para $k+1$, isto é, $100(k+1) \le 2^{k+1}$. Analisando o lado esquerdo:
+\begin{equation}
+100(k+1) = 100k + 100
+\end{equation}
+Sabemos que $k \ge 10$. Portanto, é seguro afirmar que $k \ge 1$. Multiplicando por 100 em ambos os lados, concluímos que $100k \ge 100$. Substituindo esse limitante na nossa equação:
+\begin{equation}
+100k + 100 \le 100k + 100k = 2(100k)
+\end{equation}
+Pela nossa Hipótese de Indução, $100k \le 2^k$. Usando essa limitação na equação anterior:
+\begin{equation}
+2(100k) \le 2(2^k) = 2^{k+1}
+\end{equation}
+Pela propriedade da transitividade das desigualdades, resulta que $100(k+1) \le 2^{k+1}$. A relação está demonstrada. \blacksquare
+
+\end{questaoManually}
+\newpage \begin{questaoManually}{Exercício 9}
+Prove por indução que todo polígono convexo com $n$ lados pode ser dividido em triângulos usando $n - 3$ diagonais .
+
+\textit{Demonstração (Por Indução):}
+Seja $n$ o número de lados do polígono convexo, com $n \ge 3$.
+
+\textbf{Passo Base ($n=3$):}
+Um polígono convexo de 3 lados é, por definição, um triângulo . Ele não possui diagonais internas, necessitando de $3 - 3 = 0$ diagonais para ser "triangulado". A proposição atende ao caso base.
+
+\textbf{Passo Indutivo:}
+Nossa hipótese (H.I.) dita que todo polígono convexo de $k$ lados ($k \ge 3$) pode ser fatiado perfeitamente em triângulos com o auxílio de $k - 3$ diagonais.
+Tomemos agora um polígono convexo de $k+1$ lados. Escolhemos livremente três vértices sucessivos do seu perímetro, os quais chamaremos de $V_1, V_2$ e $V_3$. Traçamos uma diagonal conectando diretamente $V_1$ a $V_3$. 
+Ao criar essa conexão, isolamos o triângulo $\triangle V_1 V_2 V_3$ do restante da figura (pelo fato do polígono ser estritamente convexo, a diagonal $V_1V_3$ sempre cruzará o interior do polígono, tornando este corte válido).
+Analisando a estrutura após o corte:
+\begin{itemize}
+    \item Adicionamos \textbf{1} diagonal.
+    \item O vértice $V_2$ perdeu conexão geométrica com o polígono restante, transformando nossa figura principal num polígono com vértices $V_1, V_3, V_4, \dots, V_{k+1}$. Ele é composto por $(k+1) - 1 = k$ lados.
+\end{itemize}
+Pela nossa H.I., o polígono restante com $k$ lados precisará usar $k - 3$ diagonais para ser completamente coberto por triângulos.
+Somando as diagonais do processo completo, teremos a diagonal do corte do $V_2$ unida às utilizadas pela figura menor:
+\begin{equation}
+Total = 1 + (k - 3) = (k + 1) - 3
+\end{equation}
+A relação $(k+1)-3$ foi atingida, garantindo assim a veracidade universal da tese pelo Princípio da Indução. \blacksquare
+
+\end{questaoManually}
+\newpage \begin{questaoManually}{Exercício 10}
+Considere uma fila formada por gatos e capivaras. Prove que se o primeiro animal da fila é uma capivara e o último é um gato, então existe uma capivara imediatamente na frente de algum gato .
+
+\textit{Demonstração (Por Contradição):}
+Suponha, por absurdo, que a afirmação seja falsa. Ou seja, admita como premissa verdadeira que \textbf{nenhuma} capivara na fila se encontra na frente direta de um gato .
+Isto força uma regra de encadeamento estrita: se o animal alocado na posição $i$ da fila for uma capivara, obrigatoriamente o animal atrás dele na posição $i+1$ não poderá ser um gato. A única opção restante (desconsiderando o fim da fila) é que o indivíduo $i+1$ seja outra capivara.
+É dado em enunciado que o primeiro animal (posição 1) é uma capivara .
+Pela nossa suposição imposta acima, sendo o animal 1 uma capivara, o animal 2 tem que ser uma capivara. Por repetição lógica, se o animal 2 é uma capivara, o 3 é uma capivara, e assim o comportamento se estende recursivamente até o fim da fila, obrigando todos os indivíduos da fila a pertencerem à mesma espécie.
+Isto culmina numa consequência inevitável de que o último animal na fila é uma capivara. Entretanto, o enunciado relata explicitamente que a última posição é ocupada por um \textbf{gato} , gerando um evidente Paradoxo/Contradição.
+Ao invalidarmos a suposição original, confirma-se o seu oposto: é matematicamente certo que deve existir no mínimo uma posição em que uma capivara precede um gato na fila. \blacksquare
+
+\end{questaoManually}
+\newpage \begin{questaoManually}{Exercício 11}
+Prove que, para qualquer modo que você quebrar a barra (formada por $n$ quadradinhos) de acordo com a regra, você sempre precisará de exatamente $n - 1$ quebras para separar todos os quadradinhos .
+
+\textit{Demonstração (Por Indução Forte):}
+Seja $P(n)$ a afirmação: "Uma barra composta de $n$ blocos necessitará de exatamente $n-1$ fraturas retas para ser convertida em peças unitárias" .
+
+\textbf{Passo Base ($n=1$):}
+Uma peça contendo apenas 1 bloco já se encontra perfeitamente separada na dimensão unitária, exigindo $1 - 1 = 0$ quebras . A declaração base é correta.
+
+\textbf{Passo Indutivo (Indução Forte):}
+Consideremos a afirmação $P(i)$ verdadeira para todos os tamanhos inteiros $i$ no intervalo de $1 \le i < k$.
+Possuímos agora uma barra não quebrada com $k$ quadradinhos totais ($k \ge 2$). Efetuaremos nossa primeira quebra reta nas ranhuras. Independentemente da ranhura escolhida, essa atitude particionará a nossa barra principal de tamanho $k$ em dois pequenos segmentos avulsos de tamanhos $x$ e $y$.
+É garantido que a união de ambos dá a barra original ($x + y = k$) e que ambos contêm ao menos 1 quadrado ($x \ge 1$ e $y \ge 1$). Isso garante que os valores $x$ e $y$ são estritamente menores que $k$, credenciando-os a passar pela nossa Hipótese de Indução Forte:
+\begin{itemize}
+    \item Para reduzir o trecho menor com tamanho $x$ a unidades individuais, necessitamos de exatas $x - 1$ quebras.
+    \item Para o segmento $y$, análogo, necessitaremos de exatas $y - 1$ quebras.
+\end{itemize}
+Contando a quebra primária no total, a quantidade global de ranhuras rompidas será:
+\begin{equation}
+Total = 1 + (x - 1) + (y - 1) = x + y - 1
+\end{equation}
+Sabendo que a contagem inteira $x+y$ equivale a $k$, o resultado se transforma em $k - 1$.
+Demonstramos assim que, alheio a escolha da ranhura e dimensão lateral, as partições se reduzem a $n-1$ quebras no caso geral, cumprindo o passo da indução. \blacksquare
+\end{questaoManually}
+\end{document}

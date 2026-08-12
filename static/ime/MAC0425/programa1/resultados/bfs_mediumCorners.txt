@@ -1,0 +1,9 @@
+[SearchAgent] using function bfs
+[SearchAgent] using problem type CornersProblem
+Path found with total cost of 106 in 0.0 seconds
+Search nodes expanded: 1966
+Pacman emerges victorious! Score: 434
+Average Score: 434.0
+Scores:        434.0
+Win Rate:      1/1 (1.00)
+Record:        Win

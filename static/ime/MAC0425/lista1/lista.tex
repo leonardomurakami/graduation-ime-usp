@@ -1,0 +1,407 @@
+% =============================================================================
+% Template — resolução de listas (MAC0425 ou outras disciplinas IME)
+% Compilação: pdflatex (recomendado) ou latexmk -pdf template-lista.tex
+% =============================================================================
+\documentclass[a4paper,11pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+
+\usepackage[margin=2.4cm, top=2.7cm, bottom=2.6cm, headheight=14pt]{geometry}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{bookmark}
+\usepackage{etoolbox}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{tikz}
+\usetikzlibrary{trees, positioning, arrows.meta, shadows, calc}
+
+\usepackage{parskip}
+\usepackage[linesnumbered,ruled,vlined,portuguese]{algorithm2e}
+\SetKwProg{Fn}{Função}{:}{Fim}
+\usepackage{listings}
+\usepackage[most]{tcolorbox}
+
+% --- Hiperlinks discretos ---
+\hypersetup{
+  colorlinks=true,
+  linkcolor=IMEblue!85!black,
+  urlcolor=IMEblue!75!black,
+  citecolor=IMEblue!75!black,
+}
+
+% --- Paleta ---
+\definecolor{IMEblue}{RGB}{0, 72, 125}
+\definecolor{IMEgray}{RGB}{88, 89, 91}
+\definecolor{IMElightgray}{RGB}{245, 247, 250}
+
+% --- Configuração do Listings (Estilo para Códigos) ---
+\lstset{
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{IMEblue}\bfseries,
+  commentstyle=\color{IMEgray}\itshape,
+  stringstyle=\color{green!50!black},
+  backgroundcolor=\color{IMElightgray},
+  frame=single,
+  rulecolor=\color{IMEgray!40},
+  breaklines=true,
+  showstringspaces=false
+}
+
+% --- Atalhos Matemáticos ---
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator{\E}{\mathbb{E}}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\newcommand{\mbf}[1]{\mathbf{#1}}
+
+% ----======== PREENCHA  ========----
+\newcommand{\CodigoDisciplina}{MAC0425}
+\newcommand{\NomeDisciplina}{Inteligência Artificial}
+\newcommand{\NumeroLista}{1}
+\newcommand{\TituloListaExtra}{Primeira Lista de Exercícios}
+\newcommand{\NomeAluno}{Leonardo Heidi Almeida Murakami}
+\newcommand{\NUSP}{11260186}
+\newcommand{\DataEntrega}{\today}
+% ----=========================================----
+
+% Cabeçalho e rodapé
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{IMEgray}\NomeAluno}
+\fancyhead[R]{\small\color{IMEgray}NUSP \NUSP}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{IMEgray!40}\leaders\hrule height \headrulewidth\hfill}}
+\fancyfoot[L]{\small\color{IMEgray}\CodigoDisciplina\ -- Lista \NumeroLista}
+\fancyfoot[C]{\small\color{IMEgray}\NomeDisciplina}
+\fancyfoot[R]{\small\color{IMEgray}\thepage\ / \pageref{LastPage}}
+
+\fancypagestyle{plain}{
+  \fancyhf{}
+  \fancyfoot[R]{\small\color{IMEgray}\thepage\ / \pageref{LastPage}}
+  \renewcommand{\headrulewidth}{0pt}
+}
+
+% Teoremas / demonstrações
+\theoremstyle{definition}
+\newtheorem{definicao}{Definição}[section]
+
+\theoremstyle{plain}
+\newtheorem{teorema}{Teorema}[section]
+
+\theoremstyle{remark}
+\newtheorem*{observacao}{Observação}
+
+% Ambiente: enunciado
+\newenvironment{enunciado}
+  {\par\noindent\color{IMEgray}\itshape}
+  {\par\medskip}
+
+% --- EXERCICIOS ---
+
+% 1. Exercício com contador automático
+\newcounter{questao}[section]
+\newtcolorbox[use counter=questao]{questao}[1][]{
+  enhanced,
+  colback=white,
+  colframe=IMElightgray,
+  fonttitle=\bfseries\color{IMEblue},
+  coltitle=IMEblue,
+  colbacktitle=IMElightgray,
+  title={Questão~\thetcbcounter\ifstrempty{#1}{}{ \textnormal{\color{black}#1}}},
+  boxrule=1pt,
+  arc=2pt,
+  outer arc=2pt,
+  top=3mm,
+  bottom=3mm,
+  left=3mm,
+  right=3mm,
+  breakable
+}
+
+\newtcolorbox{questaoManually}[1]{%
+  enhanced,
+  colback=white,
+  colframe=IMElightgray,
+  fonttitle=\bfseries\color{IMEblue},
+  coltitle=IMEblue,
+  colbacktitle=IMElightgray,
+  title={#1},
+  boxrule=1pt,
+  arc=2pt,
+  outer arc=2pt,
+  top=3mm,
+  bottom=3mm,
+  left=3mm,
+  right=3mm,
+  breakable
+}
+
+\newcommand{\makelistatitle}{%
+  \thispagestyle{plain}
+  \noindent
+  \begin{minipage}[t]{0.70\linewidth}
+    {\LARGE\bfseries\color{IMEblue}\CodigoDisciplina}\par\vspace{0.15em}
+    {\large\color{IMEgray}\NomeDisciplina}\par\vspace{1.1em}
+    {\Large\bfseries Lista \NumeroLista
+      \ifdefempty{\TituloListaExtra}{}{ --- \TituloListaExtra}%
+    }
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.28\linewidth}
+    \raggedleft\small\color{IMEgray}
+    \textbf{\NomeAluno}\\[0.25em]
+    NUSP \NUSP\\[0.5em]
+    \DataEntrega
+  \end{minipage}
+  \par\vspace{1.2em}
+  \noindent{\color{IMEgray!35}\rule{\linewidth}{0.6pt}}
+  \par\vspace{1em}
+}
+
+\begin{document}
+
+\makelistatitle
+
+\begin{questaoManually}{Exercício 1}
+  \textbf{Parte A:} O livro AIMA divide as definições de Inteligência Artificial em quatro categorias: o foco no processo de raciocínio \textbf{(pensar)} contra o comportamento \textbf{(agir)}, e o foco na fidelidade à performance humana \textbf{(humano)} contra a otimização de resultados \textbf{(racional)}. A abordagem adotada por Russell e Norvig concentra-se, estritamente, em agir racionalmente, de modo que, um agente racional (inteligente) é aquele que age para alcançar o melhor resultado possível ou, quando há incerteza, o melhor resultado esperado. O foco não está em replicar o comportamento e pensamento humano, nem em apenas deduzir pensamentos logicamente corretos, mas também em tomar as ações autônomas que maximizam o sucesso no ambiente.
+  
+  \textbf{Parte B:} Sob a ótica da abordagem de agir racionalmente, a inteligência de um agente não é aferida pela mimetização do raciocínio humano (como proposto no Teste de Turing), mas sim de forma pragmática e objetiva por meio de seu comportamento no ambiente.
+  Para que essa avaliação ocorra, estabelece-se uma medida de desempenho: um critério externo que quantifica o grau de sucesso do agente. Nesse contexto, a inteligência é definida estritamente pela capacidade de escolha: um agente é considerado racional se, e somente se, a ação selecionada é aquela que maximiza a expectativa da medida de desempenho, baseando-se na sequência de percepções acumulada e nos conhecimentos intrínsecos disponíveis no momento da decisão.
+\end{questaoManually}
+
+\begin{questaoManually}{Exercício 2}
+  O Capítulo 2 do livro AIMA categoriza os programas de agentes em cinco tipos principais, que aumentam em grau de complexidade e capacidade de lidar com diferentes ambientes:
+
+  \begin{enumerate}[label=\textbf{\arabic*.}]
+    \item \textbf{Agentes Reativos Simples (Simple Reflex Agents):}
+    Estes agentes selecionam ações com base \textit{apenas} na percepção atual do ambiente, ignorando todo o histórico de percepções passadas. Eles operam por meio de regras de condição-ação (ex: "se o carro da frente frear, então freie"). Só funcionam corretamente se o ambiente for totalmente observável.
+
+    \item \textbf{Agentes Reativos Baseados em Modelo (Model-based Reflex Agents):}
+    Ao contrário dos agentes simples, estes conseguem lidar com ambientes parcialmente observáveis. Para isso, mantêm um \textbf{estado interno} que rastreia a parte do mundo que não pode ser vista no momento. Esse estado é atualizado com base no histórico de percepções e em um "modelo" de como o mundo evolui de forma independente e como as ações do agente afetam esse mundo.
+
+    \item \textbf{Agentes Baseados em Objetivos (Goal-based Agents):}
+    Saber o estado atual não é suficiente; o agente precisa de \textbf{objetivos} que descrevam situações desejáveis. Diferente dos agentes reativos que agem por instinto (regras fixas), estes consideram o futuro ("O que acontecerá se eu fizer isso?") para escolher a ação que o aproximará do seu objetivo. Isso frequentemente envolve algoritmos de busca e planejamento.
+
+    \item \textbf{Agentes Baseados em Utilidade (Utility-based Agents):}
+    Objetivos fornecem uma visão binária (alcançou ou não alcançou). Os agentes baseados em utilidade vão além, utilizando uma \textbf{função de utilidade} que mapeia um estado (ou sequência de estados) para um número real, indicando o grau de "felicidade" ou eficiência daquele estado. Eles procuram maximizar a utilidade esperada, sendo úteis quando há múltiplos caminhos para um objetivo ou objetivos conflitantes.
+
+    \item \textbf{Agentes com Aprendizado (Learning Agents):}
+    Qualquer um dos agentes anteriores pode ser transformado em um agente com aprendizado. Eles nascem com um conhecimento inicial básico, mas possuem componentes (como o elemento de aprendizado e o elemento de crítica) que lhes permitem \textbf{aprender com a experiência}. Isso permite que operem em ambientes inicialmente desconhecidos e se tornem mais competentes ao longo do tempo, ajustando seu comportamento com base no feedback recebido (recompensas ou penalidades).
+  \end{enumerate}
+\end{questaoManually}
+
+% \begin{questaoManually}{Exercício 3}
+%   \begin{enumerate}
+%     \item O tamanho da tabela é a primeira dificuldade que pode surgir durante a fase de projeto. Para um ambiente minimamente complexo, o número de entradas possíveis na tabela é gigante. Se considerarmos um agente que recebe P percepções possíveis e tem um tempo T de passos, a tabela precisaria armazenar $\sum\limits_{t=1}^{T} P^t$
+%     \item Assim como o tamanho da tabela é massivo, o esforço computacional (ou humano, dependendo da vontade) para preencher essa tabela é inviavel. O responsável pelo projeto deveria definir a ação correta para cada combinação possível de percepções, além disso, não haveria generalização, ou seja, se o ambiente for estocástico ou dinâmico e o agente encontrar uma situação com uma percepção diferente daquelas mapeadas ele não saberá o que fazer
+%     \item A falta de aprendizado, o agente fica completamente dependente da tabela. Se o ambiente mudar (ex: as regras de um jogo mudam), a tabela torna-se obsoleta. Ele não tem capacidade de raciocínio interno para descobrir soluções por conta própria.
+%   \end{enumerate}
+% \end{questaoManually}
+
+\begin{questaoManually}{Exercício 4}
+  \begin{enumerate}[label=\Alph*]
+    \item
+    \begin{enumerate}[label=\arabic*.]
+      \item \textbf{Busca Não-Informada:} O algoritmo não tem conhecimento sobre o quão longe está do objetivo, apenas gera sucessores e distingue se um estado é objetivo ou não.
+      \item \textbf{Busca Informada:} Utiliza conhecimento específico do domínio através de uma função heurística $h(n)$, que estima o custo do estado atual até o objetivo. 
+    \end{enumerate}
+
+    \item
+    \begin{enumerate}[label=\arabic*.]
+      \item \textbf{Busca em Árvore:} O algoritmo não mantém um registro de estados já visitados. Se o espaço de estados contiver ciclos ou múltiplos caminhos para o mesmo nó, a busca em árvore pode entrar em loop infinito.
+      \item \textbf{Busca em Grafo:} Inclui uma estrutura de dados para armazenar todos os estados já visitados. Isso evita a exploração redundante de estados e evita ciclos infinitos.
+    \end{enumerate}
+
+    \item
+    \begin{enumerate}[label=\arabic*.]
+      \item \textbf{Busca por Planejamento de Ações:} O foco está na sequência de passos necessária para chegar ao objetivo. O caminho é a solução
+      \item \textbf{Busca por Identificação de Estados:} O foco está apenas no estado final que satisfaz as condições do problema. O caminho percorrido é irrelevante
+    \end{enumerate}
+
+    \item
+    \begin{enumerate}[label=\arabic*.]
+      \item \textbf{Busca Local:} Opera sobre um único estado atual e tenta melhorá-lo movendo-se para vizinhos. Não mantém um caminho e é ideal para otimização.
+      \item \textbf{Busca CSP:} Busca em espaços onde os estados são definidos por variáveis que devem satisfazer um conjunto de restrições.
+    \end{enumerate}
+
+    \item
+    \begin{enumerate}[label=\arabic*.]
+      \item \textbf{Busca Offline:} O agente calcula a solução completa antes de executar a primeira ação. Assume um ambiente estático e conhecido
+      \item \textbf{Busca Online:} O agente intercala computação e ação. Ele expande um nó, executa uma ação, observa o novo estado e então decide o novo passo.
+    \end{enumerate}
+
+    \item
+    \begin{enumerate}[label=\arabic*.]
+      \item \textbf{Busca Completa:} Um algoritmo é considerado completo se ele garante encontrar uma solução, caso exista, em tempo finito
+      \item \textbf{Busca Otima:} Um algoritmo é ótimo se ele garante encontrar a melhor solução entre todas as possíveis
+    \end{enumerate}
+  \end{enumerate}
+\end{questaoManually}
+
+% \begin{questaoManually}{Exercício 5}
+%   \begin{enumerate}[label=\roman*]
+%     \item O BFS retornará primeiro o nó meta 6. Como os nós metas estão nos niveis 2 e 3 (considerando a raiz como nível 0) para os nós 6 e 10 respectivamente e o BFS garante encontrar a solução mais próxima da raiz, ele atingirá o nó 6 antes de sequer explorar o nível onde o nó 10 se encontra
+%     A ordem de expansão será 1 -> 2 -> 3 -> 4 -> 5 -> 6 (Meta)
+    
+%     \item O DFS não encontrá nenhum nó meta. Como ele segue a árvore binaria sempre pelo filho mais à esquerda ele atingirá uma árvore de profundidade infinita antes de encontrar um nó meta. Isso faz com que ele siga infinitamente (ja que os triângulos representam árvores binarias de profundidade infinita) sem encontrar nenhuma meta.
+%     A ordem de expansão será 1 -> 2 -> 4 -> 8, ao chegar no nó 8 ele entrará numa arvore infinita e nunca retornará
+
+%     \item O IDS realiza buscas em profundidade com profundidade limitada. Basicamente ele funciona parecido com um BFS mas com a economia de memória de um DFS. Simulando a execução teríamos que
+    
+%     Com Limite L = 0 ele visita o nó 1
+    
+%     Com Limite L = 1 ele visita os nós 1 -> 2 -> 3
+
+%     Com Limite L = 2 ele visita os nós 1 -> 2 -> 4 -> 5 -> 3 -> 6 (meta)
+
+%     Ou seja, ele retorna o nó meta 6 e tem sequencia total de 1 -> 1 -> 2 -> 3 -> 1 -> 2 -> 4 -> 5 -> 3 -> 6
+%   \end{enumerate}
+% \end{questaoManually}
+
+\begin{questaoManually}{Exercício 6}
+
+  \begin{center}
+    \begin{tikzpicture}[
+      scale=0.75, transform shape,
+      level distance=1.6cm,
+      edge from parent/.style={draw=gray!70, thick, -{Stealth[length=2.5mm, width=1.5mm]}}
+    ]
+    \begin{scope}[
+      every node/.style={circle, draw=gray!80, fill=gray!10, thick, minimum size=7mm, font=\sffamily\bfseries\footnotesize},
+      start/.style={draw=blue!80, fill=blue!20},
+      goal/.style={draw=red!80, fill=red!30},
+    ]
+  
+    % Structurally isolated search tree (No overlaps)
+    \node [start] (A) {A}
+      [sibling distance=7cm]
+      child {node {B}} % Dead End
+      child {node {D}
+        [sibling distance=3.5cm]
+        child {node {E}
+          child {node [goal] {I}}
+        }
+        child {node {C}
+          [sibling distance=1.5cm]
+          child {node {B}}
+          child {node {E}
+            child {node [goal] {I}}
+          }
+          child {node {F}
+            [sibling distance=1cm]
+            child {node [goal] {I}}
+            child {node {J}}
+          }
+        }
+      }
+      child {node {G}
+        [sibling distance=4.5cm]
+        child {node {K}
+          child {node {O}
+            child {node [goal] {I}}
+          }
+        }
+        child {node {L}
+          [sibling distance=3.5cm]
+          child {node [goal] {H}}
+          child {node {D}
+            [sibling distance=3cm]
+            child {node {E}
+              child {node [goal] {I}}
+            }
+            child {node {C}
+              [sibling distance=1.5cm]
+              child {node {B}}
+              child {node {E}
+                child {node [goal] {I}}
+              }
+              child {node {F}
+                [sibling distance=1cm]
+                child {node [goal] {I}}
+                child {node {J}}
+              }
+            }
+          }
+        }
+      };
+    \end{scope}
+  
+    % Legend - Anchored safely to the far left and shifted down
+    \begin{scope}[shift={(-9, -2.5)}]
+        \draw[draw=gray!30, fill=white, rounded corners, thick] (0,0.3) rectangle (3.8,-2.7);
+        
+        % Local style to force identical, perfectly round circles in the legend
+        \tikzstyle{legnode}=[circle, minimum size=7mm, inner sep=0pt, font=\sffamily\tiny, align=center]
+        
+        \node[anchor=west, font=\sffamily\tiny] at (0.2, -0.4) {Nó Inicial};
+        \node[legnode, draw=blue!80, fill=blue!20] at (3.2, -0.4) {A};
+        
+        \node[anchor=west, font=\sffamily\tiny] at (0.2, -1.2) {Nó de Meta};
+        \node[legnode, draw=red!80, fill=red!30] at (3.2, -1.2) {H, I};
+        
+        \node[anchor=west, font=\sffamily\tiny] at (0.2, -2.0) {Nó Intermediário};
+        \node[legnode, draw=gray!80, fill=gray!10] at (3.2, -2.0) {C};
+    \end{scope}
+\end{tikzpicture}
+  \end{center}
+
+  \begin{enumerate}
+    \item[4.1]: A -> B -> D -> G -> C -> E -> L -> K -> B -> F -> I
+    \item[4.2]: A -> B -> D -> G -> C -> E -> L -> K -> F -> I
+    \item[4.3]: A -> B -> D -> C -> B -> E -> I
+    \item[4.4]: A -> B -> D -> C -> E -> I
+    \item[4.5]:  Lim 0: A
+
+    Lim 1: A -> B -> D -> G 
+    
+    Lim 2: A -> B -> D -> C -> E -> G -> L -> K
+    
+    Lim 3: A -> B -> D -> C -> E -> F -> E -> I (META)
+
+    Lista Final: A -> A -> B -> D -> G -> A -> B -> D -> C -> E -> G -> L -> K -> A -> B -> D -> C -> E -> F -> E -> I
+  \end{enumerate}
+\end{questaoManually}
+
+\begin{questaoManually}{Exercício 10}
+  \begin{enumerate}
+    \item Verdadeiro.
+    \item Falso, como a busca gulosa ignora o custo do caminho e toma as decisões baseadas exclusivamente no menor valor de $h(n)$ se vermos o vizinhos de A disponiveis que são B (h = 20.0), C (h = 33.54) e K (h = 40.0) o algoritmo greedy inevitavelmente escolherá o B
+    \item Verdadeiro
+    \item Falso, para que algoritmos de busca heurística garantam otimalidade, a heurística precisa ser admissível, ou seja, por definição ela deve sempre subestimar ou ser igual ao custo real
+    \item Falso, heuristicas admissiveis garantem a completude e otimalidade do A* apenas quando a implementação utiliza a busca em árvore. Se a implementação utilizar a busca em grafo, uma heurística pode fechar um estado por um caminho subótimo antes de encontrar o caminho ótimo
+    \item Verdadeiro
+    \item Verdadeiro
+    \item Falso, a relação de implicação é no sentido inverso. Toda heurística consistente é obrigatoriamente admissível, no entanto, é possível construir uma heurística que seja admissivel mas que seja inconsistente.
+  \end{enumerate}
+\end{questaoManually}
+
+\begin{questaoManually}{Exercício 13}
+  \begin{enumerate}[label=\alph*.]
+    \item $h1 + h2$: não é admissivel. Contra-exemplo: Suponha um estado $s$ onde o custo até a meta seja $h^(s) = 10$. Sejam as estimativas $h_1(s) = 8$ e $h_2(s) = 7$, a heurística induzida resultaria em $h(s) = 15$ que não é admissível
+    \item $h1 \times h2$: não é admissivel. Contra-exemplo: Suponha um estado $s$ onde o custo até a meta seja $h^(s) = 10$. Sejam as estimativas $h_1(s) = 8$ e $h_2(s) = 7$, a heurística induzida resultaria em $h(s) = 56$ que não é admissível
+    \item $max\{h_1\,h_2\}$: é admissivel, como sabemos por premissa que tanto $h_1(s) \leq h^*(s)$ e $h_2(s) \leq h^*(s)$ é logicamente impossível que o valor máximo entre eles exceda $h^*(s)$
+    \item $1 + min\{h_1\,h_2\}$: não é admissível. Contra-exemplo: Suponhamos $h^*(s) = 0$, como $h1$ e $h2$ devem ser admissíveis para todos os estados, temos que $h_1(s) = h_2(s) = 0$, avaliando a heurística. $h(s) = 1 + min\{0,0\} = 1$, como $ 1 > 0 $, não é admissível
+    \item $\alpha h_1 + \beta h_2$, com $\alpha \geq 0, \beta \geq 0$ e $\alpha+\beta = 1$. Partindo das premissas de admissibilidade e multiplicando cada heuristica por $\alpha$ e $\beta$ (que são não negativos, logo não invertem o sinal da inequação):
+    
+    \begin{align}
+      \alpha h_1(s) \leq \alpha h^* \\
+      \beta h_2(s) \leq \beta h^* \\
+      \alpha h_1(s) + \beta h_2(s) \leq \alpha h^* + \beta h^* \\
+      \alpha h_1(s) + \beta h_2(s) \leq (\alpha + \beta) h^* \\
+      \alpha h_1(s) + \beta h_2(s) \leq (1) h^*
+    \end{align}
+    
+    Logo, a heurística é provada como admissível
+  \end{enumerate}
+\end{questaoManually}
+
+\end{document}

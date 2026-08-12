@@ -1,0 +1,10 @@
+[SearchAgent] using function lrta and heuristic nullHeuristic with 50 trial(s)
+[SearchAgent] using problem type PositionSearchProblem
+Final H-value of the initial state: 39
+Path found with total cost of 110 in 0.0 seconds
+Search nodes expanded: 9950
+Pacman emerges victorious! Score: 400
+Average Score: 400.0
+Scores:        400.0
+Win Rate:      1/1 (1.00)
+Record:        Win
