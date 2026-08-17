@@ -1,0 +1,121 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{geometry}
+\geometry{a4paper, margin=15mm}
+
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{hyperref}
+
+% Color definitions
+\definecolor{primary}{HTML}{1A365D}   % Deep Navy
+\definecolor{secondary}{HTML}{2B6CB0} % Slate Blue
+\definecolor{textdark}{HTML}{2D3748}  % Charcoal
+\definecolor{lightgray}{HTML}{E2E8F0}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=secondary,
+    urlcolor=secondary,
+    pdftitle={Resume - Leonardo Heidi Almeida Murakami},
+    pdfauthor={Leonardo Murakami}
+}
+
+% Typography and Layout adjustments
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\titleformat{\section}
+  {\normalfont\large\bfseries\color{primary}}
+  {}{0em}{}
+  [{\color{lightgray}\titlerule[1pt]}]
+\titlespacing*{\section}{0pt}{12pt}{6pt}
+
+\newcommand{\experienceitem}[4]{
+  \vspace{4pt}
+  {\bfseries\color{textdark}#1} \hfill {\em #2} \\
+  {\itshape\color{secondary}#3} \hfill {\small\color{gray}#4} \\[2pt]
+}
+
+\begin{document}
+\pagestyle{empty}
+
+% Header
+\begin{center}
+    {\LARGE \bfseries \color{primary} Leonardo Heidi Almeida Murakami} \\
+    \vspace{2pt}
+    {\large \color{secondary} Site Reliability Engineer} \\
+    \vspace{4pt}
+    \small
+    \href{mailto:contato@murakams.com}{contato@murakams.com} $\cdot$ +55 11 97683-8455 $\cdot$ São Paulo, Brazil \\
+    \href{https://linkedin.com/in/leonardo-murakami}{linkedin.com/in/leonardo-murakami} $\cdot$ \href{https://github.com/leonardomurakami}{github.com/leonardomurakami} $\cdot$ \href{https://murakams.com}{murakams.com}
+\end{center}
+
+\vspace{6pt}
+
+\section*{Professional Summary}
+Software Engineer with a solid background transitioning from Data Science and Machine Learning Engineering to Site Reliability Engineering (SRE). Highly experienced in building Internal Developer Platforms (IDP) on Kubernetes and AWS, Infrastructure as Code (IaC) automation, CI/CD, observability, and designing robust infrastructure for ML/Large Language Models (LLMs). Operating at the intersection of reliability, Developer Experience (DevEx), and MLOps, with a track record of driving large-scale Kubernetes migrations, enforcing auditable IaC governance, optimizing cloud costs, and supporting highly distributed multi-cluster environments.
+
+\section*{Technical Skills}
+\begin{itemize}[leftmargin=*, noitemsep, topsep=0pt]
+    \item \textbf{Orchestration \& Containers:} Kubernetes (EKS), Helm, Karpenter, Knative, KServe.
+    \item \textbf{Infrastructure as Code \& CI/CD:} Terraform, Terragrunt, Atlantis, Argo CD, GitHub Actions, Jenkins.
+    \item \textbf{Cloud \& Core Services:} AWS (S3, SQS, RDS, IAM, EC2), AWS SageMaker.
+    \item \textbf{Security \& Networking:} HashiCorp Vault, Kong API Gateway (Plugins, JWT Validation, Routing).
+    \item \textbf{Observability \& Data:} Datadog (Cost Optimization, Metric/Log Opt-in), Python, SQL (PostgreSQL).
+    \item \textbf{AI \& LLMOps:} vLLM, Bifrost, Serverless Open-Weight LLM Inference Infrastructure.
+    \item \textbf{Languages:} Portuguese (Native), English (Fluent).
+\end{itemize}
+
+\section*{Professional Experience}
+
+\experienceitem{Loft}{March 2024 -- Present}{Site Reliability Engineer}{Remote}
+\begin{itemize}[leftmargin=*, noitemsep, topsep=2pt]
+    \item \textbf{Cluster Reorganization (EKS to EKS):} Acted in the strategic migration and standardization of 24 Kubernetes clusters to enhance environment segregation, multi-level governance, architectural compliance, and cloud cost visibility.
+    \item \textbf{Internal Developer Platform (IDP):} Engineered an automated self-service bootstrap platform via GitHub Actions, reducing application setup time by 90\% (from 4 hours to $\sim$20 minutes). Automated the provisioning of repositories, SQS queues, S3 Buckets, RDS, and IAM Roles via Terraform/Terragrunt, integrating HashiCorp Vault for secure secrets injection.
+    \item \textbf{AI Infrastructure \& LLMOps:} Architected a self-hosted open-weight LLM inference Proof of Concept (PoC) for Agentic Coding on AWS EKS with GPUs. Leveraged Karpenter for dynamic provisioning and Knative/KServe for serverless (scale-to-zero) execution, validating technical feasibility while keeping infrastructure costs low.
+    \item \textbf{Traffic Governance (API Gateway):} Managed and evolved the Kong API Gateway infrastructure, leading cross-squad architectural reviews, external route exposure, and the implementation of security middleware (e.g., JWT validation).
+    \item \textbf{Cloud FinOps:} Achieved a $\sim$10\% reduction in global Datadog costs by enforcing an opt-in model for logs and metrics in non-production environments and deprecating default agents.
+    \item \textbf{DevEx \& Toil Reduction:} Acted as a core technical partner for dozens of product squads (Acquisition, Financing, Engagement), mitigating operational toil and resolving complex incidents including RDS/PostgreSQL concurrency bottlenecks, AWS IAM permissions, and advanced Kubernetes debugging.
+\end{itemize}
+
+\experienceitem{Loft}{March 2023 -- March 2024}{Site Reliability Engineer (Junior)}{Remote}
+\begin{itemize}[leftmargin=*, noitemsep, topsep=2pt]
+    \item \textbf{Legacy Infrastructure Migration:} Led the technical migration of the Finance department's development environments and workloads from legacy EC2 instances and Jenkins to modern Kubernetes (EKS) clusters, standardizing deployment pipelines.
+    \item \textbf{K8s Workload Management:} Maintained and evolved Kubernetes workloads utilizing Argo CD, Helm, and GitHub Actions for continuous delivery.
+    \item \textbf{Infrastructure Auditing:} Reviewed, audited, and optimized corporate cloud configurations across AWS, Kong, Datadog, and Terraform modules.
+    \item \textbf{Automation \& Support:} Developed internal scripts to streamline cloud resource provisioning, reducing team toil, and provided consultative support to engineering squads on deployments, observability, and database modeling.
+\end{itemize}
+
+\experienceitem{Loft}{May 2022 -- March 2023}{Machine Learning Engineer}{Remote}
+\begin{itemize}[leftmargin=*, noitemsep, topsep=2pt]
+    \item Governed the MLOps lifecycle, managing the deployment, robust monitoring, and continuous maintenance of machine learning models in production.
+    \item Provisioned scalable infrastructure on AWS SageMaker to accelerate the model training and experimentation cycles for Data Scientists.
+    \item Supported the productization of proprietary real estate pricing models and their resilient integration into internal systems.
+\end{itemize}
+
+\experienceitem{Loft}{June 2021 -- July 2022}{Data Scientist}{São Paulo, SP}
+\begin{itemize}[leftmargin=*, noitemsep, topsep=2pt]
+    \item Developed advanced statistical and predictive models for real estate pricing (Automated Valuation Models).
+    \item Built feature engineering pipelines integrating property registries, listings, and multiple geo-spatial data sources.
+    \item Utilized the Python ecosystem (Pandas, NumPy, Scikit-Learn) and complex SQL queries for statistical modeling, exploratory analysis, and automated pricing quality monitoring.
+\end{itemize}
+
+\experienceitem{Loft}{December 2019 -- June 2021}{Data Science Intern / Summer Intern}{São Paulo, SP}
+\begin{itemize}[leftmargin=*, noitemsep, topsep=2pt]
+    \item Supported exploratory data analysis, experiment design, and the early development of predictive models for real estate datasets.
+\end{itemize}
+
+\section*{Education}
+\begin{itemize}[leftmargin=*, noitemsep, topsep=0pt]
+    \item \textbf{Institute of Mathematics and Statistics — IME-USP} \\
+    Bachelor of Science in Computer Science $\cdot$ 2023 -- Present
+    \item \textbf{Polytechnic School of the University of São Paulo (Poli-USP)} \\
+    Electrical Engineering (Emphasis in Computing) $\cdot$ 2020 -- 2021 \\
+    {\small Extracurricular: Member of the Turing Group (USP Artificial Intelligence Group)}
+\end{itemize}
+
+\end{document}
