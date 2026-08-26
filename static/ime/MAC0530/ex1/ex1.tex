@@ -1,0 +1,232 @@
+% =============================================================================
+% Template — resolução de listas (MAC0425 ou outras disciplinas IME)
+% Compilação: pdflatex (recomendado) ou latexmk -pdf template-lista.tex
+% =============================================================================
+\documentclass[a4paper,11pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+
+\usepackage[margin=2.4cm, top=2.7cm, bottom=2.6cm, headheight=14pt]{geometry}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{bookmark}
+\usepackage{etoolbox}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{tikz}
+\usetikzlibrary{trees, positioning, arrows.meta, shadows, calc}
+
+\usepackage{parskip}
+\usepackage[linesnumbered,ruled,vlined,portuguese]{algorithm2e}
+\SetKwProg{Fn}{Função}{:}{Fim}
+\usepackage{listings}
+\usepackage[most]{tcolorbox}
+
+% --- Hiperlinks discretos ---
+\hypersetup{
+  colorlinks=true,
+  linkcolor=IMEblue!85!black,
+  urlcolor=IMEblue!75!black,
+  citecolor=IMEblue!75!black,
+}
+
+% --- Paleta ---
+\definecolor{IMEblue}{RGB}{0, 72, 125}
+\definecolor{IMEgray}{RGB}{88, 89, 91}
+\definecolor{IMElightgray}{RGB}{245, 247, 250}
+
+% --- Configuração do Listings (Estilo para Códigos) ---
+\lstset{
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{IMEblue}\bfseries,
+  commentstyle=\color{IMEgray}\itshape,
+  stringstyle=\color{green!50!black},
+  backgroundcolor=\color{IMElightgray},
+  frame=single,
+  rulecolor=\color{IMEgray!40},
+  breaklines=true,
+  showstringspaces=false
+}
+
+% --- Atalhos Matemáticos ---
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator{\E}{\mathbb{E}}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\newcommand{\mbf}[1]{\mathbf{#1}}
+
+% ----======== PREENCHA  ========----
+\newcommand{\CodigoDisciplina}{MAC0530}
+\newcommand{\NomeDisciplina}{Aprendizado de Máquina para Bioinformática}
+\newcommand{\NumeroLista}{1}
+\newcommand{\TituloListaExtra}{Nivelamento - Perceptrons}
+\newcommand{\NomeAluno}{Leonardo Heidi Almeida Murakami}
+\newcommand{\NUSP}{11260186}
+\newcommand{\DataEntrega}{\today}
+% ----=========================================----
+
+% Cabeçalho e rodapé
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{IMEgray}\NomeAluno}
+\fancyhead[R]{\small\color{IMEgray}NUSP \NUSP}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{IMEgray!40}\leaders\hrule height \headrulewidth\hfill}}
+\fancyfoot[L]{\small\color{IMEgray}\CodigoDisciplina\ -- Lista \NumeroLista}
+\fancyfoot[C]{\small\color{IMEgray}\NomeDisciplina}
+\fancyfoot[R]{\small\color{IMEgray}\thepage\ / \pageref{LastPage}}
+
+\fancypagestyle{plain}{
+  \fancyhf{}
+  \fancyfoot[R]{\small\color{IMEgray}\thepage\ / \pageref{LastPage}}
+  \renewcommand{\headrulewidth}{0pt}
+}
+
+% Teoremas / demonstrações
+\theoremstyle{definition}
+\newtheorem{definicao}{Definição}[section]
+
+\theoremstyle{plain}
+\newtheorem{teorema}{Teorema}[section]
+
+\theoremstyle{remark}
+\newtheorem*{observacao}{Observação}
+
+% Ambiente: enunciado
+\newenvironment{enunciado}
+  {\par\noindent\color{IMEgray}\itshape}
+  {\par\medskip}
+
+% --- EXERCICIOS ---
+
+% 1. Exercício com contador automático
+\newcounter{questao}[section]
+\newtcolorbox[use counter=questao]{questao}[1][]{
+  enhanced,
+  colback=white,
+  colframe=IMElightgray,
+  fonttitle=\bfseries\color{IMEblue},
+  coltitle=IMEblue,
+  colbacktitle=IMElightgray,
+  title={Questão~\thetcbcounter\ifstrempty{#1}{}{ \textnormal{\color{black}#1}}},
+  boxrule=1pt,
+  arc=2pt,
+  outer arc=2pt,
+  top=3mm,
+  bottom=3mm,
+  left=3mm,
+  right=3mm,
+  breakable
+}
+
+\newtcolorbox{questaoManually}[1]{%
+  enhanced,
+  colback=white,
+  colframe=IMElightgray,
+  fonttitle=\bfseries\color{IMEblue},
+  coltitle=IMEblue,
+  colbacktitle=IMElightgray,
+  title={#1},
+  boxrule=1pt,
+  arc=2pt,
+  outer arc=2pt,
+  top=3mm,
+  bottom=3mm,
+  left=3mm,
+  right=3mm,
+  breakable
+}
+
+\newcommand{\makelistatitle}{%
+  \thispagestyle{plain}
+  \noindent
+  \begin{minipage}[t]{0.70\linewidth}
+    {\LARGE\bfseries\color{IMEblue}\CodigoDisciplina}\par\vspace{0.15em}
+    {\large\color{IMEgray}\NomeDisciplina}\par\vspace{1.1em}
+    {\Large\bfseries Lista \NumeroLista
+      \ifdefempty{\TituloListaExtra}{}{ --- \TituloListaExtra}%
+    }
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.28\linewidth}
+    \raggedleft\small\color{IMEgray}
+    \textbf{\NomeAluno}\\[0.25em]
+    NUSP \NUSP\\[0.5em]
+    \DataEntrega
+  \end{minipage}
+  \par\vspace{1.2em}
+  \noindent{\color{IMEgray!35}\rule{\linewidth}{0.6pt}}
+  \par\vspace{1em}
+}
+
+\begin{document}
+
+\makelistatitle
+\begin{questaoManually}{Exercício 1.1}
+
+\noindent\textbf{Função de entrada:}
+\[
+  z = \mbf{w}^\top \mbf{x} + b = \sum_{i=1}^{d} w_i\, x_i + b
+\]
+
+\medskip
+
+\noindent\textbf{Função de ativação degrau unitário:}
+\[
+  \phi(z) =
+  \begin{cases}
+    +1, & \text{se } z \geq 0, \\
+    -1, & \text{se } z < 0.
+  \end{cases}
+\]
+
+\medskip
+
+\noindent\textbf{Regra de decisão final:}
+\[
+  \hat{y} = f(\mbf{x}) = \phi\!\left(\mbf{w}^\top \mbf{x} + b\right) =
+  \begin{cases}
+    +1, & \text{se } \mbf{w}^\top \mbf{x} + b \geq 0, \\
+    -1, & \text{se } \mbf{w}^\top \mbf{x} + b < 0.
+  \end{cases}
+\]
+
+\end{questaoManually}
+\begin{questaoManually}{Exercício 1.4}
+
+Sejam $\mbf{w} = [0.4,\,-0.6]^\top$ e $b = 0.1$.
+
+\medskip
+
+\noindent\textbf{Instância 1:} $\mbf{x}^{(1)} = [2.0,\,1.0]^\top$
+
+\[
+  z^{(1)} = \mbf{w}^\top \mbf{x}^{(1)} + b = 0.4 \cdot 2.0 + (-0.6) \cdot 1.0 + 0.1 = 0.8 - 0.6 + 0.1 = 0.3
+\]
+
+\[
+  \hat{y}^{(1)} = \phi(0.3) = +1 \quad (\text{pois } z \geq 0)
+\]
+
+\medskip
+
+\noindent\textbf{Instância 2:} $\mbf{x}^{(2)} = [1.0,\,2.0]^\top$
+
+\[
+  z^{(2)} = \mbf{w}^\top \mbf{x}^{(2)} + b = 0.4 \cdot 1.0 + (-0.6) \cdot 2.0 + 0.1 = 0.4 - 1.2 + 0.1 = -0.7
+\]
+
+\[
+  \hat{y}^{(2)} = \phi(-0.7) = -1 \quad (\text{pois } z < 0)
+\]
+
+\end{questaoManually}
+\end{document}
