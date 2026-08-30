@@ -22,7 +22,7 @@ import * as THREE from "three";
 // still declared inline where they're first used.
 // ---------------------------------------------------------------------------
 
-let scene, camera, renderer, cube, target, gizmo, translationGizmo, rotationGizmo;
+let scene, camera, renderer, cube, target;
 
 /**
  * buildScene()
@@ -98,8 +98,6 @@ function buildScene() {
  */
 function main() {
   ({ scene, cube, target } = buildScene());
-  gizmo = createGizmo();
-  scene.add(gizmo);
 
   camera = new THREE.PerspectiveCamera(
     60,
@@ -113,9 +111,7 @@ function main() {
   renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.localClippingEnabled = true;
   document.body.appendChild(renderer.domElement);
-  syncMappingUi();
 
   window.addEventListener("resize", handleWindowResize);
 
@@ -388,259 +384,27 @@ const YAW_AXIS   = new THREE.Vector3(0, 1, 0);
 const PITCH_AXIS = new THREE.Vector3(1, 0, 0);
 const ROLL_AXIS  = new THREE.Vector3(0, 0, 1);
 
-let gizmoRotateMode = false;
-let activeGizmoHandle = null;
-let hoveredGizmoHandle = null;
-const translationHandles = [];
-const rotationHandles = [];
-const raycaster = new THREE.Raycaster();
-const pointer = new THREE.Vector2();
-const dragPlane = new THREE.Plane();
-const dragPoint = new THREE.Vector3();
-const dragStartPoint = new THREE.Vector3();
-const dragStartPosition = new THREE.Vector3();
-const dragAxis = new THREE.Vector3();
-const rotationTangent = new THREE.Vector3();
-const projectedCenter = new THREE.Vector3();
-const projectedTangentEnd = new THREE.Vector3();
-const rotationDragDirection = new THREE.Vector2();
-const rotationMovement = new THREE.Vector2();
-const clipWorldAxis = new THREE.Vector3();
-const clipToCamera = new THREE.Vector3();
-const clipNormal = new THREE.Vector3();
-const GIZMO_AXES = [
-  { name: "X", vector: new THREE.Vector3(1, 0, 0), color: 0xef5b5b },
-  { name: "Y", vector: new THREE.Vector3(0, 1, 0), color: 0x61c878 },
-  { name: "Z", vector: new THREE.Vector3(0, 0, 1), color: 0x5598ed },
-];
-
-function createHandleMaterial(color) {
-  return new THREE.MeshBasicMaterial({
-    color,
-    transparent: true,
-    opacity: 0.50,
-    depthTest: false,
-    depthWrite: false,
-    toneMapped: false,
-  });
-}
-
-function registerHandle(mesh, axis, type, collection) {
-  mesh.userData.axis = axis.vector.clone();
-  mesh.userData.axisName = axis.name;
-  mesh.userData.type = type;
-  mesh.userData.baseColor = axis.color;
-  mesh.renderOrder = 2;
-  collection.push(mesh);
-}
-
-function createGizmo() {
-  const group = new THREE.Group();
-  translationGizmo = new THREE.Group();
-  rotationGizmo = new THREE.Group();
-  const shaftGeometry = new THREE.CylinderGeometry(0.014, 0.014, 0.27, 10); // TODO: fix the magic numbers, eventually
-  const tipGeometry = new THREE.ConeGeometry(0.042, 0.1, 12);
-  const ringGeometry = new THREE.TorusGeometry(0.34, 0.018, 10, 72);
-
-  for (const axis of GIZMO_AXES) {
-    const material = createHandleMaterial(axis.color);
-    const arrow = new THREE.Group();
-    const shaft = new THREE.Mesh(shaftGeometry, material);
-    const tip = new THREE.Mesh(tipGeometry, material);
-    shaft.position.y = 0.17;
-    tip.position.y = 0.355;
-    arrow.quaternion.setFromUnitVectors(YAW_AXIS, axis.vector);
-    registerHandle(shaft, axis, "translate", translationHandles);
-    registerHandle(tip, axis, "translate", translationHandles);
-    arrow.add(shaft, tip);
-    translationGizmo.add(arrow);
-
-    const ringMaterial = createHandleMaterial(axis.color);
-    const ring = new THREE.Mesh(ringGeometry, ringMaterial);
-    if (axis.name === "X") ring.rotation.y = Math.PI / 2;
-    if (axis.name === "Y") ring.rotation.x = -Math.PI / 2;
-    registerHandle(ring, axis, "rotate", rotationHandles);
-    const clipPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
-    ringMaterial.clippingPlanes = [clipPlane];
-    ring.userData.clipPlane = clipPlane;
-    rotationGizmo.add(ring);
-  }
-
-  group.add(translationGizmo, rotationGizmo);
-  group.visible = false;
-  return group;
-}
-
-function setPointerFromEvent(e) {
-  const rect = renderer.domElement.getBoundingClientRect();
-  pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-  pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-  raycaster.setFromCamera(pointer, camera);
-}
-
-function resetGizmoColors() {
-  for (const handle of [...translationHandles, ...rotationHandles]) {
-    handle.material.color.setHex(handle.userData.baseColor);
-    handle.material.opacity = 0.50;
-  }
-}
-
-function setHighlightedHandle(handle) {
-  resetGizmoColors();
-  if (handle) {
-    handle.material.color.setHex(0xffffff);
-    handle.material.opacity = 1;
-  }
-}
-
-function setHandleVisibility(activeHandle = null) {
-  for (const handle of translationHandles) {
-    handle.visible = !gizmoRotateMode &&
-      (!activeHandle || handle.userData.axisName === activeHandle.userData.axisName);
-  }
-  for (const handle of rotationHandles) {
-    handle.visible = gizmoRotateMode &&
-      (!activeHandle || handle.userData.axisName === activeHandle.userData.axisName);
-  }
-}
-
-function updateGizmoHover(e) {
-  if (currentMapping() !== "2" || activeGizmoHandle) return;
-  setPointerFromEvent(e);
-  const handles = gizmoRotateMode ? rotationHandles : translationHandles;
-  const hit = raycaster.intersectObjects(handles, false)[0];
-  const nextHandle = hit ? hit.object : null;
-  if (nextHandle === hoveredGizmoHandle) return;
-  hoveredGizmoHandle = nextHandle;
-  setHighlightedHandle(hoveredGizmoHandle);
-  renderer.domElement.style.cursor = hoveredGizmoHandle ? "grab" : "default";
-}
-
-function beginGizmoDrag(e) {
-  setPointerFromEvent(e);
-  const handles = gizmoRotateMode ? rotationHandles : translationHandles;
-  const hit = raycaster.intersectObjects(handles, false)[0];
-  if (!hit) return false;
-
-  activeGizmoHandle = hit.object;
-  dragStartPosition.copy(cube.position);
-  dragAxis.copy(activeGizmoHandle.userData.axis);
-  if (activeGizmoHandle.userData.type === "rotate") {
-    dragAxis.applyQuaternion(cube.quaternion).normalize();
-  }
-  lastX = e.clientX;
-  lastY = e.clientY;
-
-  if (activeGizmoHandle.userData.type === "translate") {
-    const cameraDirection = camera.position.clone().sub(cube.position).normalize();
-    const planeNormal = dragAxis.clone().cross(cameraDirection).cross(dragAxis).normalize();
-    if (planeNormal.lengthSq() < 0.001) planeNormal.copy(PITCH_AXIS);
-    dragPlane.setFromNormalAndCoplanarPoint(planeNormal, cube.position);
-    if (!raycaster.ray.intersectPlane(dragPlane, dragStartPoint)) {
-      activeGizmoHandle = null;
-      return false;
-    }
-  } else {
-    rotationTangent.copy(hit.point).sub(cube.position);
-    rotationTangent.addScaledVector(dragAxis, -rotationTangent.dot(dragAxis));
-    rotationTangent.normalize();
-    rotationTangent.crossVectors(dragAxis, rotationTangent).normalize();
-    projectedCenter.copy(cube.position).project(camera);
-    projectedTangentEnd.copy(cube.position).add(rotationTangent).project(camera);
-    rotationDragDirection.set(
-      projectedTangentEnd.x - projectedCenter.x,
-      projectedCenter.y - projectedTangentEnd.y
-    ).normalize();
-    if (Math.abs(rotationDragDirection.x) >= Math.abs(rotationDragDirection.y)) {
-      rotationDragDirection.set(Math.sign(rotationDragDirection.x) || 1, 0);
-    } else {
-      rotationDragDirection.set(0, Math.sign(rotationDragDirection.y) || 1);
-    }
-  }
-
-  setHandleVisibility(activeGizmoHandle);
-  setHighlightedHandle(activeGizmoHandle);
-  renderer.domElement.style.cursor = "grabbing";
-  return true;
-}
-
-function dragGizmo(e) {
-  if (activeGizmoHandle.userData.type === "translate") {
-    setPointerFromEvent(e);
-    if (!raycaster.ray.intersectPlane(dragPlane, dragPoint)) return;
-    const distance = dragPoint.sub(dragStartPoint).dot(dragAxis);
-    cube.position.copy(dragStartPosition).addScaledVector(dragAxis, distance);
-    return;
-  }
-
-  const movementX = document.pointerLockElement === renderer.domElement
-    ? e.movementX
-    : e.clientX - lastX;
-  const movementY = document.pointerLockElement === renderer.domElement
-    ? e.movementY
-    : e.clientY - lastY;
-  lastX = e.clientX;
-  lastY = e.clientY;
-  const angle = rotationDragDirection.dot(rotationMovement.set(movementX, movementY)) * 0.008;
-  if (angle === 0) return;
-  _q.setFromAxisAngle(activeGizmoHandle.userData.axis, angle);
-  cube.quaternion.multiply(_q).normalize();
-}
-
-function endGizmoDrag(e) {
-  if (!activeGizmoHandle) return;
-  activeGizmoHandle = null;
-  hoveredGizmoHandle = null;
-  setHighlightedHandle(null);
-  renderer.domElement.style.cursor = "default";
-  if (e && renderer.domElement.hasPointerCapture(e.pointerId)) {
-    renderer.domElement.releasePointerCapture(e.pointerId);
-  }
-  if (document.pointerLockElement === renderer.domElement) document.exitPointerLock();
-  syncMappingUi();
-}
-
-function syncMappingUi() {
-  if (!gizmo) return;
-  gizmo.visible = currentMapping() === "2";
-  translationGizmo.visible = !gizmoRotateMode;
-  rotationGizmo.visible = gizmoRotateMode;
-  rotationGizmo.quaternion.copy(cube.quaternion);
-  setHandleVisibility(activeGizmoHandle);
-}
-
 window.addEventListener("pointerdown", (e) => {
-  if (e.target !== renderer.domElement) return;
-  if (currentMapping() === "2") {
-    if (beginGizmoDrag(e)) {
-      e.preventDefault();
-      renderer.domElement.setPointerCapture(e.pointerId);
-      if (activeGizmoHandle.userData.type === "rotate") {
-        const lockRequest = renderer.domElement.requestPointerLock();
-        if (lockRequest) lockRequest.catch(() => {});
-      }
-    }
-    return;
+  if (currentMapping() == "1"){
+    if (e.target !== renderer.domElement) return;
+    isDragging = true;
+    lastX = e.clientX;
+    lastY = e.clientY;
   }
-  isDragging = true;
-  lastX = e.clientX;
-  lastY = e.clientY;
 });
 
-window.addEventListener("pointerup", (e) => {
-  isDragging = false;
-  endGizmoDrag(e);
+window.addEventListener("pointerup", () => {
+  if (currentMapping() == "1"){
+    isDragging = false;
+  }
 });
+
+window.addEventListener("wheel", (e) => {
+  e.preventDefault();
+  wheelDY += e.deltaY;
+}, { passive: false});
 
 window.addEventListener("pointermove", (e) => {
-  if (activeGizmoHandle) {
-    dragGizmo(e);
-    return;
-  }
-  if (currentMapping() === "2") {
-    updateGizmoHover(e);
-    return;
-  }
   if (!isDragging) return;
   mouseDX = e.clientX - lastX;
   mouseDY = e.clientY - lastY;
@@ -648,35 +412,14 @@ window.addEventListener("pointermove", (e) => {
   lastY = e.clientY;
 });
 
-window.addEventListener("wheel", (e) => {
-  if (currentMapping() !== "1") return;
-  e.preventDefault();
-  wheelDY += e.deltaY;
-}, { passive: false });
-
 window.addEventListener("keydown", (e) => {
-  if ((e.code !== "Space" && e.code !== "Tab") || e.repeat) return;
-  if (["INPUT", "BUTTON"].includes(document.activeElement.tagName)) return;
-  e.preventDefault();
-  modeSwitches += 1;
-  if (currentMapping() === "1") {
-    isRotateMode = !isRotateMode;
-  } else {
-    endGizmoDrag();
-    gizmoRotateMode = !gizmoRotateMode;
+  if (currentMapping() == "1"){
+    if (e.code === "Space") {
+      e.preventDefault();              
+      modeSwitches += 1;
+      isRotateMode = !isRotateMode;
+    }
   }
-  syncMappingUi();
-});
-
-mappingSelect.addEventListener("change", () => {
-  isDragging = false;
-  isRotateMode = false;
-  gizmoRotateMode = false;
-  mouseDX = 0;
-  mouseDY = 0;
-  wheelDY = 0;
-  endGizmoDrag();
-  syncMappingUi();
 });
 
 function updateControlMapping(delta) {
@@ -698,24 +441,7 @@ function updateControlMapping(delta) {
     }
     mouseDX = 0; mouseDY = 0; wheelDY = 0;
   } else {
-    gizmo.position.copy(cube.position);
-    rotationGizmo.quaternion.copy(cube.quaternion);
-    updateRingClipping();
-  }
-}
-
-// imrprove ring visibility/experience by only showing half-arcs
-// similar to how blender display their gizmo, as showing the "back-half" of
-// the arc makes it really confusing.
-function updateRingClipping() {
-  clipToCamera.copy(camera.position).sub(cube.position).normalize();
-  for (const ring of rotationHandles) {
-    clipWorldAxis.copy(ring.userData.axis).applyQuaternion(cube.quaternion).normalize();
-    clipNormal.copy(clipToCamera);
-    clipNormal.addScaledVector(clipWorldAxis, -clipToCamera.dot(clipWorldAxis));
-    if (clipNormal.lengthSq() < 1e-6) continue;
-    clipNormal.normalize();
-    ring.userData.clipPlane.setFromNormalAndCoplanarPoint(clipNormal, cube.position);
+    // TODO: your own mapping design for mapping "2".
   }
 }
 

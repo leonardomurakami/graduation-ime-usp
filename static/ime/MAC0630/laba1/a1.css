@@ -88,7 +88,4 @@ html, body {
 
 /* ---- three.js canvas ---- */
 
-canvas {
-  display: block;
-  touch-action: none;
-}
+canvas { display: block; }

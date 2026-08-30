@@ -1,0 +1,73 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{fontspec}
+\usepackage[brazil]{babel}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=black}
+\setlength{\parindent}{1.25cm}
+\setlength{\parskip}{0.25em}
+
+\title{MAC0219 - Programação Concorrente e Paralela\\Mini EP4 -- Profiling e otimização}
+\author{Leonardo Heidi Almeida Murakami\\NUSP: 11260186}
+\date{26 de agosto de 2026}
+
+\begin{document}
+\maketitle
+
+\section{Profiling antes das otimizações}
+
+O programa original foi analisado com \texttt{gprof} e \texttt{perf}. As duas ferramentas mostraram que praticamente todo o tempo era gasto nas funções \texttt{slowsort} e \texttt{fibonacci}.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{lrr}
+\toprule
+Função & gprof & perf \\
+\midrule
+\texttt{slowsort} & 57,55\% & 49,70\% \\
+\texttt{fibonacci} & 42,45\% & 50,27\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+O problema era a quantidade de chamadas recursivas. O \texttt{gprof} registrou cerca de 342 milhões de chamadas recursivas de \texttt{slowsort} e 459 milhões de \texttt{fibonacci}. Isso acontece porque o Slowsort é um algoritmo de ordenação muito lento e porque os mesmos números de Fibonacci eram calculados várias vezes.
+
+\section{Otimizações}
+
+Foram feitas duas mudanças:
+
+\begin{itemize}
+  \item O \texttt{slowsort} foi trocado pelo \texttt{qsort}, que é muito mais eficiente e evita milhões de chamadas recursivas.
+  \item Os números de Fibonacci de 0 a 35 passaram a ser calculados uma única vez e guardados em um vetor. Depois disso, cada valor pode ser consultado diretamente, sem repetir os cálculos.
+\end{itemize}
+
+Essas mudanças atacam exatamente as duas funções que apareceram como gargalos no profiling. As duas versões continuaram produzindo o mesmo resultado:
+
+\begin{center}
+\texttt{Soma dos números de Fibonacci pares: 20100614}
+\end{center}
+
+\newpage
+
+\section{Resultados depois das otimizações}
+
+A versão original levou, em média, 0,943 s no \texttt{perf stat}. A versão otimizada levou 0,527 ms. Isso representa uma aceleração de aproximadamente $1.790\times$ e uma redução de 99,94\% no tempo de execução.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{lrr}
+\toprule
+Métrica & Original & Otimizado \\
+\midrule
+Tempo & 0,943 s & 0,527 ms \\
+Ciclos & 4.723.080.682 & 272.605 \\
+Instruções & 17.030.478.110 & 228.259 \\
+Desvios & 2.859.087.265 & 43.253 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+O \texttt{gprof} não conseguiu acumular tempo na versão otimizada, pois ela terminou antes do intervalo de amostragem de 0,01 s. O \texttt{perf record} coletou apenas 11 amostras, concentradas principalmente na inicialização e no encerramento do programa. Portanto, depois das mudanças, nenhuma função do código apareceu como um novo gargalo.
+
+\end{document}
